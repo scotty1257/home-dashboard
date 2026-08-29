@@ -19,6 +19,13 @@ import type {
   HouseholdMember,
   HouseholdMemberInput,
   MediaCommand,
+  PermissionDecisionInput,
+  PermissionQueueResponse,
+  PermissionReopenInput,
+  PermissionRequestInput,
+  PermissionRequestWithDecisions,
+  PermissionRule,
+  PermissionRuleInput,
   PlaybackState,
   SearchResult,
   WeatherReport,
@@ -129,6 +136,35 @@ export const api = {
       request<BackupContact>("/api/backup-contacts", { method: "POST", body: JSON.stringify(input) }),
     update: (id: string, input: BackupContactInput) =>
       request<BackupContact>(`/api/backup-contacts/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  },
+
+  // Permission queue
+  permissions: {
+    queue: () => request<PermissionQueueResponse>("/api/permissions"),
+    create: (input: PermissionRequestInput) =>
+      request<PermissionRequestWithDecisions>("/api/permissions", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    decide: (id: string, input: PermissionDecisionInput) =>
+      request<{ request: PermissionRequestWithDecisions }>(`/api/permissions/${id}/decision`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    reopen: (id: string, input: PermissionReopenInput) =>
+      request<{ request: PermissionRequestWithDecisions }>(`/api/permissions/${id}/reopen`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+  },
+
+  // Standing permission rules
+  permissionRules: {
+    list: () => request<{ rules: PermissionRule[] }>("/api/permission-rules"),
+    create: (input: PermissionRuleInput) =>
+      request<PermissionRule>("/api/permission-rules", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: string, input: PermissionRuleInput) =>
+      request<PermissionRule>(`/api/permission-rules/${id}`, { method: "PUT", body: JSON.stringify(input) }),
   },
 
   // Activity
