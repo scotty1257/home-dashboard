@@ -1,11 +1,18 @@
 import type {
   ActivityFeed,
+  BackupContact,
+  BackupContactInput,
   CalendarEvent,
   CalendarEventInput,
   CalendarListResponse,
   DashboardSettings,
   DashboardSettingsPatch,
   EntityState,
+  HandoffBackupInput,
+  HandoffBoardItem,
+  HandoffBoardResponse,
+  HandoffCreateInput,
+  HandoffObligation,
   HomeCommand,
   HomeSnapshot,
   HouseholdListResponse,
@@ -85,6 +92,43 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(patch),
       }),
+  },
+
+  // Handoffs
+  handoffs: {
+    board: (from?: string, to?: string) => {
+      const params = new URLSearchParams();
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+      const query = params.toString();
+      return request<HandoffBoardResponse>(`/api/handoffs${query ? `?${query}` : ""}`);
+    },
+    create: (input: HandoffCreateInput) =>
+      request<HandoffObligation>("/api/handoffs", { method: "POST", body: JSON.stringify(input) }),
+    claim: (id: string, actorId: string) =>
+      request<HandoffBoardItem>(`/api/handoffs/${id}/claim`, {
+        method: "PATCH",
+        body: JSON.stringify({ actorId }),
+      }),
+    requestBackup: (id: string, input: HandoffBackupInput) =>
+      request<HandoffBoardItem>(`/api/handoffs/${id}/request-backup`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      }),
+    resolve: (id: string, actorId: string) =>
+      request<HandoffBoardItem>(`/api/handoffs/${id}/resolve`, {
+        method: "PATCH",
+        body: JSON.stringify({ actorId }),
+      }),
+  },
+
+  // Backup contacts
+  backupContacts: {
+    list: () => request<{ contacts: BackupContact[] }>("/api/backup-contacts"),
+    create: (input: BackupContactInput) =>
+      request<BackupContact>("/api/backup-contacts", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: string, input: BackupContactInput) =>
+      request<BackupContact>(`/api/backup-contacts/${id}`, { method: "PUT", body: JSON.stringify(input) }),
   },
 
   // Activity

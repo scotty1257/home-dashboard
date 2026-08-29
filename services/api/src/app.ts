@@ -15,6 +15,8 @@ import { voiceActionRoutes } from "./modules/voice-actions/routes.js";
 import { SettingsStore, settingsRoutes } from "./modules/settings/routes.js";
 import { HouseholdRepository } from "./modules/household/repository.js";
 import { householdRoutes } from "./modules/household/routes.js";
+import { HandoffRepository } from "./modules/handoffs/repository.js";
+import { handoffRoutes } from "./modules/handoffs/routes.js";
 
 export interface AppContext {
   app: FastifyInstance;
@@ -25,6 +27,7 @@ export interface AppContext {
   settings: SettingsStore;
   tools: ToolRegistry;
   household: HouseholdRepository;
+  handoffs: HandoffRepository;
 }
 
 export function buildApp(config: Config): AppContext {
@@ -39,6 +42,7 @@ export function buildApp(config: Config): AppContext {
   const spotify = new SpotifyModule(db, config);
   const settings = new SettingsStore(db);
   const household = new HouseholdRepository(db);
+  const handoffs = new HandoffRepository(db, calendar, household, settings);
   const tools = new ToolRegistry({ calendar, spotify, home, weather: weatherDeps });
 
   // Health
@@ -96,6 +100,7 @@ export function buildApp(config: Config): AppContext {
   settingsRoutes(app, settings);
   voiceActionRoutes(app, db, tools);
   householdRoutes(app, household);
+  handoffRoutes(app, handoffs);
 
-  return { app, db, calendar, home, spotify, settings, tools, household };
+  return { app, db, calendar, home, spotify, settings, tools, household, handoffs };
 }
