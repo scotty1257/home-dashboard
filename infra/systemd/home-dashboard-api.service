@@ -1,0 +1,25 @@
+[Unit]
+Description=Home Dashboard API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dashboard
+Group=dashboard
+WorkingDirectory=/opt/home-dashboard/services/api
+Environment=NODE_ENV=production
+# Run via tsx (handles the workspace TypeScript source directly).
+ExecStart=/opt/home-dashboard/node_modules/.bin/tsx /opt/home-dashboard/services/api/src/index.ts
+Restart=always
+RestartSec=3
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/home-dashboard/var
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

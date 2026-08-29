@@ -43,8 +43,8 @@ export type EntityState = z.infer<typeof EntityState>;
 
 /** A normalized action the API can route to Home Assistant (or the demo provider). */
 export const HomeCommand = z.object({
-  entityId: z.string(),
-  action: z.string(), // e.g. "turn_on", "turn_off", "set_brightness", "set_temperature", "open_cover"
+  entityId: z.string().min(1),
+  action: z.string().min(1), // e.g. "turn_on", "turn_off", "set_brightness", "set_temperature", "open_cover"
   params: z.record(z.unknown()).default({}),
 });
 export type HomeCommand = z.infer<typeof HomeCommand>;

@@ -1,0 +1,16 @@
+# Home Dashboard web — build with Node, serve with nginx
+FROM node:24-slim AS build
+
+RUN npm install -g pnpm@10
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY packages ./packages
+COPY apps/dashboard-web ./apps/dashboard-web
+
+RUN pnpm install --frozen-lockfile || pnpm install
+RUN pnpm --filter @home-dashboard/web build
+
+FROM nginx:alpine
+COPY infra/docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/apps/dashboard-web/dist /usr/share/nginx/html
+EXPOSE 80

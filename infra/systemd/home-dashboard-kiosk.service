@@ -1,0 +1,27 @@
+[Unit]
+Description=Home Dashboard Kiosk (Chromium)
+After=home-dashboard-api.service nginx.service
+Wants=graphical.target
+
+[Service]
+Type=simple
+User=dashboard
+Group=dashboard
+Environment=DISPLAY=:0
+# Dedicated kiosk profile, fullscreen, no dialogs, autoplay allowed.
+ExecStart=/usr/bin/google-chrome \
+  --kiosk \
+  --noerrdialogs \
+  --disable-infobars \
+  --disable-session-crashed-bubble \
+  --disable-translate \
+  --autoplay-policy=no-user-gesture-required \
+  --user-data-dir=/opt/home-dashboard/.kiosk \
+  --window-position=0,0 \
+  http://127.0.0.1:8080
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=graphical.target

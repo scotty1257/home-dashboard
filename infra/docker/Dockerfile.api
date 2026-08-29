@@ -1,0 +1,18 @@
+# Home Dashboard API — Node 24 (node:sqlite builtin)
+FROM node:24-slim
+
+RUN npm install -g pnpm@10
+
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY packages ./packages
+COPY services/api ./services/api
+
+RUN pnpm install --frozen-lockfile || pnpm install
+
+WORKDIR /app/services/api
+ENV NODE_ENV=production
+ENV DATABASE_PATH=/data/dashboard.sqlite
+EXPOSE 8787
+
+CMD ["pnpm", "exec", "tsx", "src/index.ts"]

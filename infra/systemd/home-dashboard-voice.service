@@ -1,0 +1,24 @@
+[Unit]
+Description=Home Dashboard Voice Assistant
+After=network-online.target home-dashboard-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dashboard
+Group=dashboard
+WorkingDirectory=/opt/home-dashboard/services/voice
+Environment=NODE_ENV=production
+Environment=API_URL=http://127.0.0.1:8787
+ExecStart=/opt/home-dashboard/services/voice/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8788
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/home-dashboard/var
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
