@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import type { DatabaseSync as DatabaseSyncType } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
+import { runMigrations } from "./migrations.js";
 
 // node:sqlite is a Node 22.5+ builtin that Vite's transform pipeline (used by
 // Vitest) does not recognize. Resolve it at runtime via createRequire so every
@@ -26,49 +27,7 @@ export class Database {
   }
 
   private migrate(): void {
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS calendar_events (
-        id TEXT PRIMARY KEY,
-        calendar_id TEXT NOT NULL DEFAULT 'local',
-        title TEXT NOT NULL,
-        start_at TEXT NOT NULL,
-        end_at TEXT NOT NULL,
-        all_day INTEGER NOT NULL DEFAULT 0,
-        location TEXT,
-        notes TEXT,
-        color TEXT NOT NULL DEFAULT 'sky',
-        recurrence TEXT NOT NULL DEFAULT '{"frequency":"none","interval":1}',
-        reminders TEXT NOT NULL DEFAULT '[]',
-        created_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-      CREATE INDEX IF NOT EXISTS idx_calendar_range ON calendar_events(start_at, end_at);
-
-      CREATE TABLE IF NOT EXISTS settings (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS activity_log (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        kind TEXT NOT NULL,
-        title TEXT NOT NULL,
-        subtitle TEXT,
-        at TEXT NOT NULL,
-        ref TEXT,
-        severity TEXT NOT NULL DEFAULT 'info'
-      );
-
-      CREATE TABLE IF NOT EXISTS audit_log (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        at TEXT NOT NULL,
-        actor TEXT NOT NULL,
-        action TEXT NOT NULL,
-        entity_id TEXT,
-        detail TEXT
-      );
-    `);
+    runMigrations(this.db);
   }
 
   get raw(): DatabaseSyncType {

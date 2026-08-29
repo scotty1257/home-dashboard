@@ -97,4 +97,37 @@ describe("API integration", () => {
     });
     expect(res.statusCode).toBe(404);
   });
+
+  it("lists the seeded household members", async () => {
+    const { app } = makeApp();
+    const res = await app.inject({ method: "GET", url: "/api/household" });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.members.map((m: { displayName: string }) => m.displayName)).toEqual(["You", "Partner", "Kid"]);
+    expect(body.members.map((m: { role: string }) => m.role)).toEqual(["adult", "adult", "child"]);
+  });
+
+  it("rejects household edits from a child actor with 403", async () => {
+    const { app } = makeApp();
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/household/members/member-you",
+      payload: { displayName: "Scott", actorId: "member-kid" },
+    });
+    expect(res.statusCode).toBe(403);
+    expect(res.json().error).toBe("adult role required");
+  });
+
+  it("lets an adult actor edit a household member", async () => {
+    const { app } = makeApp();
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/household/members/member-you",
+      payload: { displayName: "Scott", color: "amber", actorId: "member-partner" },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().displayName).toBe("Scott");
+    expect(res.json().color).toBe("amber");
+    expect(res.json().role).toBe("adult");
+  });
 });

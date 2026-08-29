@@ -34,5 +34,6 @@ export const Events = {
   mediaStateChanged: "media:state-changed",
   activityUpdated: "activity:updated",
   settingsChanged: "settings:changed",
+  householdChanged: "household:changed",
   voiceTurn: "voice:turn",
 } as const;

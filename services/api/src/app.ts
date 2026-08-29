@@ -13,6 +13,8 @@ import { activityRoutes } from "./modules/activity/routes.js";
 import { ToolRegistry } from "./modules/voice-actions/toolRegistry.js";
 import { voiceActionRoutes } from "./modules/voice-actions/routes.js";
 import { SettingsStore, settingsRoutes } from "./modules/settings/routes.js";
+import { HouseholdRepository } from "./modules/household/repository.js";
+import { householdRoutes } from "./modules/household/routes.js";
 
 export interface AppContext {
   app: FastifyInstance;
@@ -22,6 +24,7 @@ export interface AppContext {
   spotify: SpotifyModule;
   settings: SettingsStore;
   tools: ToolRegistry;
+  household: HouseholdRepository;
 }
 
 export function buildApp(config: Config): AppContext {
@@ -35,6 +38,7 @@ export function buildApp(config: Config): AppContext {
   const home = createHomeModule(db, config);
   const spotify = new SpotifyModule(db, config);
   const settings = new SettingsStore(db);
+  const household = new HouseholdRepository(db);
   const tools = new ToolRegistry({ calendar, spotify, home, weather: weatherDeps });
 
   // Health
@@ -91,6 +95,7 @@ export function buildApp(config: Config): AppContext {
   activityRoutes(app, { calendar, spotify, home });
   settingsRoutes(app, settings);
   voiceActionRoutes(app, db, tools);
+  householdRoutes(app, household);
 
-  return { app, db, calendar, home, spotify, settings, tools };
+  return { app, db, calendar, home, spotify, settings, tools, household };
 }
