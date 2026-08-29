@@ -34,6 +34,22 @@ export interface Config {
   voice: {
     port: number;
   };
+  voiceNotes: {
+    /** Directory holding the stored audio files (repo-relative when not absolute). */
+    dir: string;
+    /** Upload cap in bytes. */
+    maxBytes: number;
+    /** Retention window in days for unlistened notes. */
+    retentionDays: number;
+  };
+}
+
+/** Resolve a data path against the repo root when it is not absolute. */
+function resolveDataPath(raw: string, fallback: string): string {
+  if (raw.startsWith("./") || raw.startsWith("../") || !path.isAbsolute(raw)) {
+    return path.resolve(repoRoot, raw || fallback);
+  }
+  return raw;
 }
 
 function resolveDbPath(raw: string): string {
@@ -70,6 +86,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     },
     voice: {
       port: num(env.VOICE_PORT, 8788),
+    },
+    voiceNotes: {
+      dir: resolveDataPath(env.VOICE_NOTE_DIR ?? "./var/voice-notes", "./var/voice-notes"),
+      maxBytes: num(env.VOICE_NOTE_MAX_BYTES, 8 * 1024 * 1024),
+      retentionDays: num(env.VOICE_NOTE_RETENTION_DAYS, 30),
     },
   };
 }

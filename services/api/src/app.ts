@@ -1,8 +1,10 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 import type { Config } from "./config.js";
 import { Database } from "./platform/database.js";
 import { eventHub } from "./platform/events.js";
+import { RealClock } from "./test/testClock.js";
 import { CalendarRepository } from "./modules/calendar/repository.js";
 import { calendarRoutes } from "./modules/calendar/routes.js";
 import { weatherRoutes } from "./modules/weather/routes.js";
@@ -21,6 +23,9 @@ import { PermissionRepository } from "./modules/permissions/repository.js";
 import { permissionRoutes } from "./modules/permissions/routes.js";
 import { DutyRepository } from "./modules/duties/repository.js";
 import { dutyRoutes } from "./modules/duties/routes.js";
+import { VoiceNoteStorage } from "./modules/voice-notes/storage.js";
+import { VoiceNoteRepository } from "./modules/voice-notes/repository.js";
+import { voiceNoteRoutes } from "./modules/voice-notes/routes.js";
 
 export interface AppContext {
   app: FastifyInstance;
@@ -34,6 +39,7 @@ export interface AppContext {
   handoffs: HandoffRepository;
   permissions: PermissionRepository;
   duties: DutyRepository;
+  voiceNotes: VoiceNoteRepository;
 }
 
 export function buildApp(config: Config): AppContext {
@@ -41,6 +47,10 @@ export function buildApp(config: Config): AppContext {
   const db = new Database(config.databasePath);
 
   app.register(cors, { origin: true });
+  // Multipart must be registered before the voice-note routes so they can
+  // use request.parts()/isMultipart(); the fileSize limit is the first
+  // line of defense against oversized uploads (routes double-check).
+  app.register(multipart, { limits: { fileSize: config.voiceNotes.maxBytes } });
 
   const calendar = new CalendarRepository(db);
   const weatherDeps = createWeatherDeps(config);
@@ -51,6 +61,8 @@ export function buildApp(config: Config): AppContext {
   const handoffs = new HandoffRepository(db, calendar, household, settings);
   const permissions = new PermissionRepository(db, household, settings);
   const duties = new DutyRepository(db, household, settings);
+  const voiceNoteStorage = new VoiceNoteStorage(config.voiceNotes.dir);
+  const voiceNotes = new VoiceNoteRepository(db, voiceNoteStorage, new RealClock(), config.voiceNotes.retentionDays);
   const tools = new ToolRegistry({ calendar, spotify, home, weather: weatherDeps });
 
   // Health
@@ -111,6 +123,7 @@ export function buildApp(config: Config): AppContext {
   handoffRoutes(app, handoffs);
   permissionRoutes(app, permissions);
   dutyRoutes(app, duties);
+  voiceNoteRoutes(app, { repo: voiceNotes, storage: voiceNoteStorage, maxBytes: config.voiceNotes.maxBytes });
 
-  return { app, db, calendar, home, spotify, settings, tools, household, handoffs, permissions, duties };
+  return { app, db, calendar, home, spotify, settings, tools, household, handoffs, permissions, duties, voiceNotes };
 }
