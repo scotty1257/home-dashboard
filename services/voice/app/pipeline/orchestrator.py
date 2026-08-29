@@ -129,10 +129,16 @@ class Orchestrator:
             return None
 
     @staticmethod
+    def _humanize(value: object) -> str:
+        return str(value).replace(".", " ").replace("_", " ").strip()
+
+    @staticmethod
     def _confirmation_message(call: ToolCall) -> str:
         label = call.tool
         if call.tool == "home_control":
-            label = f"{call.arguments.get('action', 'control')} {call.arguments.get('entityId', 'device')}"
+            action = Orchestrator._humanize(call.arguments.get("action", "control"))
+            entity = Orchestrator._humanize(call.arguments.get("entityId", "device"))
+            label = f"{action} {entity}"
         return f"I'd like to {label}. Tap confirm to proceed."
 
     def _compose_reply(self, calls: list[ToolCall], results: list[dict[str, Any]]) -> str:
@@ -191,8 +197,8 @@ class Orchestrator:
 
     @staticmethod
     def _home_reply(call: ToolCall) -> str:
-        action = str(call.arguments.get("action", "controlled")).replace("_", " ")
-        name = str(call.arguments.get("entityId", "device")).replace(".", " ")
+        action = Orchestrator._humanize(call.arguments.get("action", "controlled"))
+        name = Orchestrator._humanize(call.arguments.get("entityId", "device"))
         return f"{action.capitalize()} {name}."
 
     @staticmethod

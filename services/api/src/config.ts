@@ -37,6 +37,7 @@ export interface Config {
 }
 
 function resolveDbPath(raw: string): string {
+  if (raw === ":memory:") return raw;
   if (raw.startsWith("./") || raw.startsWith("../") || !path.isAbsolute(raw)) {
     return path.resolve(repoRoot, raw || "./var/dashboard.sqlite");
   }

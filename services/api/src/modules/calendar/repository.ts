@@ -73,7 +73,9 @@ function expandOccurrences(
   const out: CalendarEvent[] = [];
   const start = new Date(base.start);
   const duration = new Date(base.end).getTime() - start.getTime();
-  let cursor = new Date(start);
+  // Skip the base occurrence (already returned as the stored event) and start
+  // expanding from the first recurrence.
+  let cursor = step(start, rule);
   let count = 0;
 
   while (cursor.getTime() <= rangeEnd.getTime() && count < max) {
