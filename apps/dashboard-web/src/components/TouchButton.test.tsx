@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Play } from "lucide-react";
 import { TouchButton } from "./TouchButton";
@@ -20,5 +20,20 @@ describe("TouchButton", () => {
   it("supports icon-only usage with a Lucide icon", () => {
     render(<TouchButton icon={Play} iconOnly aria-label="Play" />);
     expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
+  });
+
+  it("gives every variant a >=48px touch target (min-h-12)", () => {
+    for (const variant of ["primary", "ghost", "soft", "danger"] as const) {
+      const { container } = render(<TouchButton variant={variant}>Label</TouchButton>);
+      expect(
+        within(container).getByRole("button").className,
+        `variant: ${variant}`,
+      ).toContain("min-h-12");
+    }
+  });
+
+  it("icon-only buttons keep a >=48px minimum width (min-w-12)", () => {
+    render(<TouchButton icon={Play} iconOnly aria-label="Play" />);
+    expect(screen.getByRole("button", { name: "Play" }).className).toContain("min-w-12");
   });
 });

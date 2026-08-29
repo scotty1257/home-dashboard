@@ -1,3 +1,6 @@
+/* Canonical non-color primitives: spacing, radii, touch targets, type,
+   motion, elevation, z-index (colors stay defined below, in this file). */
+@import "@home-dashboard/design-tokens";
 @import "tailwindcss";
 
 /* Class-based dark mode (toggled by time of day). */
@@ -160,20 +163,40 @@ body {
   border-radius: 9999px;
 }
 
-/* Range inputs (volume / brightness / fan) */
+/* Range inputs (volume / brightness / fan) — 6px visual track, 24px thumb,
+   48px-tall interactive hit area (see components/RangeControl.tsx). */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
+  height: 48px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
   border-radius: 9999px;
   background: var(--line-strong);
-  outline: none;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
+  margin-top: -9px; /* center the 24px thumb on the 6px track */
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--bg-panel);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--line-strong);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--color-accent);
   border: 2px solid var(--bg-panel);
