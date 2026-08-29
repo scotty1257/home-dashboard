@@ -29,6 +29,7 @@ export const eventHub = new EventHub();
 /** Events emitted by modules. Centralized so the UI can subscribe to a single stream. */
 export const Events = {
   calendarChanged: "calendar:changed",
+  handoffChanged: "handoff:changed",
   weatherUpdated: "weather:updated",
   homeStateChanged: "home:state-changed",
   mediaStateChanged: "media:state-changed",

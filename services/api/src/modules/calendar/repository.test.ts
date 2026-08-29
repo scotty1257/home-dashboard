@@ -73,4 +73,123 @@ describe("CalendarRepository", () => {
     expect(created.location).toBe("Italy");
     expect(created.color).toBe("coral");
   });
+
+  describe("family scheduling fields", () => {
+    function obligation(eventId: string) {
+      return db
+        .prepare(`SELECT * FROM handoff_obligations WHERE event_id = ?`)
+        .get(eventId) as
+        | { id: string; event_id: string; starts_at: string; ends_at: string; status: string }
+        | undefined;
+    }
+
+    it("round-trips ownerId, scheduleKind, and requiresHandoff", () => {
+      const created = repo.create({
+        title: "Soccer practice",
+        start: at(10),
+        end: at(10, 10),
+        ownerId: "member-kid",
+        scheduleKind: "child-commitment",
+        requiresHandoff: true,
+      });
+      expect(created.ownerId).toBe("member-kid");
+      expect(created.scheduleKind).toBe("child-commitment");
+      expect(created.requiresHandoff).toBe(true);
+
+      const updated = repo.update(created.id, {
+        title: "Soccer practice",
+        start: at(10),
+        end: at(10, 10),
+        ownerId: "member-kid",
+        scheduleKind: "child-commitment",
+        requiresHandoff: false,
+      });
+      expect(updated!.ownerId).toBe("member-kid");
+      expect(updated!.scheduleKind).toBe("child-commitment");
+      expect(updated!.requiresHandoff).toBe(false);
+    });
+
+    it("parses legacy rows that predate the family columns using contract defaults", () => {
+      db.prepare(
+        `INSERT INTO calendar_events (id, title, start_at, end_at, created_at, updated_at)
+         VALUES ('legacy-1', 'Legacy', ?, ?, ?, ?)`,
+      ).run(at(10), at(10, 10), at(1), at(1));
+      const event = repo.get("legacy-1")!;
+      expect(event.title).toBe("Legacy");
+      expect(event.ownerId).toBeUndefined();
+      expect(event.scheduleKind).toBe("general");
+      expect(event.requiresHandoff).toBe(false);
+    });
+
+    it("creates an unclaimed handoff obligation matching the event window", () => {
+      const created = repo.create({
+        title: "Pickup",
+        start: at(10),
+        end: at(10, 10),
+        scheduleKind: "child-commitment",
+        requiresHandoff: true,
+      });
+      const row = obligation(created.id);
+      expect(row).toBeDefined();
+      expect(row!.status).toBe("unclaimed");
+      expect(row!.starts_at).toBe(created.start);
+      expect(row!.ends_at).toBe(created.end);
+    });
+
+    it("moves the obligation window when event times change", () => {
+      const created = repo.create({
+        title: "Pickup",
+        start: at(10),
+        end: at(10, 10),
+        requiresHandoff: true,
+      });
+      repo.update(created.id, {
+        title: "Pickup",
+        start: at(12),
+        end: at(12, 10),
+        requiresHandoff: true,
+      });
+      const row = obligation(created.id);
+      expect(row!.starts_at).toBe(at(12));
+      expect(row!.ends_at).toBe(at(12, 10));
+    });
+
+    it("deletes an unclaimed obligation when requiresHandoff turns off", () => {
+      const created = repo.create({
+        title: "Pickup",
+        start: at(10),
+        end: at(10, 10),
+        requiresHandoff: true,
+      });
+      expect(obligation(created.id)).toBeDefined();
+      repo.update(created.id, {
+        title: "Pickup",
+        start: at(10),
+        end: at(10, 10),
+        requiresHandoff: false,
+      });
+      expect(obligation(created.id)).toBeUndefined();
+    });
+
+    it("keeps a claimed obligation when requiresHandoff turns off", () => {
+      const created = repo.create({
+        title: "Pickup",
+        start: at(10),
+        end: at(10, 10),
+        requiresHandoff: true,
+      });
+      db.prepare(`UPDATE handoff_obligations SET status = 'claimed' WHERE event_id = ?`).run(
+        created.id,
+      );
+      repo.update(created.id, {
+        title: "Pickup",
+        start: at(10),
+        end: at(10, 10),
+        requiresHandoff: false,
+      });
+      const row = obligation(created.id);
+      expect(row).toBeDefined();
+      expect(row!.status).toBe("claimed");
+    });
+  });
 });

@@ -19,23 +19,15 @@ interface EventRow {
   color: string;
   recurrence: string;
   reminders: string;
+  /** Family scheduling columns (migration "family-foundation"); legacy rows keep the DB defaults. */
+  owner_id: string | null;
+  schedule_kind: string | null;
+  requires_handoff: number | null;
   created_at: string;
   updated_at: string;
 }
 
-/**
- * Columns added by the family-coordination migration. Databases that have not
- * run the migration return rows without these keys, so they are read
- * defensively and fall back to the contract defaults.
- */
-interface FamilyEventColumns {
-  owner_id?: string | null;
-  schedule_kind?: string | null;
-  requires_handoff?: number | null;
-}
-
 function rowToEvent(row: EventRow): CalendarEvent {
-  const family = row as EventRow & Partial<FamilyEventColumns>;
   return {
     id: row.id,
     calendarId: row.calendar_id,
@@ -48,9 +40,9 @@ function rowToEvent(row: EventRow): CalendarEvent {
     color: (row.color as CalendarEvent["color"]) ?? "sky",
     recurrence: JSON.parse(row.recurrence) as RecurrenceRule,
     reminders: JSON.parse(row.reminders),
-    ownerId: family.owner_id ?? undefined,
-    scheduleKind: (family.schedule_kind as CalendarEvent["scheduleKind"]) ?? "general",
-    requiresHandoff: family.requires_handoff === 1,
+    ownerId: row.owner_id ?? undefined,
+    scheduleKind: (row.schedule_kind as CalendarEvent["scheduleKind"]) ?? "general",
+    requiresHandoff: row.requires_handoff === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -69,6 +61,9 @@ function inputToRow(input: CalendarEventInput, now: string, id: string = randomU
     color: input.color ?? "sky",
     recurrence: JSON.stringify(input.recurrence ?? { frequency: "none", interval: 1 }),
     reminders: JSON.stringify(input.reminders ?? []),
+    owner_id: input.ownerId ?? null,
+    schedule_kind: input.scheduleKind ?? "general",
+    requires_handoff: input.requiresHandoff ? 1 : 0,
     created_at: now,
     updated_at: now,
   };
@@ -162,29 +157,45 @@ export class CalendarRepository {
   create(input: CalendarEventInput): CalendarEvent {
     const now = new Date().toISOString();
     const row = inputToRow(input, now);
-    this.db
-      .prepare(
-        `INSERT INTO calendar_events
-         (id, calendar_id, title, start_at, end_at, all_day, location, notes, color, recurrence, reminders, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .run(
-        row.id,
-        row.calendar_id,
-        row.title,
-        row.start_at,
-        row.end_at,
-        row.all_day,
-        row.location,
-        row.notes,
-        row.color,
-        row.recurrence,
-        row.reminders,
-        row.created_at,
-        row.updated_at,
-      );
-    this.logActivity("event-upcoming", input.title, input.start, input.title);
+    let handoffChanged = false;
+    this.db.exec("BEGIN");
+    try {
+      this.db
+        .prepare(
+          `INSERT INTO calendar_events
+           (id, calendar_id, title, start_at, end_at, all_day, location, notes, color,
+            recurrence, reminders, owner_id, schedule_kind, requires_handoff, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          row.id,
+          row.calendar_id,
+          row.title,
+          row.start_at,
+          row.end_at,
+          row.all_day,
+          row.location,
+          row.notes,
+          row.color,
+          row.recurrence,
+          row.reminders,
+          row.owner_id,
+          row.schedule_kind,
+          row.requires_handoff,
+          row.created_at,
+          row.updated_at,
+        );
+      handoffChanged = this.syncHandoffObligation(this.get(row.id)!);
+      this.logActivity("event-upcoming", input.title, input.start, input.title);
+      this.db.exec("COMMIT");
+    } catch (err) {
+      this.db.exec("ROLLBACK");
+      throw err;
+    }
     eventHub.emit(Events.calendarChanged, { action: "created", id: row.id });
+    if (handoffChanged) {
+      eventHub.emit(Events.handoffChanged, { action: "created", id: row.id });
+    }
     return this.get(row.id)!;
   }
 
@@ -192,28 +203,44 @@ export class CalendarRepository {
     const existing = this.get(id);
     if (!existing) return undefined;
     const row = inputToRow(input, new Date().toISOString(), id);
-    this.db
-      .prepare(
-        `UPDATE calendar_events SET
-           calendar_id=?, title=?, start_at=?, end_at=?, all_day=?, location=?,
-           notes=?, color=?, recurrence=?, reminders=?, updated_at=?
-         WHERE id=?`,
-      )
-      .run(
-        row.calendar_id,
-        row.title,
-        row.start_at,
-        row.end_at,
-        row.all_day,
-        row.location,
-        row.notes,
-        row.color,
-        row.recurrence,
-        row.reminders,
-        row.updated_at,
-        id,
-      );
+    let handoffChanged = false;
+    this.db.exec("BEGIN");
+    try {
+      this.db
+        .prepare(
+          `UPDATE calendar_events SET
+             calendar_id=?, title=?, start_at=?, end_at=?, all_day=?, location=?,
+             notes=?, color=?, recurrence=?, reminders=?, owner_id=?, schedule_kind=?,
+             requires_handoff=?, updated_at=?
+           WHERE id=?`,
+        )
+        .run(
+          row.calendar_id,
+          row.title,
+          row.start_at,
+          row.end_at,
+          row.all_day,
+          row.location,
+          row.notes,
+          row.color,
+          row.recurrence,
+          row.reminders,
+          row.owner_id,
+          row.schedule_kind,
+          row.requires_handoff,
+          row.updated_at,
+          id,
+        );
+      handoffChanged = this.syncHandoffObligation(this.get(id)!);
+      this.db.exec("COMMIT");
+    } catch (err) {
+      this.db.exec("ROLLBACK");
+      throw err;
+    }
     eventHub.emit(Events.calendarChanged, { action: "updated", id });
+    if (handoffChanged) {
+      eventHub.emit(Events.handoffChanged, { action: "updated", id });
+    }
     return this.get(id);
   }
 
@@ -224,6 +251,47 @@ export class CalendarRepository {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Keep handoff_obligations aligned with the event's requiresHandoff flag.
+   * Returns true when a row was actually created, updated, or deleted, so
+   * callers emit handoffChanged only for real changes. Claimed or covered
+   * obligations are never deleted or rewritten — they are history.
+   */
+  private syncHandoffObligation(event: CalendarEvent): boolean {
+    const existing = this.db
+      .prepare(`SELECT status FROM handoff_obligations WHERE event_id = ?`)
+      .get(event.id) as { status: string } | undefined;
+
+    if (event.requiresHandoff) {
+      const now = new Date().toISOString();
+      this.db
+        .prepare(
+          `INSERT INTO handoff_obligations
+             (id, event_id, starts_at, ends_at, status, updated_by, created_at, updated_at)
+           VALUES (?, ?, ?, ?, 'unclaimed', ?, ?, ?)
+           ON CONFLICT(event_id) DO UPDATE SET
+             starts_at = excluded.starts_at,
+             ends_at = excluded.ends_at,
+             updated_by = excluded.updated_by,
+             updated_at = excluded.updated_at`,
+        )
+        .run(
+          randomUUID(),
+          event.id,
+          event.start,
+          event.end,
+          event.ownerId ?? "system",
+          now,
+          now,
+        );
+      return true;
+    }
+
+    if (!existing || existing.status !== "unclaimed") return false;
+    this.db.prepare(`DELETE FROM handoff_obligations WHERE event_id = ?`).run(event.id);
+    return true;
   }
 
   private logActivity(kind: string, title: string, at: string, ref?: string): void {

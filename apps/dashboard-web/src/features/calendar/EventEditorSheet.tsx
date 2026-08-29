@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import type { CalendarEvent, ColorToken } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
@@ -46,6 +46,15 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [color, setColor] = useState<ColorToken>("sky");
+  const [ownerId, setOwnerId] = useState("");
+  const [scheduleKind, setScheduleKind] = useState<CalendarEvent["scheduleKind"]>("general");
+  const [requiresHandoff, setRequiresHandoff] = useState(false);
+
+  const { data: household } = useQuery({
+    queryKey: ["household"],
+    queryFn: () => api.household.list(),
+  });
+  const members = household?.members ?? [];
 
   useEffect(() => {
     if (!open || !initial) return;
@@ -57,6 +66,9 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
       setLocation(existing.location ?? "");
       setNotes(existing.notes ?? "");
       setColor(existing.color);
+      setOwnerId(existing.ownerId ?? "");
+      setScheduleKind(existing.scheduleKind ?? "general");
+      setRequiresHandoff(existing.requiresHandoff ?? false);
     } else if ("date" in initial) {
       const s = defaultStart(initial.date);
       const e = new Date(s.getTime() + 60 * 60 * 1000);
@@ -67,6 +79,9 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
       setLocation("");
       setNotes("");
       setColor("sky");
+      setOwnerId("");
+      setScheduleKind("general");
+      setRequiresHandoff(false);
     }
   }, [open, initial, isEdit, existing]);
 
@@ -102,6 +117,9 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
       location: location || undefined,
       notes: notes || undefined,
       color,
+      ownerId: ownerId || undefined,
+      scheduleKind,
+      requiresHandoff: scheduleKind === "child-commitment" ? requiresHandoff : false,
     });
   };
 
@@ -123,6 +141,47 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
           <span className="text-sm text-ink-2">All day</span>
           <Toggle checked={allDay} onChange={setAllDay} label="All day" />
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <span className={label}>Owner</span>
+            <select
+              className={field}
+              aria-label="Owner"
+              value={ownerId}
+              onChange={(e) => setOwnerId(e.target.value)}
+            >
+              <option value="">No owner</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.displayName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className={label}>Schedule kind</span>
+            <select
+              className={field}
+              aria-label="Schedule kind"
+              value={scheduleKind}
+              onChange={(e) =>
+                setScheduleKind(e.target.value as CalendarEvent["scheduleKind"])
+              }
+            >
+              <option value="general">General</option>
+              <option value="adult-commitment">Adult commitment</option>
+              <option value="child-commitment">Child commitment</option>
+            </select>
+          </div>
+        </div>
+
+        {scheduleKind === "child-commitment" && (
+          <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
+            <span className="text-sm text-ink-2">Needs handoff</span>
+            <Toggle checked={requiresHandoff} onChange={setRequiresHandoff} label="Needs handoff" />
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">

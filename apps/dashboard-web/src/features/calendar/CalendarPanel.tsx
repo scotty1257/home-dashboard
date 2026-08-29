@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, ArrowLeftRight } from "lucide-react";
 import type { CalendarEvent } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { Panel } from "../../components/Panel";
@@ -111,6 +111,9 @@ export function CalendarPanel({ compact = false, className }: Props) {
                   >
                     {!e.allDay && <span className="opacity-70 tabular-nums">{timeShort(e.start)}</span>}
                     <span className="truncate">{e.title}</span>
+                    {e.requiresHandoff && (
+                      <ArrowLeftRight aria-label="Handoff" size={12} className="shrink-0" />
+                    )}
                   </span>
                 ))}
                 {dayEvents.length > maxChips && (
