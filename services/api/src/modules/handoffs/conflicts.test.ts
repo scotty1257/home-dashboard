@@ -85,7 +85,7 @@ describe("adultConflictsForHandoff", () => {
     const conflicts = adultConflictsForHandoff(
       handoff,
       [adultEvent()],
-      { ...inputs(), members: [you, partner, kid] },
+      inputs(),
       "member-you",
     );
     expect(conflicts).toHaveLength(1);

@@ -107,7 +107,7 @@ describe("HandoffRepository", () => {
     const updated = handoffs.updateContact(contacts[1]!.id, {
       name: "Neighbor", relationship: "neighbor", phone: "555-9", priority: 2, active: false,
     });
-    expect(updated.active).toBe(false);
+    expect(updated!.active).toBe(false);
   });
 
   it("emits handoff events after committed writes", () => {
