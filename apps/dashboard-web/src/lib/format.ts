@@ -1,13 +1,3 @@
-import { colors, type ColorToken } from "@home-dashboard/design-tokens/ts";
-
-export { colors };
-export type { ColorToken };
-
-/** Resolve a color token name to its hex value, defaulting to slate. */
-export function colorOf(token?: string): string {
-  return (token && token in colors ? colors[token as ColorToken] : colors.slate);
-}
-
 export function formatClock(date: Date): string {
   return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
@@ -33,38 +23,9 @@ export function temperatureLabel(value: number, units: "imperial" | "metric"): s
   return `${Math.round(value)}°`;
 }
 
-export function conditionIcon(condition: string): string {
-  const map: Record<string, string> = {
-    clear: "☀️",
-    "partly-cloudy": "⛅",
-    cloudy: "☁️",
-    fog: "🌫️",
-    rain: "🌧️",
-    drizzle: "🌦️",
-    snow: "🌨️",
-    sleet: "🌨️",
-    thunderstorm: "⛈️",
-    windy: "💨",
-  };
-  return map[condition] ?? "🌤️";
-}
-
-export function domainIcon(domain: string): string {
-  const map: Record<string, string> = {
-    light: "💡",
-    switch: "🔌",
-    climate: "🌡️",
-    cover: "🪟",
-    lock: "🔒",
-    sensor: "📊",
-    binary_sensor: "🚪",
-    fan: "🌀",
-    media_player: "🔊",
-    scene: "🎬",
-    script: "⚙️",
-    button: "🔘",
-    number: "🔢",
-    select: "🎚️",
-  };
-  return map[domain] ?? "•";
+export function conditionLabel(c: string): string {
+  return c
+    .split("-")
+    .map((w) => (w[0] ?? "").toUpperCase() + w.slice(1))
+    .join(" ");
 }

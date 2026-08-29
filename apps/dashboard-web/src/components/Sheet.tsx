@@ -1,17 +1,16 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import "./Sheet.css";
+import { cn } from "../lib/cn";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  /** Large sheet for editors, or bottom sheet for quick actions. */
   size?: "md" | "lg";
 }
 
-/** Modal sheet for editing. Closes on backdrop tap or Escape. */
+/** Bottom sheet for editing. Closes on backdrop tap or Escape. */
 export function Sheet({ open, onClose, title, children, size = "md" }: Props) {
   useEffect(() => {
     if (!open) return;
@@ -25,17 +24,25 @@ export function Sheet({ open, onClose, title, children, size = "md" }: Props) {
   if (!open) return null;
 
   return (
-    <div className="sheet-overlay" onPointerDown={onClose} role="presentation">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"
+      onPointerDown={onClose}
+      role="presentation"
+    >
       <div
-        className={`sheet sheet--${size}`}
+        className={cn(
+          "flex w-full flex-col rounded-t-xl border border-b-0 border-line bg-panel shadow-2xl",
+          "max-h-[88vh] animate-[slideUp_0.22s_cubic-bezier(0.22,1,0.36,1)]",
+          size === "md" ? "max-w-xl" : "max-w-2xl",
+        )}
         role="dialog"
         aria-modal="true"
         aria-label={title}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <div className="sheet__handle" />
-        {title && <h2 className="sheet__title">{title}</h2>}
-        <div className="sheet__content">{children}</div>
+        <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-line-strong" />
+        {title && <h2 className="px-6 pt-4 text-lg font-semibold text-ink">{title}</h2>}
+        <div className="overflow-y-auto px-6 pb-6 pt-4">{children}</div>
       </div>
     </div>
   );

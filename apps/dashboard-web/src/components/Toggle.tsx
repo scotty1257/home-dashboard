@@ -1,18 +1,14 @@
-import type { CSSProperties } from "react";
-import { colorOf } from "../lib/format";
-import "./Toggle.css";
+import { cn } from "../lib/cn";
 
 interface Props {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label?: string;
-  accent?: string;
   disabled?: boolean;
 }
 
-/** A large, colorful toggle switch with a 48px touch target. */
-export function Toggle({ checked, onChange, label, accent = "accent", disabled }: Props) {
-  const color = accent === "accent" ? "var(--accent)" : colorOf(accent);
+/** Compact switch with a 48px tap target. Accent-colored when on. */
+export function Toggle({ checked, onChange, label, disabled }: Props) {
   return (
     <button
       type="button"
@@ -20,12 +16,26 @@ export function Toggle({ checked, onChange, label, accent = "accent", disabled }
       aria-checked={checked}
       aria-label={label}
       disabled={disabled}
-      className={`toggle ${checked ? "toggle--on" : ""}`}
-      style={{ "--toggle-color": color } as CSSProperties}
       onClick={() => onChange(!checked)}
+      className={cn(
+        "inline-flex h-12 w-12 items-center justify-center rounded-md",
+        "transition-colors hover:bg-raised/60",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60",
+        disabled && "opacity-40 pointer-events-none",
+      )}
     >
-      <span className="toggle__track">
-        <span className="toggle__thumb" />
+      <span
+        className={cn(
+          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors",
+          checked ? "bg-accent border-transparent" : "bg-surface border-line-strong",
+        )}
+      >
+        <span
+          className={cn(
+            "inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform",
+            checked ? "translate-x-6" : "translate-x-1",
+          )}
+        />
       </span>
     </button>
   );

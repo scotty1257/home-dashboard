@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import type { CalendarEvent } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { Panel } from "../../components/Panel";
 import { TouchButton } from "../../components/TouchButton";
-import { colorOf } from "../../lib/format";
+import { colorOf } from "../../lib/colors";
+import { cn } from "../../lib/cn";
 import {
   eventsOnDay,
   monthGrid,
@@ -12,7 +14,6 @@ import {
   WEEKDAY_NAMES,
 } from "./calendarUtils";
 import { EventEditorSheet } from "./EventEditorSheet";
-import "./CalendarPanel.css";
 
 function monthRange(year: number, month: number): { start: string; end: string } {
   const start = new Date(year, month, 1);
@@ -22,9 +23,10 @@ function monthRange(year: number, month: number): { start: string; end: string }
 
 interface Props {
   compact?: boolean;
+  className?: string;
 }
 
-export function CalendarPanel({ compact = false }: Props) {
+export function CalendarPanel({ compact = false, className }: Props) {
   const today = new Date();
   const [cursor, setCursor] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [editing, setEditing] = useState<CalendarEvent | { date: Date } | null>(null);
@@ -43,67 +45,86 @@ export function CalendarPanel({ compact = false }: Props) {
     setCursor((c) => (c.month === 11 ? { year: c.year + 1, month: 0 } : { year: c.year, month: c.month + 1 }));
   const todayNav = () => setCursor({ year: today.getFullYear(), month: today.getMonth() });
 
+  const maxChips = compact ? 2 : 3;
+
   return (
     <Panel
-      className="calendar-panel"
+      className={cn("flex h-full flex-col", className)}
+      bodyClassName="flex flex-1 flex-col pt-1"
+      icon={CalendarDays}
+      accent="accent"
       title={`${MONTH_NAMES[cursor.month]} ${cursor.year}`}
-      icon="🗓️"
-      accent="coral"
       actions={
         <>
-          <TouchButton variant="ghost" onClick={prev} aria-label="Previous month">‹</TouchButton>
+          <TouchButton variant="ghost" icon={ChevronLeft} iconOnly onClick={prev} aria-label="Previous month" />
           <TouchButton variant="ghost" onClick={todayNav}>Today</TouchButton>
-          <TouchButton variant="ghost" onClick={next} aria-label="Next month">›</TouchButton>
+          <TouchButton variant="ghost" icon={ChevronRight} iconOnly onClick={next} aria-label="Next month" />
         </>
       }
     >
-      <div className="calendar-grid">
+      <div className="grid grid-cols-7 gap-px pb-1">
         {WEEKDAY_NAMES.map((d) => (
-          <div key={d} className="calendar-weekday">{d}</div>
+          <div key={d} className="py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-ink-4">
+            {d}
+          </div>
         ))}
+      </div>
+
+      <div className="grid flex-1 grid-cols-7 grid-rows-6 gap-px overflow-hidden rounded-md border border-line bg-line">
         {cells.map((cell) => {
           const dayEvents = eventsOnDay(events, cell.date);
           return (
             <button
               key={cell.key}
               type="button"
-              className={[
-                "calendar-cell",
-                cell.inMonth ? "" : "calendar-cell--out",
-                cell.isToday ? "calendar-cell--today" : "",
-              ].join(" ")}
               onClick={() => setEditing({ date: cell.date })}
+              className={cn(
+                "flex min-h-0 flex-col items-stretch gap-1 bg-panel p-1.5 text-left",
+                "transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-2/60",
+                !cell.inMonth && "opacity-45",
+              )}
             >
-              <span className="calendar-cell__num">{cell.date.getDate()}</span>
-              <div className="calendar-cell__events">
-                {dayEvents.slice(0, compact ? 2 : 3).map((e) => (
-                  <button
+              <span
+                className={cn(
+                  "flex h-6 w-6 items-center justify-center self-end rounded-md text-[13px] font-medium tabular-nums",
+                  cell.isToday
+                    ? "bg-accent text-white"
+                    : cell.inMonth
+                      ? "text-ink-2"
+                      : "text-ink-4",
+                )}
+              >
+                {cell.date.getDate()}
+              </span>
+              <div className="flex flex-col gap-1 overflow-hidden">
+                {dayEvents.slice(0, maxChips).map((e) => (
+                  <span
                     key={e.id}
-                    type="button"
-                    className="calendar-chip"
-                    style={{ background: colorOf(e.color) }}
+                    role="button"
+                    tabIndex={-1}
                     onClick={(ev) => {
                       ev.stopPropagation();
                       setEditing(e);
                     }}
+                    className="flex items-center gap-1.5 truncate rounded px-1.5 py-0.5 text-[11px] font-medium leading-tight"
+                    style={{ backgroundColor: `${colorOf(e.color)}1f`, color: colorOf(e.color) }}
                   >
-                    {e.allDay ? "" : <span className="calendar-chip__time">{timeShort(e.start)}</span>}
-                    <span className="calendar-chip__label">{e.title}</span>
-                  </button>
+                    {!e.allDay && <span className="opacity-70 tabular-nums">{timeShort(e.start)}</span>}
+                    <span className="truncate">{e.title}</span>
+                  </span>
                 ))}
-                {dayEvents.length > (compact ? 2 : 3) && (
-                  <span className="calendar-cell__more">+{dayEvents.length - (compact ? 2 : 3)}</span>
+                {dayEvents.length > maxChips && (
+                  <span className="px-1.5 text-[11px] font-medium text-ink-4">
+                    +{dayEvents.length - maxChips}
+                  </span>
                 )}
               </div>
             </button>
           );
         })}
       </div>
-      <EventEditorSheet
-        open={editing !== null}
-        initial={editing}
-        onClose={() => setEditing(null)}
-      />
+
+      <EventEditorSheet open={editing !== null} initial={editing} onClose={() => setEditing(null)} />
     </Panel>
   );
 }

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import type { CalendarEvent, ColorToken } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { Sheet } from "../../components/Sheet";
 import { TouchButton } from "../../components/TouchButton";
 import { Toggle } from "../../components/Toggle";
-import { colors, colorOf } from "../../lib/format";
-import "./EventEditorSheet.css";
+import { colorList, colorOf } from "../../lib/colors";
+import { cn } from "../../lib/cn";
 
 type Initial = CalendarEvent | { date: Date } | null;
 
@@ -21,7 +22,11 @@ function defaultStart(date: Date): Date {
   return d;
 }
 
-const COLOR_OPTIONS: ColorToken[] = ["coral", "amber", "lime", "teal", "sky", "indigo", "violet", "rose"];
+const field =
+  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink " +
+  "placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50";
+
+const label = "text-xs font-semibold uppercase tracking-wide text-ink-3";
 
 interface Props {
   open: boolean;
@@ -89,13 +94,11 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
 
   const save = () => {
     if (!canSave) return;
-    const startIso = new Date(start).toISOString();
-    const endIso = new Date(end).toISOString();
     mutation.mutate({
       title: title.trim(),
       allDay,
-      start: startIso,
-      end: endIso,
+      start: new Date(start).toISOString(),
+      end: new Date(end).toISOString(),
       location: location || undefined,
       notes: notes || undefined,
       color,
@@ -104,87 +107,89 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
 
   return (
     <Sheet open={open} onClose={onClose} title={isEdit ? "Edit event" : "New event"} size="lg">
-      <div className="event-editor">
-        <label className="field">
-          <span className="field__label">Title</span>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <span className={label}>Title</span>
           <input
-            className="field__input field__input--title"
+            className={cn(field, "text-base font-medium")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's happening?"
             autoFocus
           />
-        </label>
-
-        <div className="field-row">
-          <div className="field field--grow">
-            <span className="field__label">All day</span>
-            <Toggle checked={allDay} onChange={setAllDay} label="All day" accent="coral" />
-          </div>
         </div>
 
-        <div className="field-row">
-          <label className="field field--grow">
-            <span className="field__label">{allDay ? "Date" : "Starts"}</span>
+        <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
+          <span className="text-sm text-ink-2">All day</span>
+          <Toggle checked={allDay} onChange={setAllDay} label="All day" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <span className={label}>{allDay ? "Date" : "Starts"}</span>
             <input
-              className="field__input"
+              className={field}
               type={allDay ? "date" : "datetime-local"}
               value={allDay ? start.slice(0, 10) : start}
               onChange={(e) => setStart(allDay ? `${e.target.value}T09:00` : e.target.value)}
             />
-          </label>
-          <label className="field field--grow">
-            <span className="field__label">{allDay ? "Date" : "Ends"}</span>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className={label}>{allDay ? "Date" : "Ends"}</span>
             <input
-              className="field__input"
+              className={field}
               type={allDay ? "date" : "datetime-local"}
               value={allDay ? end.slice(0, 10) : end}
               onChange={(e) => setEnd(allDay ? `${e.target.value}T10:00` : e.target.value)}
             />
-          </label>
+          </div>
         </div>
 
-        <label className="field">
-          <span className="field__label">Location</span>
+        <div className="flex flex-col gap-1.5">
+          <span className={label}>Location</span>
           <input
-            className="field__input"
+            className={field}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Where?"
           />
-        </label>
+        </div>
 
-        <label className="field">
-          <span className="field__label">Notes</span>
+        <div className="flex flex-col gap-1.5">
+          <span className={label}>Notes</span>
           <textarea
-            className="field__input field__input--area"
+            className={cn(field, "resize-none")}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Details…"
             rows={2}
           />
-        </label>
+        </div>
 
-        <div className="field">
-          <span className="field__label">Color</span>
-          <div className="color-swatches">
-            {COLOR_OPTIONS.map((c) => (
+        <div className="flex flex-col gap-2">
+          <span className={label}>Color</span>
+          <div className="flex flex-wrap gap-2.5">
+            {colorList.map((c) => (
               <button
                 key={c}
                 type="button"
-                className={`color-swatch ${color === c ? "color-swatch--active" : ""}`}
-                style={{ background: colorOf(c) }}
                 aria-label={c}
-                onClick={() => setColor(c)}
+                onClick={() => setColor(c as ColorToken)}
+                className={cn(
+                  "h-8 w-8 rounded-full transition-transform active:scale-90",
+                  color === c && "ring-2 ring-ink ring-offset-2 ring-offset-panel",
+                )}
+                style={{ backgroundColor: colorOf(c) }}
               />
             ))}
           </div>
         </div>
 
-        <div className="event-editor__actions">
+        <div className="mt-1 flex items-center gap-2 border-t border-line pt-4">
           {isEdit && (
             <TouchButton
               variant="danger"
+              icon={Trash2}
               disabled={remove.isPending}
               onClick={() => {
                 if (confirm("Delete this event?")) remove.mutate();
@@ -193,13 +198,13 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
               Delete
             </TouchButton>
           )}
-          <div className="spacer" />
+          <div className="flex-1" />
           <TouchButton variant="ghost" onClick={onClose}>Cancel</TouchButton>
           <TouchButton variant="primary" disabled={!canSave || mutation.isPending} onClick={save}>
             {mutation.isPending ? "Saving…" : isEdit ? "Save" : "Create"}
           </TouchButton>
         </div>
-        {mutation.isError && <p className="field__error">Couldn't save. Try again.</p>}
+        {mutation.isError && <p className="text-sm text-danger">Couldn't save. Try again.</p>}
       </div>
     </Sheet>
   );

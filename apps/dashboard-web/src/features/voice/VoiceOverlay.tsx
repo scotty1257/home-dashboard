@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Mic, Send, X, Loader2, Volume2, AlertTriangle, HelpCircle, Sparkles } from "lucide-react";
 import { api } from "../../lib/api";
 import { TouchButton } from "../../components/TouchButton";
 import { useVoiceStore } from "../../lib/store";
-import "./VoiceOverlay.css";
+import { cn } from "../../lib/cn";
 
 type Turn = {
   state: string;
@@ -27,8 +28,7 @@ export function VoiceOverlay() {
   const recognitionRef = useRef<any>(null);
 
   const session = useMutation({
-    mutationFn: ({ text, confirm }: { text: string; confirm: boolean }) =>
-      api.voiceSession(text, confirm),
+    mutationFn: ({ text, confirm }: { text: string; confirm: boolean }) => api.voiceSession(text, confirm),
     onSuccess: (data) => {
       setTurn(data);
       if (data.reply) speak(data.reply);
@@ -67,11 +67,7 @@ export function VoiceOverlay() {
   };
 
   const startListening = () => {
-    if (!SpeechRecognition) {
-      // Fall back to text input only.
-      setListening(false);
-      return;
-    }
+    if (!SpeechRecognition) return;
     const rec = new SpeechRecognition();
     rec.continuous = false;
     rec.interimResults = false;
@@ -99,76 +95,107 @@ export function VoiceOverlay() {
 
   if (!open) return null;
 
-  const state = session.isPending && !turn?.requiresConfirmation ? "thinking" : turn?.state ?? "idle";
+  const state = session.isPending && !turn?.requiresConfirmation ? "thinking" : (turn?.state ?? "idle");
+  const StateIcon = stateIcon(state);
 
   return (
-    <div className="voice-overlay" role="dialog" aria-modal="true" aria-label="Voice assistant">
-      <div className="voice-orb-wrap">
-        <div className={`voice-orb voice-orb--${state}`}>
-          <span className="voice-orb__glyph">{orbGlyph(state)}</span>
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/60 px-8 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Voice assistant"
+    >
+      <button
+        className="absolute right-6 top-6 flex h-12 w-12 items-center justify-center rounded-md border border-line bg-panel text-ink-3 transition-colors hover:text-ink"
+        onClick={() => setOpen(false)}
+        aria-label="Close"
+      >
+        <X size={20} />
+      </button>
+
+      <div className="flex flex-col items-center gap-3">
+        <div
+          className={cn(
+            "flex h-24 w-24 items-center justify-center rounded-full border border-line bg-panel text-accent",
+            state === "listening" && "animate-[pulse_1.4s_ease-in-out_infinite] border-accent/40",
+            state === "speaking" && "text-teal",
+            state === "error" && "text-danger",
+          )}
+        >
+          {state === "thinking" ? (
+            <Loader2 size={36} className="animate-spin" />
+          ) : (
+            <StateIcon size={36} strokeWidth={1.75} />
+          )}
         </div>
-        <div className="voice-orb__label">{stateLabel(state)}</div>
+        <span className="text-base font-medium text-ink">{stateLabel(state)}</span>
       </div>
 
-      {turn?.transcript && <div className="voice-transcript">“{turn.transcript}”</div>}
-      {turn?.reply && <div className="voice-reply">{turn.reply}</div>}
+      {turn?.transcript && <div className="max-w-xl text-center text-sm italic text-ink-2">“{turn.transcript}”</div>}
+      {turn?.reply && <div className="max-w-2xl text-center text-2xl font-semibold leading-snug text-ink">{turn.reply}</div>}
 
       {turn?.requiresConfirmation && (
-        <div className="voice-confirm">
-          <span className="voice-confirm__note">This action needs your OK.</span>
-          <div className="voice-confirm__actions">
-            <TouchButton variant="danger" onClick={() => submit(lastText, true)}>Confirm</TouchButton>
+        <div className="flex flex-col items-center gap-3">
+          <span className="text-sm font-medium text-warning">This action needs your OK.</span>
+          <div className="flex gap-3">
+            <TouchButton variant="primary" icon={HelpCircle} onClick={() => submit(lastText, true)}>
+              Confirm
+            </TouchButton>
             <TouchButton variant="ghost" onClick={() => setTurn(null)}>Cancel</TouchButton>
           </div>
         </div>
       )}
 
-      <div className="voice-input-row">
+      <div className="flex w-full max-w-xl items-center gap-2">
         <input
-          className="voice-input"
+          className="h-12 flex-1 rounded-md border border-line-strong bg-panel px-4 text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit(input)}
-          placeholder="Ask anything — 'what's the weather', 'turn off the lights'…"
+          placeholder="Ask anything — weather, calendar, lights, music…"
           aria-label="Ask the assistant"
         />
-        <TouchButton
-          variant="primary"
-          icon="🎤"
-          aria-label="Talk"
-          onClick={startListening}
-          disabled={session.isPending}
-        />
-        <TouchButton variant="soft" icon="➤" aria-label="Send" onClick={() => submit(input)} disabled={session.isPending} />
+        <TouchButton variant="soft" icon={Mic} iconOnly onClick={startListening} disabled={session.isPending} aria-label="Talk" />
+        <TouchButton variant="primary" icon={Send} iconOnly onClick={() => submit(input)} disabled={session.isPending} aria-label="Send" />
       </div>
 
       {!SpeechRecognition && (
-        <div className="voice-note">Voice input needs Chrome; type instead.</div>
+        <div className="flex items-center gap-2 text-xs text-ink-3">
+          <Sparkles size={13} /> Voice input needs Chrome — type instead.
+        </div>
       )}
-
-      <button className="voice-close" onClick={setOpen.bind(null, false)} aria-label="Close">✕</button>
     </div>
   );
 }
 
-function orbGlyph(state: string): string {
+function stateIcon(state: string) {
   switch (state) {
-    case "listening": return "🎙️";
-    case "thinking": return "…";
-    case "speaking": return "💬";
-    case "confirming": return "❓";
-    case "error": return "⚠️";
-    default: return "✦";
+    case "listening":
+      return Mic;
+    case "speaking":
+      return Volume2;
+    case "confirming":
+      return HelpCircle;
+    case "error":
+      return AlertTriangle;
+    default:
+      return Sparkles;
   }
 }
 
 function stateLabel(state: string): string {
   switch (state) {
-    case "listening": return "Listening…";
-    case "thinking": return "Thinking…";
-    case "speaking": return "Speaking";
-    case "confirming": return "Confirm";
-    case "error": return "Something went wrong";
-    default: return "Tap to talk";
+    case "listening":
+      return "Listening…";
+    case "thinking":
+      return "Thinking…";
+    case "speaking":
+      return "Speaking";
+    case "confirming":
+      return "Confirm";
+    case "error":
+      return "Something went wrong";
+    default:
+      return "How can I help?";
   }
 }

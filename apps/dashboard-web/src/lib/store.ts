@@ -1,15 +1,4 @@
 import { create } from "zustand";
-import type { DashboardSettings } from "@home-dashboard/contracts";
-
-interface SettingsState {
-  settings: DashboardSettings | null;
-  setSettings: (settings: DashboardSettings) => void;
-}
-
-export const useSettingsStore = create<SettingsState>((set) => ({
-  settings: null,
-  setSettings: (settings) => set({ settings }),
-}));
 
 interface VoiceState {
   open: boolean;
@@ -21,9 +10,11 @@ export const useVoiceStore = create<VoiceState>((set) => ({
   setOpen: (open) => set({ open }),
 }));
 
+export type View = "overview" | "calendar" | "home" | "media" | "settings";
+
 interface NavState {
-  view: "overview" | "calendar" | "home" | "media" | "settings";
-  setView: (view: NavState["view"]) => void;
+  view: View;
+  setView: (view: View) => void;
 }
 
 export const useNavStore = create<NavState>((set) => ({

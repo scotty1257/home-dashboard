@@ -1,16 +1,13 @@
 import { useMemo } from "react";
-import type { CSSProperties } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { EntityState } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
-import { Panel } from "../../components/Panel";
 import { EntityControl } from "./EntityControl";
 import { useHomeCommand } from "./useHomeCommand";
-import { colorOf } from "../../lib/format";
-import "./HomeOverview.css";
+import { colorOf } from "../../lib/colors";
+import { cn } from "../../lib/cn";
 
 interface Props {
-  /** Show only favorites (used on the Overview screen's strip). */
   favoritesOnly?: boolean;
   max?: number;
 }
@@ -30,31 +27,38 @@ export function HomeOverview({ favoritesOnly = false, max }: Props) {
   const { scenes, connected } = data;
 
   return (
-    <div className="home-overview">
+    <div className="flex flex-col gap-4">
       {!favoritesOnly && scenes.length > 0 && (
-        <div className="home-scenes">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {scenes.map((scene) => (
             <button
               key={scene.id}
               type="button"
-              className="scene-btn"
-              style={{ "--scene-accent": colorOf(scene.color) } as CSSProperties}
               onClick={() => command.mutate({ entityId: scene.id, action: "turn_on", params: {} })}
+              className="flex shrink-0 items-center gap-2 rounded-md border border-line bg-panel px-3.5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-raised"
             >
-              <span className="scene-btn__icon">{scene.icon ?? "🎬"}</span>
-              <span className="scene-btn__name">{scene.name}</span>
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: colorOf(scene.color) }}
+                aria-hidden
+              />
+              {scene.name}
             </button>
           ))}
         </div>
       )}
 
-      <div className={`entity-grid ${favoritesOnly ? "entity-grid--favorites" : ""}`}>
+      <div className={cn("grid gap-3", favoritesOnly ? "grid-cols-2 sm:grid-cols-3 xl:grid-cols-6" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3")}>
         {entities.map((e) => (
           <EntityControl key={e.id} entity={e as EntityState} large={!favoritesOnly && (e.favorite ?? false)} />
         ))}
       </div>
 
-      {!connected && <div className="home-offline">Home Assistant unreachable — showing last known state.</div>}
+      {!connected && (
+        <div className="rounded-md bg-warning/15 px-4 py-2.5 text-sm font-medium text-warning">
+          Home Assistant unreachable — showing last known state.
+        </div>
+      )}
     </div>
   );
 }

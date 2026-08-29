@@ -1,5 +1,5 @@
 import type { CalendarEvent } from "@home-dashboard/contracts";
-import { colorOf } from "../../lib/format";
+import { colorOf } from "../../lib/colors";
 
 export interface DayCell {
   date: Date;

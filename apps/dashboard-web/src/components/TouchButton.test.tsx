@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Play } from "lucide-react";
 import { TouchButton } from "./TouchButton";
 
 describe("TouchButton", () => {
@@ -16,8 +17,8 @@ describe("TouchButton", () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it("supports icon-only usage", () => {
-    render(<TouchButton icon="▶" aria-label="Play" />);
+  it("supports icon-only usage with a Lucide icon", () => {
+    render(<TouchButton icon={Play} iconOnly aria-label="Play" />);
     expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument();
   });
 });

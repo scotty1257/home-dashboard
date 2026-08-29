@@ -1,8 +1,6 @@
-import { useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "./lib/api";
+import { useNavStore } from "./lib/store";
+import { useTimeOfDayTheme } from "./lib/theme";
 import { useLiveEvents } from "./lib/useLiveEvents";
-import { useSettingsStore, useNavStore } from "./lib/store";
 import { Header } from "./app/Header";
 import { Nav } from "./app/Nav";
 import { CalendarPanel } from "./features/calendar/CalendarPanel";
@@ -12,38 +10,31 @@ import { ActivityFeed } from "./features/overview/ActivityFeed";
 import { HomeOverview } from "./features/home/HomeOverview";
 import { VoiceOverlay } from "./features/voice/VoiceOverlay";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
-import "./app/DashboardLayout.css";
 
 function OverviewView() {
   return (
-    <div className="overview">
-      <div className="overview__main">
-        <CalendarPanel />
+    <div className="grid h-full grid-cols-12 gap-5">
+      <div className="col-span-7 min-h-0">
+        <CalendarPanel className="h-full" />
       </div>
-      <div className="overview__rail">
+      <div className="col-span-5 flex min-h-0 flex-col gap-5">
         <WeatherPanel />
         <NowPlaying />
-        <ActivityFeed />
-      </div>
-      <div className="overview__home">
-        <h3 className="overview__section-title">Favorites</h3>
-        <HomeOverview favoritesOnly max={6} />
+        <div className="min-h-0 flex-1">
+          <ActivityFeed />
+        </div>
       </div>
     </div>
   );
 }
 
 function CalendarView() {
-  return (
-    <div className="single-view">
-      <CalendarPanel />
-    </div>
-  );
+  return <CalendarPanel className="h-full" />;
 }
 
 function HomeView() {
   return (
-    <div className="single-view">
+    <div className="h-full overflow-y-auto">
       <HomeOverview />
     </div>
   );
@@ -51,47 +42,29 @@ function HomeView() {
 
 function MediaView() {
   return (
-    <div className="single-view single-view--narrow">
+    <div className="mx-auto h-full w-full max-w-xl overflow-y-auto">
       <NowPlaying />
     </div>
   );
 }
 
 function SettingsView() {
-  return <SettingsScreen />;
+  return (
+    <div className="h-full overflow-y-auto py-2">
+      <SettingsScreen />
+    </div>
+  );
 }
 
 export default function App() {
   const view = useNavStore((s) => s.view);
-  const setSettings = useSettingsStore((s) => s.setSettings);
+  useTimeOfDayTheme();
   useLiveEvents();
 
-  // Load settings once and drive theme attributes from them.
-  const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: api.settings });
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (settings) setSettings(settings);
-  }, [settings, setSettings]);
-
-  useEffect(() => {
-    const applyTheme = () => {
-      const s = useSettingsStore.getState().settings;
-      const theme = s?.theme ?? "dark";
-      const resolved = theme === "auto" ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : theme;
-      document.documentElement.setAttribute("data-theme", resolved);
-      document.documentElement.setAttribute("data-accent", s?.accentColor ?? "coral");
-    };
-    applyTheme();
-    const mq = window.matchMedia("(prefers-color-scheme: light)");
-    mq.addEventListener("change", applyTheme);
-    return () => mq.removeEventListener("change", applyTheme);
-  }, [queryClient]);
-
   return (
-    <div className="app">
+    <div className="flex h-full flex-col bg-canvas text-ink">
       <Header />
-      <main className="app__content">
+      <main className="min-h-0 flex-1 overflow-hidden px-6 py-5">
         {view === "overview" && <OverviewView />}
         {view === "calendar" && <CalendarView />}
         {view === "home" && <HomeView />}
