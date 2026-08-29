@@ -1,0 +1,37 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    env_file:
+      - .env
+    environment:
+      - DATABASE_PATH=/data/dashboard.sqlite
+    ports:
+      - "8787:8787"
+    volumes:
+      - dashboard-data:/data
+    restart: unless-stopped
+
+  voice:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.voice
+    env_file:
+      - .env
+    ports:
+      - "8788:8788"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  dashboard-data:

@@ -1,0 +1,28 @@
+{
+  "name": "home-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Touch-first home dashboard: calendar, weather, media, Home Assistant, and a custom AI voice assistant.",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "dev": "concurrently -n web,api,voice -c cyan,magenta,yellow \"pnpm --filter @home-dashboard/web dev\" \"pnpm --filter @home-dashboard/api dev\" \"pnpm --filter @home-dashboard/voice dev\"",
+    "dev:web": "pnpm --filter @home-dashboard/web dev",
+    "dev:api": "pnpm --filter @home-dashboard/api dev",
+    "dev:voice": "pnpm --filter @home-dashboard/voice dev",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @home-dashboard/web test:e2e",
+    "clean": "pnpm -r clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}
