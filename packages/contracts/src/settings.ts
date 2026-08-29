@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ColorToken } from "./core.js";
+import { ColorToken } from "./core";
 
 export const DashboardSettings = z.object({
   theme: z.enum(["light", "dark", "auto"]).default("dark"),

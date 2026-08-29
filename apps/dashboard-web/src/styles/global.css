@@ -1,0 +1,74 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, var(--accent-soft), transparent 60%),
+    radial-gradient(1000px 500px at 100% 0%, var(--violet-soft), transparent 55%),
+    var(--bg);
+}
+
+.app__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.single-view {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.single-view--narrow {
+  max-width: 640px;
+}
+
+/* Accent color applied to key surfaces */
+[data-accent="coral"] { --accent: var(--coral); --accent-strong: #ff5a3d; --accent-soft: var(--coral-soft); }
+[data-accent="amber"] { --accent: var(--amber); --accent-strong: #f09a30; --accent-soft: var(--amber-soft); }
+[data-accent="lime"] { --accent: var(--lime); --accent-strong: #8cc93e; --accent-soft: var(--lime-soft); }
+[data-accent="teal"] { --accent: var(--teal); --accent-strong: #2bb8aa; --accent-soft: var(--teal-soft); }
+[data-accent="sky"] { --accent: var(--sky); --accent-strong: #3a9fe8; --accent-soft: var(--sky-soft); }
+[data-accent="indigo"] { --accent: var(--indigo); --accent-strong: #5c6de0; --accent-soft: var(--indigo-soft); }
+[data-accent="violet"] { --accent: var(--violet); --accent-strong: #9d6fe0; --accent-soft: var(--violet-soft); }
+[data-accent="rose"] { --accent: var(--rose); --accent-strong: #f05c9d; --accent-soft: var(--rose-soft); }
+[data-accent="slate"] { --accent: var(--slate); --accent-strong: #6b7483; --accent-soft: var(--slate-soft); }
+
+::selection {
+  background: var(--accent-soft);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+}

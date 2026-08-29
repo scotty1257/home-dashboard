@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IsoDate } from "./core.js";
+import { IsoDate } from "./core";
 
 export const WeatherCondition = z.enum([
   "clear",

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ColorToken, IsoDate } from "./core.js";
+import { ColorToken, IsoDate } from "./core";
 
 export const RecurrenceRule = z.object({
   frequency: z.enum(["none", "daily", "weekly", "monthly", "yearly"]),
@@ -47,7 +47,7 @@ export const CalendarEventInput = CalendarEvent.pick({
   recurrence: true,
   reminders: true,
 });
-export type CalendarEventInput = z.infer<typeof CalendarEventInput>;
+export type CalendarEventInput = z.input<typeof CalendarEventInput>;
 
 /** A calendar range query, all timestamps UTC ISO. */
 export const CalendarRangeQuery = z.object({

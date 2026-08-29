@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IsoDate } from "./core.js";
+import { IsoDate } from "./core";
 
 export const MediaSource = z.enum(["spotify", "demo", "none"]);
 export type MediaSource = z.infer<typeof MediaSource>;

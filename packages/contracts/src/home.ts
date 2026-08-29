@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ColorToken, IsoDate } from "./core.js";
+import { ColorToken, IsoDate } from "./core";
 
 export const EntityDomain = z.enum([
   "light",

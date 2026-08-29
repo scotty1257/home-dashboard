@@ -1,0 +1,110 @@
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  padding: 6px 0;
+}
+
+.calendar-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 74px;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: rgb(255 255 255 / 0.02);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease-out), border var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calendar-cell:hover {
+  background: rgb(255 255 255 / 0.05);
+  border-color: var(--border);
+}
+
+.calendar-cell:active {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.calendar-cell--out {
+  opacity: 0.4;
+}
+
+.calendar-cell--today .calendar-cell__num {
+  background: var(--accent);
+  color: #fff;
+}
+
+.calendar-cell__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.calendar-cell__events {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+}
+
+.calendar-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 22px;
+  padding: 3px 7px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calendar-chip:active {
+  filter: brightness(1.15);
+}
+
+.calendar-chip__time {
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar-chip__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-cell__more {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  padding-left: 6px;
+}

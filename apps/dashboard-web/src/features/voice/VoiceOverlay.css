@@ -1,0 +1,142 @@
+.voice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 40px;
+  background: radial-gradient(circle at 50% 30%, rgb(124 140 255 / 0.12), transparent 55%), var(--overlay);
+  backdrop-filter: blur(14px);
+  animation: fade-in var(--dur-base) var(--ease-out);
+}
+
+.voice-orb-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.voice-orb {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--indigo), var(--violet));
+  box-shadow: 0 20px 60px rgb(124 140 255 / 0.4);
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.voice-orb--listening {
+  animation: pulse 1.4s ease-in-out infinite;
+  background: linear-gradient(135deg, var(--accent), var(--rose));
+}
+
+.voice-orb--thinking {
+  animation: spin 1.6s linear infinite;
+}
+
+.voice-orb--speaking {
+  background: linear-gradient(135deg, var(--teal), var(--sky));
+}
+
+.voice-orb__glyph {
+  font-size: 54px;
+  color: #fff;
+}
+
+.voice-orb__label {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.voice-transcript {
+  font-size: var(--text-md);
+  color: var(--muted);
+  font-style: italic;
+  max-width: 560px;
+  text-align: center;
+}
+
+.voice-reply {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  max-width: 640px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.voice-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.voice-confirm__note {
+  color: var(--warning);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.voice-confirm__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.voice-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(640px, 100%);
+}
+
+.voice-input {
+  flex: 1;
+  min-height: var(--touch-lg);
+  padding: 0 20px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--foreground);
+  font: 500 var(--text-md) var(--font-sans);
+}
+
+.voice-input:focus {
+  outline: none;
+  border-color: var(--indigo);
+}
+
+.voice-note {
+  font-size: var(--text-xs);
+  color: var(--muted-2);
+}
+
+.voice-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
