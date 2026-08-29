@@ -7,6 +7,11 @@ import type {
   CalendarListResponse,
   DashboardSettings,
   DashboardSettingsPatch,
+  DutyDefinition,
+  DutyDefinitionInput,
+  DutyEntryInput,
+  DutyEntryView,
+  DutySummary,
   EntityState,
   HandoffBackupInput,
   HandoffBoardItem,
@@ -165,6 +170,26 @@ export const api = {
       request<PermissionRule>("/api/permission-rules", { method: "POST", body: JSON.stringify(input) }),
     update: (id: string, input: PermissionRuleInput) =>
       request<PermissionRule>(`/api/permission-rules/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+  },
+
+  // Duty ledger
+  duties: {
+    summary: (windowDays: number) =>
+      request<DutySummary>(`/api/duties?windowDays=${encodeURIComponent(windowDays)}`),
+    logEntry: (input: DutyEntryInput) =>
+      request<DutyEntryView>("/api/duties/entries", { method: "POST", body: JSON.stringify(input) }),
+    undoEntry: (id: string, actorId: string) =>
+      request<{ entry: DutyEntryView }>(`/api/duties/entries/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        body: JSON.stringify({ actorId }),
+      }),
+    createDefinition: (input: DutyDefinitionInput & { actorId: string }) =>
+      request<DutyDefinition>("/api/duties", { method: "POST", body: JSON.stringify(input) }),
+    updateDefinition: (id: string, input: DutyDefinitionInput & { actorId: string }) =>
+      request<DutyDefinition>(`/api/duties/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify(input),
+      }),
   },
 
   // Activity

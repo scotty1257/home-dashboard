@@ -19,6 +19,8 @@ import { HandoffRepository } from "./modules/handoffs/repository.js";
 import { handoffRoutes } from "./modules/handoffs/routes.js";
 import { PermissionRepository } from "./modules/permissions/repository.js";
 import { permissionRoutes } from "./modules/permissions/routes.js";
+import { DutyRepository } from "./modules/duties/repository.js";
+import { dutyRoutes } from "./modules/duties/routes.js";
 
 export interface AppContext {
   app: FastifyInstance;
@@ -31,6 +33,7 @@ export interface AppContext {
   household: HouseholdRepository;
   handoffs: HandoffRepository;
   permissions: PermissionRepository;
+  duties: DutyRepository;
 }
 
 export function buildApp(config: Config): AppContext {
@@ -47,6 +50,7 @@ export function buildApp(config: Config): AppContext {
   const household = new HouseholdRepository(db);
   const handoffs = new HandoffRepository(db, calendar, household, settings);
   const permissions = new PermissionRepository(db, household, settings);
+  const duties = new DutyRepository(db, household, settings);
   const tools = new ToolRegistry({ calendar, spotify, home, weather: weatherDeps });
 
   // Health
@@ -106,6 +110,7 @@ export function buildApp(config: Config): AppContext {
   householdRoutes(app, household);
   handoffRoutes(app, handoffs);
   permissionRoutes(app, permissions);
+  dutyRoutes(app, duties);
 
-  return { app, db, calendar, home, spotify, settings, tools, household, handoffs, permissions };
+  return { app, db, calendar, home, spotify, settings, tools, household, handoffs, permissions, duties };
 }
