@@ -35,7 +35,7 @@ export function Header() {
   const homeDetail = health?.services.find((s) => s.service === "home")?.detail ?? "demo";
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-6 border-b border-line bg-panel/60 px-6">
+    <header className="flex h-16 shrink-0 items-center gap-6 border-b border-line bg-panel/60 px-6 backdrop-blur-sm">
       <div className="flex items-center gap-2.5">
         <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-white">
           <House size={16} strokeWidth={2.2} />

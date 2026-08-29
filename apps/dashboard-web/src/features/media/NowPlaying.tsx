@@ -1,24 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Music2 } from "lucide-react";
-import { api } from "../../lib/api";
 import { Panel } from "../../components/Panel";
 import { TouchButton } from "../../components/TouchButton";
 import { formatDuration } from "../../lib/format";
 import { cn } from "../../lib/cn";
+import { usePlayer } from "./usePlayer";
 
+/** Compact-but-large player for the overview rail. */
 export function NowPlaying() {
-  const queryClient = useQueryClient();
-  const { data } = useQuery({ queryKey: ["media"], queryFn: api.media, refetchInterval: 10_000 });
-
-  const command = useMutation({
-    mutationFn: api.mediaCommand,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["media"] }),
-  });
+  const { state: data, command } = usePlayer();
 
   if (!data) {
     return (
       <Panel title="Now Playing" accent="teal">
-        <div className="py-6 text-center text-sm text-ink-3">Nothing playing</div>
+        <div className="py-8 text-center text-sm text-ink-3">Nothing playing</div>
       </Panel>
     );
   }
@@ -36,25 +30,29 @@ export function NowPlaying() {
         </span>
       }
     >
-      <div className="flex gap-4">
-        <div className="flex h-[88px] w-[88px] shrink-0 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-teal/70 to-indigo/70">
+      <div className="flex gap-5">
+        <div className="relative flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-teal/60 via-indigo/60 to-violet/60"
+            aria-hidden
+          />
           {track?.artworkUrl ? (
-            <img src={track.artworkUrl} alt="" className="h-full w-full object-cover" />
+            <img src={track.artworkUrl} alt="" className="relative h-full w-full object-cover" />
           ) : (
-            <Music2 size={30} className="text-white/80" />
+            <Music2 size={40} className="relative text-white/85" />
           )}
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="truncate text-[15px] font-semibold text-ink">{track?.name ?? "Nothing playing"}</div>
+          <div className="truncate text-lg font-semibold text-ink">{track?.name ?? "Nothing playing"}</div>
           <div className="truncate text-sm text-ink-2">{track?.artists.join(", ") ?? "—"}</div>
           <div className="truncate text-xs text-ink-3">{track?.album}</div>
 
           <div className="mt-auto">
-            <div className="h-1 w-full overflow-hidden rounded-full bg-surface">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${progress * 100}%` }} />
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
+              <div className="h-full rounded-full bg-gradient-to-r from-teal to-accent" style={{ width: `${progress * 100}%` }} />
             </div>
-            <div className="mt-1 flex justify-between text-[11px] tabular-nums text-ink-4">
+            <div className="mt-1.5 flex justify-between text-[11px] tabular-nums text-ink-4">
               <span>{formatDuration(progressMs)}</span>
               <span>{track ? formatDuration(track.durationMs) : "0:00"}</span>
             </div>
@@ -62,7 +60,7 @@ export function NowPlaying() {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-2">
+      <div className="mt-4 flex items-center justify-center gap-3">
         <TouchButton variant="ghost" icon={SkipBack} iconOnly onClick={() => command.mutate({ action: "previous" })} aria-label="Previous" />
         <TouchButton
           variant="primary"
@@ -70,6 +68,7 @@ export function NowPlaying() {
           iconOnly
           onClick={() => command.mutate({ action: isPlaying ? "pause" : "play" })}
           aria-label={isPlaying ? "Pause" : "Play"}
+          className="h-14 w-14"
         />
         <TouchButton variant="ghost" icon={SkipForward} iconOnly onClick={() => command.mutate({ action: "next" })} aria-label="Next" />
       </div>

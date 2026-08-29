@@ -31,7 +31,7 @@ export function Sheet({ open, onClose, title, children, size = "md" }: Props) {
     >
       <div
         className={cn(
-          "flex w-full flex-col rounded-t-xl border border-b-0 border-line bg-panel shadow-2xl",
+          "flex w-full flex-col rounded-t-xl border border-b-0 border-line bg-panel shadow-2xl backdrop-blur-md",
           "max-h-[88vh] animate-[slideUp_0.22s_cubic-bezier(0.22,1,0.36,1)]",
           size === "md" ? "max-w-xl" : "max-w-2xl",
         )}

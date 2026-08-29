@@ -4,58 +4,82 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------------------
-   Semantic tokens (Linear-inspired) — light by default, overridden by `.dark`.
+   Semantic tokens — light space theme by default, `.dark` flips to deep space.
    The `@theme inline` block references these vars so utilities re-resolve at
    runtime when the `.dark` class flips, with no rebuild.
 --------------------------------------------------------------------------- */
 :root {
-  --bg-canvas: #f6f7f8;
-  --bg-panel: #ffffff;
-  --bg-surface: #f1f2f4;
-  --bg-raised: #e8eaed;
+  /* Space base — soft blue-white "daylight" cosmos */
+  --bg-canvas: #e6ebf6;
+  --bg-panel: rgba(255, 255, 255, 0.5);
+  --bg-surface: #eef0f4;
+  --bg-raised: #e3e7ee;
 
-  --line: rgba(15, 18, 25, 0.10);
-  --line-strong: rgba(15, 18, 25, 0.18);
+  --line: rgba(30, 40, 70, 0.12);
+  --line-strong: rgba(30, 40, 70, 0.22);
 
-  --ink: #1a1d21;
-  --ink-2: #4a4f57;
-  --ink-3: #73777f;
-  --ink-4: #9aa0a8;
+  --ink: #161a24;
+  --ink-2: #3f4756;
+  --ink-3: #6b7385;
+  --ink-4: #98a0b0;
 
   --accent: #5e6ad2;
   --accent-2: #7170ff;
-  --accent-soft: rgba(94, 106, 210, 0.12);
+  --accent-soft: rgba(94, 106, 210, 0.14);
 
   --success: #16a34a;
   --warning: #d97706;
   --danger: #dc2626;
 
-  --shadow-panel: 0 1px 2px rgba(15, 18, 25, 0.06);
+  --shadow-panel: 0 1px 2px rgba(30, 40, 70, 0.08);
+
+  /* Space elements (daylight — pastel, clearly visible) */
+  --star-a: rgba(124, 140, 255, 0.65);
+  --star-b: rgba(181, 140, 255, 0.6);
+  --star-c: rgba(63, 198, 178, 0.6);
+  --star-d: rgba(255, 122, 184, 0.55);
+  --star-e: rgba(245, 166, 35, 0.55);
+  --orbit: rgba(124, 140, 255, 0.6);
+  --nebula-a: rgba(124, 140, 255, 0.24);
+  --nebula-b: rgba(255, 122, 184, 0.18);
+  --nebula-c: rgba(63, 198, 178, 0.18);
+  --glow-core: rgba(124, 140, 255, 0.3);
 }
 
 .dark {
-  --bg-canvas: #08090a;
-  --bg-panel: #0f1011;
-  --bg-surface: #191a1b;
-  --bg-raised: #24262a;
+  --bg-canvas: #05060c;
+  --bg-panel: rgba(13, 14, 20, 0.55);
+  --bg-surface: #14161d;
+  --bg-raised: #1e212b;
 
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.16);
 
-  --ink: #f7f8f8;
-  --ink-2: #d0d6e0;
-  --ink-3: #8a8f98;
-  --ink-4: #62666d;
+  --ink: #f4f6fb;
+  --ink-2: #d3d8e4;
+  --ink-3: #8a92a3;
+  --ink-4: #5f6674;
 
-  --accent: #5e6ad2;
-  --accent-2: #7170ff;
-  --accent-soft: rgba(94, 106, 210, 0.16);
+  --accent: #6d7bff;
+  --accent-2: #8a94ff;
+  --accent-soft: rgba(109, 123, 255, 0.18);
 
   --success: #10b981;
   --warning: #f5a623;
   --danger: #f2555a;
 
-  --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.25);
+
+  --star-a: rgba(255, 255, 255, 0.85);
+  --star-b: rgba(255, 255, 255, 0.6);
+  --star-c: rgba(180, 194, 255, 0.7);
+  --star-d: rgba(255, 255, 255, 0.55);
+  --star-e: rgba(255, 255, 255, 0.5);
+  --orbit: rgba(150, 160, 255, 0.42);
+  --nebula-a: rgba(109, 123, 255, 0.32);
+  --nebula-b: rgba(181, 140, 255, 0.24);
+  --nebula-c: rgba(63, 198, 178, 0.18);
+  --glow-core: rgba(109, 123, 255, 0.42);
 }
 
 @theme inline {
@@ -80,10 +104,9 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas,
-    monospace;
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Semantic accent family (calendar events, device colors) — fixed brights. */
   --color-coral: #ff7a5c;
@@ -116,7 +139,7 @@ body {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
-  font-feature-settings: "cv01", "ss03";
+  letter-spacing: -0.01em;
 }
 
 ::selection {
@@ -157,11 +180,161 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
 }
 
+/* =========================================================================
+   Space background — nebula gradients, twinkling stars, thin elliptical
+   orbits with orbiting planets.
+   ========================================================================= */
+.space {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.space__nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.8;
+  will-change: transform;
+}
+
+.space__nebula--a {
+  width: 55vmax;
+  height: 55vmax;
+  left: -12vmax;
+  top: -18vmax;
+  background: var(--nebula-a);
+  animation: nebulaDrift 46s ease-in-out infinite alternate;
+}
+.space__nebula--b {
+  width: 48vmax;
+  height: 48vmax;
+  right: -14vmax;
+  top: 8vmax;
+  background: var(--nebula-b);
+  animation: nebulaDrift 58s ease-in-out infinite alternate-reverse;
+}
+.space__nebula--c {
+  width: 40vmax;
+  height: 40vmax;
+  left: 18vmax;
+  bottom: -20vmax;
+  background: var(--nebula-c);
+  animation: nebulaDrift 66s ease-in-out infinite alternate;
+}
+
+.space__star {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--star-tone, var(--star-a));
+  animation: twinkle var(--tw-dur, 4s) ease-in-out var(--tw-delay, 0s) infinite;
+}
+
+.space__orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.space__orbit-plane {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--orbit-tilt, 62deg)) rotateZ(var(--orbit-azimuth, 0deg));
+}
+
+.space__orbit-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--orbit);
+  animation: orbitSpin var(--orbit-dur, 60s) linear infinite;
+}
+
+.space__planet {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px 1px var(--planet-glow, transparent);
+}
+
+.space__glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 44vmax;
+  height: 44vmax;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--glow-core) 0%, transparent 62%);
+  animation: glowPulse 14s ease-in-out infinite;
+}
+
+@keyframes orbitSpin {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes nebulaDrift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4vmax, 3vmax, 0) scale(1.12);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+/* Big album-art glow on the media screen */
+@keyframes artGlow {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

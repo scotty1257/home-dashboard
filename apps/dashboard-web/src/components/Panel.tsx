@@ -18,7 +18,7 @@ export function Panel({ title, icon: Icon, accent, children, actions, className,
   return (
     <section
       className={cn(
-        "rounded-lg border border-line bg-panel shadow-panel",
+        "rounded-lg border border-line bg-panel shadow-panel backdrop-blur-md",
         className,
       )}
     >

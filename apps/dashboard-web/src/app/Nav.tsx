@@ -16,7 +16,7 @@ export function Nav() {
   const setView = useNavStore((s) => s.setView);
 
   return (
-    <nav className="flex h-16 shrink-0 items-stretch border-t border-line bg-panel/60 px-4" aria-label="Primary">
+    <nav className="flex h-16 shrink-0 items-stretch border-t border-line bg-panel/60 px-4 backdrop-blur-sm" aria-label="Primary">
       {TABS.map((tab) => {
         const active = view === tab.id;
         const Icon = tab.icon;
