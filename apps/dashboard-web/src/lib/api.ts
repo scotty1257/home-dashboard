@@ -8,6 +8,9 @@ import type {
   EntityState,
   HomeCommand,
   HomeSnapshot,
+  HouseholdListResponse,
+  HouseholdMember,
+  HouseholdMemberInput,
   MediaCommand,
   PlaybackState,
   SearchResult,
@@ -73,6 +76,16 @@ export const api = {
     request<{ ok: boolean }>("/api/spotify/command", { method: "POST", body: JSON.stringify(command) }),
   mediaSearch: (q: string) => request<SearchResult[]>(`/api/spotify/search?q=${encodeURIComponent(q)}`),
   mediaStatus: () => request<{ configured: boolean; authorized: boolean; authorizeUrl: string | null }>("/api/spotify/status"),
+
+  // Household
+  household: {
+    list: () => request<HouseholdListResponse>("/api/household"),
+    updateMember: (id: string, patch: HouseholdMemberInput & { actorId: string }) =>
+      request<HouseholdMember>(`/api/household/members/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      }),
+  },
 
   // Activity
   activity: () => request<ActivityFeed>("/api/activity"),

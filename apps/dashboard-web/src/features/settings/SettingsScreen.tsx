@@ -1,12 +1,113 @@
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Thermometer, Mic, ShieldCheck, Plug, Music2 } from "lucide-react";
-import { api } from "../../lib/api";
+import { Thermometer, Mic, ShieldCheck, Plug, Music2, Users } from "lucide-react";
+import type { HouseholdMember, HouseholdMemberInput } from "@home-dashboard/contracts";
+import { api, ApiError } from "../../lib/api";
+import { memberIcon, useActiveActor } from "../household/ActorSwitcher";
 import { Panel } from "../../components/Panel";
 import { Toggle } from "../../components/Toggle";
 import { TouchButton } from "../../components/TouchButton";
 import { cn } from "../../lib/cn";
 
 const row = "flex items-center justify-between gap-4 py-3 border-b border-line last:border-0";
+
+const ICON_KEYS = ["user", "user-round", "baby", "heart", "star"] as const;
+
+/** One editable member: name input (save on blur/Enter) + icon select. */
+function MemberEditor({
+  member,
+  onSave,
+}: {
+  member: HouseholdMember;
+  onSave: (id: string, patch: HouseholdMemberInput) => void;
+}) {
+  const [name, setName] = useState(member.displayName);
+
+  useEffect(() => {
+    setName(member.displayName);
+  }, [member.displayName]);
+
+  const commitName = () => {
+    const trimmed = name.trim();
+    if (trimmed && trimmed !== member.displayName) onSave(member.id, { displayName: trimmed });
+  };
+
+  const Icon = memberIcon(member.icon);
+
+  return (
+    <div className={row}>
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <Icon
+          size={18}
+          strokeWidth={2}
+          aria-hidden
+          style={{ color: `var(--color-${member.color})` }}
+        />
+        <input
+          value={name}
+          aria-label={`${member.displayName} name`}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={commitName}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+          }}
+          className="min-h-12 w-full max-w-56 rounded-md border border-line bg-surface px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
+        />
+      </div>
+      <select
+        aria-label={`${member.displayName} icon`}
+        value={member.icon}
+        onChange={(e) => onSave(member.id, { icon: e.target.value as HouseholdMember["icon"] })}
+        className="min-h-12 rounded-md border border-line bg-surface px-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
+      >
+        {ICON_KEYS.map((key) => (
+          <option key={key} value={key}>
+            {key}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/** Household roster with per-member editing, attributed to the active actor. */
+function HouseholdPanel() {
+  const queryClient = useQueryClient();
+  const { data } = useQuery({ queryKey: ["household"], queryFn: api.household.list });
+  const { actor } = useActiveActor();
+  const [error, setError] = useState<string | null>(null);
+  const members = data?.members ?? [];
+
+  const update = useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: HouseholdMemberInput }) =>
+      api.household.updateMember(id, { ...patch, actorId: actor?.id ?? "" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["household"] }),
+    onError: (err) => {
+      // 403 = the active actor is a child; the API refuses, we just shrug.
+      if (err instanceof ApiError && err.status === 403) return;
+      setError(err instanceof Error ? err.message : "Update failed");
+    },
+  });
+
+  return (
+    <Panel title="Household" icon={Users} accent="indigo">
+      {actor?.role === "child" && (
+        <div className="pb-3 text-xs text-ink-3">Adults only — kid profiles can view but not edit members</div>
+      )}
+      {error && <div className="pb-3 text-xs text-danger">{error}</div>}
+      {members.map((member) => (
+        <MemberEditor
+          key={member.id}
+          member={member}
+          onSave={(id, patch) => {
+            setError(null);
+            update.mutate({ id, patch });
+          }}
+        />
+      ))}
+    </Panel>
+  );
+}
 
 export function SettingsScreen() {
   const queryClient = useQueryClient();
@@ -24,6 +125,8 @@ export function SettingsScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+      <HouseholdPanel />
+
       <Panel title="Units" icon={Thermometer} accent="sky">
         <div className={cn(row, "pt-1")}>
           <div>

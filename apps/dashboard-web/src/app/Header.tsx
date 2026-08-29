@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Mic, House, CloudSun, Music } from "lucide-react";
+import { Mic, House, CloudSun, Music, Settings } from "lucide-react";
 import { api } from "../lib/api";
 import { TouchButton } from "../components/TouchButton";
-import { useVoiceStore } from "../lib/store";
+import { useVoiceStore, useNavStore } from "../lib/store";
+import { ActorSwitcher } from "../features/household/ActorSwitcher";
 import { formatClock, formatDate } from "../lib/format";
 import { cn } from "../lib/cn";
 
@@ -23,6 +24,7 @@ function StatusDot({ tone }: { tone: "ok" | "muted" | "down" }) {
 export function Header() {
   const [now, setNow] = useState(() => new Date());
   const setVoiceOpen = useVoiceStore((s) => s.setOpen);
+  const setView = useNavStore((s) => s.setView);
 
   const { data: health } = useQuery({ queryKey: ["health"], queryFn: api.health, refetchInterval: 60_000 });
   const { data: spotify } = useQuery({ queryKey: ["media-status"], queryFn: api.mediaStatus, refetchInterval: 60_000 });
@@ -41,6 +43,7 @@ export function Header() {
           <House size={16} strokeWidth={2.2} />
         </span>
         <span className="text-[15px] font-semibold tracking-tight text-ink">Home</span>
+        <ActorSwitcher />
       </div>
 
       <div className="flex flex-1 items-center justify-center gap-3">
@@ -67,6 +70,14 @@ export function Header() {
             <span>{spotify?.authorized ? "Spotify" : "demo"}</span>
           </span>
         </div>
+
+        <TouchButton
+          variant="ghost"
+          icon={Settings}
+          iconOnly
+          aria-label="Settings"
+          onClick={() => setView("settings")}
+        />
 
         <TouchButton variant="primary" icon={Mic} onClick={() => setVoiceOpen(true)} aria-label="Open voice assistant">
           Assistant

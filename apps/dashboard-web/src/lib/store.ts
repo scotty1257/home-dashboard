@@ -21,3 +21,14 @@ export const useNavStore = create<NavState>((set) => ({
   view: "overview",
   setView: (view) => set({ view }),
 }));
+
+interface ActorState {
+  /** Currently active household member (null until resolved from the household). */
+  actorId: string | null;
+  setActorId: (actorId: string | null) => void;
+}
+
+export const useActorStore = create<ActorState>((set) => ({
+  actorId: null,
+  setActorId: (actorId) => set({ actorId }),
+}));
