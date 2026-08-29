@@ -23,7 +23,19 @@ interface EventRow {
   updated_at: string;
 }
 
+/**
+ * Columns added by the family-coordination migration. Databases that have not
+ * run the migration return rows without these keys, so they are read
+ * defensively and fall back to the contract defaults.
+ */
+interface FamilyEventColumns {
+  owner_id?: string | null;
+  schedule_kind?: string | null;
+  requires_handoff?: number | null;
+}
+
 function rowToEvent(row: EventRow): CalendarEvent {
+  const family = row as EventRow & Partial<FamilyEventColumns>;
   return {
     id: row.id,
     calendarId: row.calendar_id,
@@ -36,6 +48,9 @@ function rowToEvent(row: EventRow): CalendarEvent {
     color: (row.color as CalendarEvent["color"]) ?? "sky",
     recurrence: JSON.parse(row.recurrence) as RecurrenceRule,
     reminders: JSON.parse(row.reminders),
+    ownerId: family.owner_id ?? undefined,
+    scheduleKind: (family.schedule_kind as CalendarEvent["scheduleKind"]) ?? "general",
+    requiresHandoff: family.requires_handoff === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

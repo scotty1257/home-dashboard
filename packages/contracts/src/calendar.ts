@@ -29,6 +29,14 @@ export const CalendarEvent = z.object({
   color: ColorToken.default("sky"),
   recurrence: RecurrenceRule.default({ frequency: "none", interval: 1 }),
   reminders: z.array(Reminder).default([]),
+  /** Whose schedule this event belongs to, when attributed to a member. */
+  ownerId: z.string().min(1).optional(),
+  /** How the event participates in family scheduling. */
+  scheduleKind: z
+    .enum(["general", "adult-commitment", "child-commitment"])
+    .default("general"),
+  /** True when this event requires a handoff between adults. */
+  requiresHandoff: z.boolean().default(false),
   createdAt: IsoDate,
   updatedAt: IsoDate,
 });
@@ -46,6 +54,9 @@ export const CalendarEventInput = CalendarEvent.pick({
   color: true,
   recurrence: true,
   reminders: true,
+  ownerId: true,
+  scheduleKind: true,
+  requiresHandoff: true,
 });
 export type CalendarEventInput = z.input<typeof CalendarEventInput>;
 

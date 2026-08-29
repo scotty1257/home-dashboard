@@ -17,6 +17,12 @@ export const DEFAULT_SETTINGS: DashboardSettings = {
   nightDimEnd: "07:00",
   voice: { wakeWordEnabled: false, pushToTalkEnabled: true, confirmHighRisk: true },
   accentColor: "coral",
+  family: {
+    handoffAlertTime: "18:00",
+    travelBufferMinutes: 15,
+    overrunBufferMinutes: 15,
+    dutyWindowDays: 30,
+  },
 };
 
 export class SettingsStore {

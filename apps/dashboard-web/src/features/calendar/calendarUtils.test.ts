@@ -12,6 +12,8 @@ const base = (id: string, start: string, end: string, allDay = false): CalendarE
   color: "sky",
   recurrence: { frequency: "none", interval: 1 },
   reminders: [],
+  scheduleKind: "general",
+  requiresHandoff: false,
   createdAt: start,
   updatedAt: start,
 });
