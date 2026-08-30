@@ -33,6 +33,9 @@ import type {
   PermissionRuleInput,
   PlaybackState,
   SearchResult,
+  VoiceNote,
+  VoiceNoteInput,
+  VoiceNoteListResponse,
   WeatherReport,
 } from "@home-dashboard/contracts";
 
@@ -190,6 +193,28 @@ export const api = {
         method: "PUT",
         body: JSON.stringify(input),
       }),
+  },
+
+  // Voice notes (query key: ["voice-notes", recipientId])
+  voiceNotes: {
+    list: (recipientId: string, limit = 20) =>
+      request<VoiceNoteListResponse>(
+        `/api/voice-notes?recipientId=${encodeURIComponent(recipientId)}&limit=${limit}`,
+      ),
+    upload: (input: VoiceNoteInput, audio: Blob) => {
+      const form = new FormData();
+      form.append("metadata", JSON.stringify(input));
+      const ext =
+        input.mimeType === "audio/webm" ? "webm" : input.mimeType === "audio/ogg" ? "ogg" : "mp4";
+      form.append("audio", audio, `note.${ext}`);
+      // An explicitly empty headers object overrides the JSON content type,
+      // letting fetch set the multipart boundary itself.
+      return request<VoiceNote>("/api/voice-notes", { method: "POST", body: form, headers: {} });
+    },
+    markRead: (id: string) =>
+      request<VoiceNote>(`/api/voice-notes/${encodeURIComponent(id)}/read`, { method: "POST" }),
+    remove: (id: string) =>
+      request<void>(`/api/voice-notes/${encodeURIComponent(id)}`, { method: "DELETE" }),
   },
 
   // Activity
