@@ -57,7 +57,7 @@ export function WeatherPanel({ compact = false }: Props) {
       bodyClassName={compact ? "pb-2 pt-0" : undefined}
       actions={
         stale ? (
-          <span className="flex items-center gap-1.5 text-[11px] font-medium text-warning">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-warning">
             <RefreshCw size={12} /> offline
           </span>
         ) : undefined
@@ -107,7 +107,7 @@ export function WeatherPanel({ compact = false }: Props) {
             const Icon = weatherIcon(h.condition);
             return (
               <div key={h.time} className="flex min-w-[52px] flex-col items-center gap-1 rounded-md px-1 py-2">
-                <span className="text-[11px] text-ink-3 tabular-nums">{i === 0 ? "Now" : new Date(h.time).getHours()}</span>
+                <span className="text-xs text-ink-3 tabular-nums">{i === 0 ? "Now" : new Date(h.time).getHours()}</span>
                 <Icon size={16} strokeWidth={1.75} className={conditionTint(h.condition)} />
                 <span className="text-xs font-medium tabular-nums">{Math.round(h.temperature)}°</span>
               </div>

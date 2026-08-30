@@ -243,7 +243,7 @@ export function SettingsScreen() {
   const set = (patch: Parameters<typeof api.updateSettings>[0]) => update.mutate(patch);
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 xl:grid-cols-2">
+    <div data-testid="settings-grid" className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 xl:grid-cols-2">
       <HouseholdPanel />
 
       <FamilyPanel family={settings.family} saving={update.isPending} onSave={set} />

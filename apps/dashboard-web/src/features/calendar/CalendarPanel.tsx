@@ -64,7 +64,7 @@ export function CalendarPanel({ compact = false, className }: Props) {
     >
       <div className="grid grid-cols-7 gap-px pb-1">
         {WEEKDAY_NAMES.map((d) => (
-          <div key={d} className="py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-ink-4">
+          <div key={d} className="py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-ink-4">
             {d}
           </div>
         ))}
@@ -86,7 +86,7 @@ export function CalendarPanel({ compact = false, className }: Props) {
             >
               <span
                 className={cn(
-                  "flex h-6 w-6 items-center justify-center self-end rounded-md text-[13px] font-medium tabular-nums",
+                  "flex h-6 w-6 items-center justify-center self-end rounded-md text-sm font-medium tabular-nums",
                   cell.isToday
                     ? "bg-accent text-white"
                     : cell.inMonth
@@ -102,11 +102,12 @@ export function CalendarPanel({ compact = false, className }: Props) {
                     key={e.id}
                     role="button"
                     tabIndex={-1}
+                    data-testid="event-chip"
                     onClick={(ev) => {
                       ev.stopPropagation();
                       setEditing(e);
                     }}
-                    className="flex items-center gap-1.5 truncate rounded px-1.5 py-0.5 text-[11px] font-medium leading-tight"
+                    className="flex min-h-6 items-center gap-1.5 truncate rounded px-1.5 py-0.5 text-xs font-medium leading-tight"
                     style={{ backgroundColor: `${colorOf(e.color)}1f`, color: colorOf(e.color) }}
                   >
                     {!e.allDay && <span className="opacity-70 tabular-nums">{timeShort(e.start)}</span>}
@@ -117,7 +118,7 @@ export function CalendarPanel({ compact = false, className }: Props) {
                   </span>
                 ))}
                 {dayEvents.length > maxChips && (
-                  <span className="px-1.5 text-[11px] font-medium text-ink-4">
+                  <span className="px-1.5 text-xs font-medium text-ink-4">
                     +{dayEvents.length - maxChips}
                   </span>
                 )}

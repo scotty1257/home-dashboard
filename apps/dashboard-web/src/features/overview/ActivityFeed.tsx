@@ -71,7 +71,7 @@ export function ActivityFeed({ compact = false }: Props) {
                     {item.title}
                   </span>
                   {item.subtitle && (
-                    <span className={cn("truncate text-ink-3", compact ? "text-[11px]" : "text-xs")}>
+                    <span className={cn("truncate text-ink-3", compact ? "text-xs" : "text-xs")}>
                       {item.subtitle}
                     </span>
                   )}

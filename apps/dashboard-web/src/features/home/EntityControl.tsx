@@ -4,6 +4,7 @@ import type { EntityState } from "@home-dashboard/contracts";
 import { useHomeCommand } from "./useHomeCommand";
 import { Toggle } from "../../components/Toggle";
 import { TouchButton } from "../../components/TouchButton";
+import { RangeControl } from "../../components/RangeControl";
 import { colorOf } from "../../lib/colors";
 import { domainIcon } from "../../lib/icons";
 import { cn } from "../../lib/cn";
@@ -56,13 +57,11 @@ export function EntityControl({ entity, large = false }: Props) {
         )}
 
         {entity.domain === "light" && isOn && (
-          <input
-            type="range"
-            className="w-full"
+          <RangeControl
             min={1}
             max={255}
             value={Number(entity.attributes.brightness ?? 255)}
-            onChange={(e) => send("set_brightness", { brightness: Number(e.target.value) })}
+            onChange={(v) => send("set_brightness", { brightness: v })}
             aria-label="Brightness"
             disabled={unavailable}
             style={{ "--tw-accent": accent } as CSSProperties}
@@ -71,11 +70,23 @@ export function EntityControl({ entity, large = false }: Props) {
 
         {entity.domain === "climate" && (
           <div className="flex items-center gap-2">
-            <TouchButton variant="soft" icon={Minus} iconOnly onClick={() => send("set_temperature", { temperature: (Number(entity.attributes.temperature ?? 70)) - 1, hvac_mode: "heat" })} />
+            <TouchButton
+              variant="soft"
+              icon={Minus}
+              iconOnly
+              aria-label="Cooler"
+              onClick={() => send("set_temperature", { temperature: (Number(entity.attributes.temperature ?? 70)) - 1, hvac_mode: "heat" })}
+            />
             <span className="min-w-[48px] text-center text-base font-semibold tabular-nums">
               {Number(entity.attributes.temperature ?? entity.state)}°
             </span>
-            <TouchButton variant="soft" icon={Plus} iconOnly onClick={() => send("set_temperature", { temperature: (Number(entity.attributes.temperature ?? 70)) + 1, hvac_mode: "heat" })} />
+            <TouchButton
+              variant="soft"
+              icon={Plus}
+              iconOnly
+              aria-label="Warmer"
+              onClick={() => send("set_temperature", { temperature: (Number(entity.attributes.temperature ?? 70)) + 1, hvac_mode: "heat" })}
+            />
           </div>
         )}
 
@@ -98,26 +109,22 @@ export function EntityControl({ entity, large = false }: Props) {
         )}
 
         {entity.domain === "fan" && isOn && (
-          <input
-            type="range"
-            className="w-full"
+          <RangeControl
             min={0}
             max={100}
             value={Number(entity.attributes.percentage ?? 0)}
-            onChange={(e) => send("set_fan_percentage", { percentage: Number(e.target.value) })}
+            onChange={(v) => send("set_fan_percentage", { percentage: v })}
             aria-label="Fan speed"
             disabled={unavailable}
           />
         )}
 
         {entity.domain === "media_player" && isOn && (
-          <input
-            type="range"
-            className="w-full"
+          <RangeControl
             min={0}
             max={100}
             value={Math.round(Number(entity.attributes.volume_level ?? 0.5) * 100)}
-            onChange={(e) => send("set_volume", { volume_level: Number(e.target.value) / 100 })}
+            onChange={(v) => send("set_volume", { volume_level: v / 100 })}
             aria-label="Volume"
             disabled={unavailable}
           />

@@ -2,8 +2,9 @@ import { useEffect } from "react";
 
 /**
  * Time-of-day theming. The dashboard toggles between light and dark
- * automatically: light from 06:00, dark from 19:00. No manual override — this
- * keeps the theme system minimal (the `dark` class on <html> drives Tailwind).
+ * automatically: light from 06:00, dark from 19:00. A `?theme=dark|light`
+ * URL param overrides the clock (used by e2e for deterministic themes);
+ * the `dark` class on <html> drives Tailwind.
  */
 export const LIGHT_START_HOUR = 6; // 06:00
 export const DARK_START_HOUR = 19; // 19:00
@@ -16,11 +17,21 @@ export function themeForNow(date: Date = new Date()): "light" | "dark" {
   return isDarkAtHour(date.getHours()) ? "dark" : "light";
 }
 
+/**
+ * Deterministic theme override for e2e/visual review: `?theme=dark` or
+ * `?theme=light` in the URL forces that theme regardless of the clock.
+ * Anything else (missing, bogus) falls back to time-of-day.
+ */
+export function forcedThemeFromSearch(search: string): "light" | "dark" | null {
+  const param = new URLSearchParams(search).get("theme");
+  return param === "dark" || param === "light" ? param : null;
+}
+
 /** Applies the time-of-day theme to the document and keeps it current. */
 export function useTimeOfDayTheme(): void {
   useEffect(() => {
     const apply = () => {
-      const theme = themeForNow();
+      const theme = forcedThemeFromSearch(window.location.search) ?? themeForNow();
       document.documentElement.classList.toggle("dark", theme === "dark");
       document.documentElement.style.colorScheme = theme;
       document.documentElement.setAttribute("data-theme", theme);

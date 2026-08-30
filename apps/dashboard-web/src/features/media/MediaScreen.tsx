@@ -1,6 +1,7 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Music2, Shuffle, Repeat } from "lucide-react";
 import type { CSSProperties } from "react";
 import { TouchButton } from "../../components/TouchButton";
+import { RangeControl } from "../../components/RangeControl";
 import { formatDuration } from "../../lib/format";
 import { cn } from "../../lib/cn";
 import { usePlayer } from "./usePlayer";
@@ -64,7 +65,7 @@ export function MediaScreen() {
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-6">
         <TouchButton
           variant="ghost"
           icon={Shuffle}
@@ -97,13 +98,11 @@ export function MediaScreen() {
       <div className="flex w-full max-w-2xl flex-col gap-4">
         <div className="flex items-center gap-3">
           <Volume2 size={20} className="shrink-0 text-ink-3" />
-          <input
-            type="range"
+          <RangeControl
             min={0}
             max={100}
             value={volume}
-            onChange={(e) => command.mutate({ action: "setVolume", volume: Number(e.target.value) })}
-            className="w-full"
+            onChange={(v) => command.mutate({ action: "setVolume", volume: v })}
             aria-label="Volume"
           />
         </div>

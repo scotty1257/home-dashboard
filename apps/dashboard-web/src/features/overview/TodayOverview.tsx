@@ -30,27 +30,35 @@ export function TodayOverview() {
   const setView = useNavStore((s) => s.setView);
 
   return (
-    <div className="grid grid-cols-1 gap-6 2xl:h-full 2xl:grid-cols-12 2xl:grid-rows-2">
-      {/* Row 1: coordination summaries + the voice note drop. */}
-      <div className={cn(CELL, "2xl:col-span-5")}>
-        <HandoffSummaryTile onOpen={() => setView("family")} />
-      </div>
-      <div className={cn(CELL, "2xl:col-span-4")}>
-        <PermissionQueueTile onOpen={() => setView("family")} />
-      </div>
-      <div className={cn(CELL, "2xl:col-span-3")}>
-        <VoiceNoteTile />
-      </div>
+    <div className="flex h-full min-h-0 flex-col gap-6">
+      {/* Live family alerts — renders nothing when the household is on top of
+          things, and takes its height out of the grid (never an overlay). */}
+      <FamilyAlertBanner />
+      <div
+        data-testid="today-grid"
+        className="grid grid-cols-1 gap-6 2xl:min-h-0 2xl:flex-1 2xl:grid-cols-12 2xl:grid-rows-2"
+      >
+        {/* Row 1: coordination summaries + the voice note drop. */}
+        <div className={cn(CELL, "2xl:col-span-5")}>
+          <HandoffSummaryTile onOpen={() => setView("family")} />
+        </div>
+        <div className={cn(CELL, "2xl:col-span-4")}>
+          <PermissionQueueTile onOpen={() => setView("family")} />
+        </div>
+        <div className={cn(CELL, "2xl:col-span-3")}>
+          <VoiceNoteTile />
+        </div>
 
-      {/* Row 2: launch + duties + the weather/media/activity context rail. */}
-      <div className={cn(CELL, "2xl:col-span-5")}>
-        <LaunchSummaryTile />
-      </div>
-      <div className={cn(CELL, "2xl:col-span-4")}>
-        <DutyLedgerTile onOpen={() => setView("family")} />
-      </div>
-      <div className="min-h-[300px] 2xl:min-h-0 2xl:col-span-3">
-        <ContextRail />
+        {/* Row 2: launch + duties + the weather/media/activity context rail. */}
+        <div className={cn(CELL, "2xl:col-span-5")}>
+          <LaunchSummaryTile />
+        </div>
+        <div className={cn(CELL, "2xl:col-span-4")}>
+          <DutyLedgerTile onOpen={() => setView("family")} />
+        </div>
+        <div className="min-h-[300px] 2xl:min-h-0 2xl:col-span-3">
+          <ContextRail />
+        </div>
       </div>
     </div>
   );

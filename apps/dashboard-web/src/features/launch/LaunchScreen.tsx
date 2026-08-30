@@ -103,7 +103,7 @@ export function LaunchScreen() {
     : null;
 
   return (
-    <div className="flex h-full flex-col gap-6">
+    <div data-testid="launch-root" className="flex h-full flex-col gap-6">
       {/* Top: who is launching + hero countdown */}
       <header className="flex flex-col gap-1">
         <p className="text-sm font-medium text-ink-3">

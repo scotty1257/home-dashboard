@@ -42,7 +42,7 @@ export function Header() {
         <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-white">
           <House size={16} strokeWidth={2.2} />
         </span>
-        <span className="text-[15px] font-semibold tracking-tight text-ink">Home</span>
+        <span className="text-base font-semibold tracking-tight text-ink">Home</span>
         <ActorSwitcher />
       </div>
 
@@ -53,7 +53,7 @@ export function Header() {
         <span className="text-sm text-ink-3">{formatDate(now)}</span>
       </div>
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-6">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-2 text-xs text-ink-3">
             <StatusDot tone="ok" />

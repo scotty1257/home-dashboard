@@ -100,7 +100,7 @@ export function VoiceOverlay() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/60 px-8 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-black/60 px-8 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Voice assistant"

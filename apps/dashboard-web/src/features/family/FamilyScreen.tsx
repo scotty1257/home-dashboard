@@ -11,7 +11,7 @@ import { DutyLedger } from "../duties/DutyLedger";
  */
 export function FamilyScreen() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:h-full 2xl:grid-cols-3 2xl:grid-rows-1">
+    <div data-testid="family-grid" className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:h-full 2xl:grid-cols-3 2xl:grid-rows-1">
       <div className="2xl:min-h-0 2xl:overflow-y-auto">
         <HandoffBoard />
       </div>

@@ -1,6 +1,7 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Music2 } from "lucide-react";
 import { Panel } from "../../components/Panel";
 import { TouchButton } from "../../components/TouchButton";
+import { RangeControl } from "../../components/RangeControl";
 import { formatDuration } from "../../lib/format";
 import { cn } from "../../lib/cn";
 import { usePlayer } from "./usePlayer";
@@ -94,12 +95,12 @@ export function NowPlaying({ compact = false }: Props) {
       title="Now Playing"
       accent="teal"
       actions={
-        <span className="text-[11px] font-medium uppercase tracking-wide text-ink-4">
+        <span className="text-xs font-medium uppercase tracking-wide text-ink-4">
           {data.source === "demo" ? "demo" : "Spotify"}
         </span>
       }
     >
-      <div className="flex gap-5">
+      <div className="flex gap-6">
         <div className="relative flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-lg">
           <div
             className="absolute inset-0 bg-gradient-to-br from-teal/60 via-indigo/60 to-violet/60"
@@ -121,7 +122,7 @@ export function NowPlaying({ compact = false }: Props) {
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
               <div className="h-full rounded-full bg-gradient-to-r from-teal to-accent" style={{ width: `${progress * 100}%` }} />
             </div>
-            <div className="mt-1.5 flex justify-between text-[11px] tabular-nums text-ink-4">
+            <div className="mt-1.5 flex justify-between text-xs tabular-nums text-ink-4">
               <span>{formatDuration(progressMs)}</span>
               <span>{track ? formatDuration(track.durationMs) : "0:00"}</span>
             </div>
@@ -144,13 +145,11 @@ export function NowPlaying({ compact = false }: Props) {
 
       <div className="mt-3 flex items-center gap-3">
         <Volume2 size={16} className="shrink-0 text-ink-3" />
-        <input
-          type="range"
+        <RangeControl
           min={0}
           max={100}
           value={volume}
-          onChange={(e) => command.mutate({ action: "setVolume", volume: Number(e.target.value) })}
-          className="w-full"
+          onChange={(v) => command.mutate({ action: "setVolume", volume: v })}
           aria-label="Volume"
         />
       </div>
@@ -161,7 +160,7 @@ export function NowPlaying({ compact = false }: Props) {
             <span
               key={d.id}
               className={cn(
-                "rounded-md px-2 py-1 text-[11px] font-medium",
+                "rounded-md px-2 py-1 text-xs font-medium",
                 d.isActive ? "bg-accent-soft text-accent" : "bg-surface text-ink-3",
               )}
             >
