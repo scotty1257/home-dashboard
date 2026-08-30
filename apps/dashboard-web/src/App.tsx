@@ -5,30 +5,13 @@ import { SpaceBackground } from "./components/SpaceBackground";
 import { Header } from "./app/Header";
 import { Nav } from "./app/Nav";
 import { CalendarPanel } from "./features/calendar/CalendarPanel";
-import { WeatherPanel } from "./features/weather/WeatherPanel";
-import { NowPlaying } from "./features/media/NowPlaying";
-import { MediaScreen } from "./features/media/MediaScreen";
-import { ActivityFeed } from "./features/overview/ActivityFeed";
+import { TodayOverview } from "./features/overview/TodayOverview";
+import { FamilyScreen } from "./features/family/FamilyScreen";
+import { LaunchScreen } from "./features/launch/LaunchScreen";
 import { HomeOverview } from "./features/home/HomeOverview";
+import { MediaScreen } from "./features/media/MediaScreen";
 import { VoiceOverlay } from "./features/voice/VoiceOverlay";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
-
-function OverviewView() {
-  return (
-    <div className="grid h-full grid-cols-12 gap-5">
-      <div className="col-span-7 min-h-0">
-        <CalendarPanel className="h-full" />
-      </div>
-      <div className="col-span-5 flex min-h-0 flex-col gap-5">
-        <WeatherPanel />
-        <NowPlaying />
-        <div className="min-h-0 flex-1">
-          <ActivityFeed />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function CalendarView() {
   return <CalendarPanel className="h-full" />;
@@ -61,9 +44,11 @@ export default function App() {
 
       <div className="relative z-10 flex h-full flex-col">
         <Header />
-        <main className="min-h-0 flex-1 overflow-hidden px-6 py-5">
-          {view === "overview" && <OverviewView />}
+        <main className="min-h-0 flex-1 overflow-y-auto p-6 2xl:overflow-hidden">
+          {view === "today" && <TodayOverview />}
           {view === "calendar" && <CalendarView />}
+          {view === "family" && <FamilyScreen />}
+          {view === "launch" && <LaunchScreen />}
           {view === "home" && <HomeView />}
           {view === "media" && <MediaScreen />}
           {view === "settings" && <SettingsView />}

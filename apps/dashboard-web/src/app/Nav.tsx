@@ -1,14 +1,23 @@
-import { LayoutDashboard, CalendarDays, Lightbulb, Music, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  Rocket,
+  Lightbulb,
+  Music,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { View } from "../lib/store";
 import { useNavStore } from "../lib/store";
 import { cn } from "../lib/cn";
 
-const TABS: { id: "overview" | "calendar" | "home" | "media" | "settings"; label: string; icon: LucideIcon }[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
+const TABS: { id: View; label: string; icon: LucideIcon }[] = [
+  { id: "today", label: "Today", icon: LayoutDashboard },
   { id: "calendar", label: "Calendar", icon: CalendarDays },
+  { id: "family", label: "Family", icon: Users },
+  { id: "launch", label: "Launch", icon: Rocket },
   { id: "home", label: "Home", icon: Lightbulb },
   { id: "media", label: "Music", icon: Music },
-  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export function Nav() {
@@ -33,8 +42,8 @@ export function Nav() {
             )}
           >
             {active && <span className="absolute top-0 h-0.5 w-10 rounded-full bg-accent" />}
-            <Icon size={22} strokeWidth={active ? 2.2 : 2} />
-            <span className={cn("text-[11px] font-medium", active && "font-semibold")}>{tab.label}</span>
+            <Icon size={24} strokeWidth={active ? 2.2 : 2} aria-hidden />
+            <span className={cn("text-[12px] font-medium", active && "font-semibold")}>{tab.label}</span>
           </button>
         );
       })}

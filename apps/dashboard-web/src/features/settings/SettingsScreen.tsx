@@ -1,7 +1,20 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Thermometer, Mic, ShieldCheck, Plug, Music2, Users } from "lucide-react";
-import type { HouseholdMember, HouseholdMemberInput } from "@home-dashboard/contracts";
+import {
+  Thermometer,
+  Mic,
+  ShieldCheck,
+  Plug,
+  Music2,
+  Users,
+  HeartHandshake,
+} from "lucide-react";
+import type {
+  DashboardSettingsPatch,
+  FamilySettings,
+  HouseholdMember,
+  HouseholdMemberInput,
+} from "@home-dashboard/contracts";
 import { api, ApiError } from "../../lib/api";
 import { memberIcon, useActiveActor } from "../household/ActorSwitcher";
 import { Panel } from "../../components/Panel";
@@ -109,6 +122,112 @@ function HouseholdPanel() {
   );
 }
 
+/** Shared field shell: label + description on the left, control on the right. */
+function Field({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
+  return (
+    <div className={row}>
+      <div>
+        <div className="text-sm font-medium text-ink">{title}</div>
+        <div className="text-xs text-ink-3">{hint}</div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Family-coordination settings: the night-before handoff alert time, the
+ * travel/overrun buffers used for conflict detection, and the duty summary
+ * window. Edited locally, saved as one `updateSettings({ family })` patch.
+ */
+function FamilyPanel({
+  family,
+  saving,
+  onSave,
+}: {
+  family: FamilySettings;
+  saving: boolean;
+  onSave: (patch: DashboardSettingsPatch) => void;
+}) {
+  const [handoffAlertTime, setHandoffAlertTime] = useState(family.handoffAlertTime);
+  const [travelBufferMinutes, setTravelBufferMinutes] = useState(family.travelBufferMinutes);
+  const [overrunBufferMinutes, setOverrunBufferMinutes] = useState(family.overrunBufferMinutes);
+  const [dutyWindowDays, setDutyWindowDays] = useState(family.dutyWindowDays);
+
+  // Refetches (e.g. after a save) re-sync the form from the stored settings.
+  useEffect(() => {
+    setHandoffAlertTime(family.handoffAlertTime);
+    setTravelBufferMinutes(family.travelBufferMinutes);
+    setOverrunBufferMinutes(family.overrunBufferMinutes);
+    setDutyWindowDays(family.dutyWindowDays);
+  }, [family]);
+
+  const save = () =>
+    onSave({
+      family: {
+        handoffAlertTime,
+        travelBufferMinutes: Number(travelBufferMinutes),
+        overrunBufferMinutes: Number(overrunBufferMinutes),
+        dutyWindowDays: Number(dutyWindowDays),
+      },
+    });
+
+  const numberInput =
+    "min-h-12 w-24 rounded-md border border-line bg-surface px-3 text-sm tabular-nums text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60";
+
+  return (
+    <Panel title="Family" icon={HeartHandshake} accent="rose">
+      <Field title="Handoff alert time" hint="When the night-before board starts demanding attention">
+        <input
+          type="time"
+          aria-label="Handoff alert time"
+          value={handoffAlertTime}
+          onChange={(e) => setHandoffAlertTime(e.target.value)}
+          className="min-h-12 rounded-md border border-line bg-surface px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
+        />
+      </Field>
+      <Field title="Travel buffer" hint="Minutes before an event blocked for travel">
+        <input
+          type="number"
+          min={0}
+          max={120}
+          aria-label="Travel buffer minutes"
+          value={travelBufferMinutes}
+          onChange={(e) => setTravelBufferMinutes(Number(e.target.value))}
+          className={numberInput}
+        />
+      </Field>
+      <Field title="Overrun buffer" hint="Minutes after an event blocked for overrun">
+        <input
+          type="number"
+          min={0}
+          max={120}
+          aria-label="Overrun buffer minutes"
+          value={overrunBufferMinutes}
+          onChange={(e) => setOverrunBufferMinutes(Number(e.target.value))}
+          className={numberInput}
+        />
+      </Field>
+      <Field title="Duty window" hint="Rolling window (days) for the duty summary">
+        <input
+          type="number"
+          min={1}
+          max={365}
+          aria-label="Duty window days"
+          value={dutyWindowDays}
+          onChange={(e) => setDutyWindowDays(Number(e.target.value))}
+          className={numberInput}
+        />
+      </Field>
+      <div className="pt-3">
+        <TouchButton variant="primary" disabled={saving} onClick={save}>
+          Save family settings
+        </TouchButton>
+      </div>
+    </Panel>
+  );
+}
+
 export function SettingsScreen() {
   const queryClient = useQueryClient();
   const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: api.settings });
@@ -124,8 +243,10 @@ export function SettingsScreen() {
   const set = (patch: Parameters<typeof api.updateSettings>[0]) => update.mutate(patch);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+    <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 xl:grid-cols-2">
       <HouseholdPanel />
+
+      <FamilyPanel family={settings.family} saving={update.isPending} onSave={set} />
 
       <Panel title="Units" icon={Thermometer} accent="sky">
         <div className={cn(row, "pt-1")}>

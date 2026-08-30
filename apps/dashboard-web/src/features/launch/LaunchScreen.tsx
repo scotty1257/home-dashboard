@@ -90,7 +90,7 @@ export function LaunchScreen() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
         <p className="text-lg text-ink-3">No launch right now</p>
-        <TouchButton variant="soft" icon={X} onClick={() => setView("overview")}>
+        <TouchButton variant="soft" icon={X} onClick={() => setView("today")}>
           Exit
         </TouchButton>
       </div>
@@ -178,7 +178,7 @@ export function LaunchScreen() {
             <TouchButton variant="danger" icon={RotateCcw} disabled={reset.isPending} onClick={onReset}>
               Reset
             </TouchButton>
-            <TouchButton variant="soft" icon={X} onClick={() => setView("overview")}>
+            <TouchButton variant="soft" icon={X} onClick={() => setView("today")}>
               Exit
             </TouchButton>
           </div>

@@ -11,10 +11,10 @@ export const useVoiceStore = create<VoiceState>((set) => ({
 }));
 
 /**
- * 'family' and 'launch' exist ahead of the nav wiring so the feature screens
- * compile now; the nav rail adopts them in a later task.
+ * The six nav tabs map to today/calendar/family/launch/home/media; settings is
+ * reachable from the header gear, not the tab bar.
  */
-export type View = "overview" | "calendar" | "family" | "launch" | "home" | "media" | "settings";
+export type View = "today" | "calendar" | "family" | "launch" | "home" | "media" | "settings";
 
 interface NavState {
   view: View;
@@ -22,7 +22,7 @@ interface NavState {
 }
 
 export const useNavStore = create<NavState>((set) => ({
-  view: "overview",
+  view: "today",
   setView: (view) => set({ view }),
 }));
 
