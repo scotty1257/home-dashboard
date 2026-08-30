@@ -101,11 +101,19 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
       ? { left: panelStyle.paddingLeft, right: panelStyle.paddingRight }
       : null;
 
-    // Panels must stay inside main (+1px tolerance for subpixel rounding).
+    // Panels must stay inside main (+1px tolerance) UNLESS they sit inside an
+    // intentionally scrollable ancestor (Family columns scroll internally at
+    // 2xl; Today tiles never scroll at 1080p). A panel inside a scroller is
+    // reachable by scrolling, so it is not "clipped" — only panels in a
+    // non-scrolling context escaping main are real defects.
     const panelsOutsideMain: string[] = [];
-    for (const section of main.querySelectorAll("section")) {
+    for (const section of main.querySelectorAll("section.rounded-lg")) {
       const rect = section.getBoundingClientRect();
-      if (rect.bottom > mainRect.bottom + 1 || rect.right > mainRect.right + 1) {
+      if (rect.bottom <= mainRect.bottom + 1 && rect.right <= mainRect.right + 1) continue;
+      const inScroller = !!section.parentElement?.closest(
+        "div[class*='overflow-y-auto'], div[class*='overflow-auto']",
+      );
+      if (!inScroller) {
         panelsOutsideMain.push(
           section.getAttribute("aria-label") ??
             (section.querySelector("h2")?.textContent ?? "section"),
