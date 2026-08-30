@@ -10,7 +10,11 @@ export const useVoiceStore = create<VoiceState>((set) => ({
   setOpen: (open) => set({ open }),
 }));
 
-export type View = "overview" | "calendar" | "home" | "media" | "settings";
+/**
+ * 'family' and 'launch' exist ahead of the nav wiring so the feature screens
+ * compile now; the nav rail adopts them in a later task.
+ */
+export type View = "overview" | "calendar" | "family" | "launch" | "home" | "media" | "settings";
 
 interface NavState {
   view: View;

@@ -13,6 +13,9 @@ import type {
   DutyEntryView,
   DutySummary,
   EntityState,
+  LaunchCurrentResponse,
+  LaunchRun,
+  LaunchTemplate,
   HandoffBackupInput,
   HandoffBoardItem,
   HandoffBoardResponse,
@@ -215,6 +218,28 @@ export const api = {
       request<VoiceNote>(`/api/voice-notes/${encodeURIComponent(id)}/read`, { method: "POST" }),
     remove: (id: string) =>
       request<void>(`/api/voice-notes/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  },
+
+  // Launch sequences (query key: ["launch"]; mutations invalidate it)
+  launch: {
+    current: (at?: string) =>
+      request<LaunchCurrentResponse>(`/api/launch/current${at ? `?at=${encodeURIComponent(at)}` : ""}`),
+    toggleStep: (runId: string, stepId: string, actorId: string) =>
+      request<{ run: LaunchRun }>(
+        `/api/launch/runs/${encodeURIComponent(runId)}/steps/${encodeURIComponent(stepId)}/toggle`,
+        { method: "POST", body: JSON.stringify({ actorId }) },
+      ),
+    chimePlayed: (runId: string, actorId?: string) =>
+      request<{ run: LaunchRun }>(`/api/launch/runs/${encodeURIComponent(runId)}/chime-played`, {
+        method: "POST",
+        body: JSON.stringify({ actorId }),
+      }),
+    reset: (runId: string, actorId: string) =>
+      request<{ run: LaunchRun }>(`/api/launch/runs/${encodeURIComponent(runId)}/reset`, {
+        method: "POST",
+        body: JSON.stringify({ actorId }),
+      }),
+    templates: () => request<{ templates: LaunchTemplate[] }>("/api/launch/templates"),
   },
 
   // Activity
