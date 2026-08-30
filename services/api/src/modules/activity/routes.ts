@@ -3,11 +3,18 @@ import type { ActivityFeed, ActivityItem } from "@home-dashboard/contracts";
 import type { CalendarRepository } from "../calendar/repository.js";
 import type { SpotifyModule } from "../spotify/routes.js";
 import type { HomeModule } from "../home/routes.js";
+import type { HandoffRepository } from "../handoffs/repository.js";
+import type { PermissionRepository } from "../permissions/repository.js";
+import type { SettingsStore } from "../settings/routes.js";
+import { formatLocalTime, weekdayLabel } from "../handoffs/conflicts.js";
 
 export interface ActivityDeps {
   calendar: CalendarRepository;
   spotify: SpotifyModule;
   home: HomeModule;
+  handoffs: HandoffRepository;
+  permissions: PermissionRepository;
+  settings: SettingsStore;
 }
 
 function upcomingEvents(repo: CalendarRepository, now: Date): ActivityItem[] {
@@ -35,6 +42,66 @@ function formatWhen(iso: string, allDay: boolean): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+/** Family alerts rank above every ordinary item: alert > warning > notice. */
+const SEVERITY_RANK: Record<ActivityItem["severity"], number> = {
+  alert: 0,
+  warning: 1,
+  notice: 2,
+  info: 3,
+};
+
+function sortRank(item: ActivityItem): number {
+  // Ordinary items all share the lowest rank, keeping their time ordering.
+  return item.kind === "family-alert" ? SEVERITY_RANK[item.severity] : 4;
+}
+
+/**
+ * Unclaimed handoffs that need an adult tonight (night-before) or right now
+ * (urgent), plus a pending-permissions summary — the actionable layer the
+ * Today banner and the context rail both draw from.
+ */
+function familyAlertItems(
+  boardItems: ReturnType<HandoffRepository["board"]>["items"],
+  pendingPermissions: number,
+  now: Date,
+  timezone: string,
+): ActivityItem[] {
+  const items: ActivityItem[] = [];
+
+  const unattended = boardItems
+    .filter(
+      (item) =>
+        item.status === "unclaimed" &&
+        (item.attentionState === "night-before" || item.attentionState === "urgent"),
+    )
+    .slice(0, 3);
+
+  for (const item of unattended) {
+    const title = item.eventSummary?.title ?? "Handoff";
+    items.push({
+      id: `handoff-${item.id}`,
+      kind: "family-alert",
+      title: `Unclaimed: ${title} ${formatLocalTime(item.startsAt, timezone)}`,
+      subtitle: `${weekdayLabel(item.startsAt, timezone)} handoff needs an adult`,
+      at: item.startsAt,
+      ref: item.id,
+      severity: item.attentionState === "urgent" ? "alert" : "warning",
+    });
+  }
+
+  if (pendingPermissions > 0) {
+    items.push({
+      id: "permissions-waiting",
+      kind: "family-alert",
+      title: `${pendingPermissions} permission request${pendingPermissions === 1 ? "" : "s"} waiting`,
+      at: now.toISOString(),
+      severity: "notice",
+    });
+  }
+
+  return items;
 }
 
 export async function buildActivityFeed(deps: ActivityDeps): Promise<ActivityFeed> {
@@ -94,7 +161,21 @@ export async function buildActivityFeed(deps: ActivityDeps): Promise<ActivityFee
   // Upcoming calendar events
   items.push(...upcomingEvents(deps.calendar, now));
 
-  items.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  // Live family alerts: unclaimed handoffs + waiting permission requests.
+  const timezone = deps.settings.get().timezone;
+  const board = deps.handoffs.board(
+    now.toISOString(),
+    new Date(now.getTime() + 14 * 86_400_000).toISOString(),
+    now,
+  );
+  const pendingPermissions = deps.permissions.queue().pending.length;
+  items.push(...familyAlertItems(board.items, pendingPermissions, now, timezone));
+
+  items.sort((a, b) => {
+    const rankDiff = sortRank(a) - sortRank(b);
+    if (rankDiff !== 0) return rankDiff;
+    return new Date(a.at).getTime() - new Date(b.at).getTime();
+  });
 
   return { items, updatedAt: now.toISOString() };
 }

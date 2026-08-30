@@ -9,6 +9,8 @@ export const ActivityKind = z.enum([
   "alert",
   "device",
   "system",
+  /** Live family-coordination alerts (unclaimed handoffs, waiting permissions). */
+  "family-alert",
 ]);
 export type ActivityKind = z.infer<typeof ActivityKind>;
 
@@ -21,7 +23,7 @@ export const ActivityItem = z.object({
   at: IsoDate,
   /** Optional entity/event/media reference. */
   ref: z.string().optional(),
-  severity: z.enum(["info", "notice", "warning"]).default("info"),
+  severity: z.enum(["info", "notice", "warning", "alert"]).default("info"),
 });
 export type ActivityItem = z.infer<typeof ActivityItem>;
 

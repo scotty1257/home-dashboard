@@ -120,7 +120,7 @@ export function buildApp(config: Config): AppContext {
   weatherRoutes(app, weatherDeps);
   homeRoutes(app, db, home);
   spotifyRoutes(app, spotify);
-  activityRoutes(app, { calendar, spotify, home });
+  activityRoutes(app, { calendar, spotify, home, handoffs, permissions, settings });
   settingsRoutes(app, settings);
   voiceActionRoutes(app, db, tools);
   householdRoutes(app, household);

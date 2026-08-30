@@ -6,6 +6,7 @@ import { VoiceNoteTile } from "../voice-notes/VoiceNoteTile";
 import { LaunchSummaryTile } from "../launch/LaunchSummaryTile";
 import { DutyLedgerTile } from "../duties/DutyLedgerTile";
 import { ContextRail } from "./ContextRail";
+import { FamilyAlertBanner } from "./FamilyAlertBanner";
 
 /**
  * A grid cell. Below 2xl the cell keeps a comfortable minimum height so the
