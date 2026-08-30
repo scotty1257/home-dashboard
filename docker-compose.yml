@@ -7,6 +7,7 @@ services:
       - .env
     environment:
       - DATABASE_PATH=/data/dashboard.sqlite
+      - VOICE_NOTE_DIR=/data/voice-notes
     ports:
       - "8787:8787"
     volumes:

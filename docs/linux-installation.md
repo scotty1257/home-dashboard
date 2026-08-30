@@ -49,6 +49,21 @@ sudo systemctl restart home-dashboard-api
    sudo systemctl enable --now home-dashboard-kiosk   # fullscreen Chromium
    ```
 
+## Timezone
+
+Handoff alerts and other family features fire according to the dashboard's
+timezone — set it during install so alerts don't fire at odd hours:
+
+1. Check the host zone (and set it if wrong):
+   ```bash
+   timedatectl                       # current zone
+   sudo timedatectl set-timezone America/New_York
+   ```
+2. Open the dashboard → **Settings** → set **Timezone** to the same local IANA
+   zone (e.g. `America/New_York`). The API reads it from
+   `DashboardSettings.timezone` (default `UTC`), so the in-app zone — not just
+   the host clock — must match where the family lives.
+
 ## Kiosk details
 
 The kiosk unit launches Chromium with `--kiosk` and a dedicated profile

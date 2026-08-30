@@ -13,12 +13,14 @@ Environment=NODE_ENV=production
 ExecStart=/opt/home-dashboard/node_modules/.bin/tsx /opt/home-dashboard/services/api/src/index.ts
 Restart=always
 RestartSec=3
-# Hardening
+# Hardening. VOICE_NOTE_DIR defaults to /opt/home-dashboard/var/voice-notes
+# (still covered by the var path below, listed explicitly for clarity). If you
+# point VOICE_NOTE_DIR elsewhere in .env, add that path here too.
+ReadWritePaths=/opt/home-dashboard/var /opt/home-dashboard/var/voice-notes
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/home-dashboard/var
 CapabilityBoundingSet=
 
 [Install]

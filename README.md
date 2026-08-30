@@ -24,8 +24,13 @@ polished, touch-optimized UI.
 - **Voice assistant** — push-to-talk (browser speech-to-text), a provider-neutral
   STT/LLM/TTS pipeline, and a strict, schema-validated tool registry so the AI can
   only perform safe, registered actions. High-risk actions require a tap to confirm.
-- **Settings** — theme (light/dark/auto), accent color, units, night mode, voice
-  behavior, integration status.
+- **Family coordination** — handoffs between adults (with a chime alert before the
+  handoff time), a permission queue for kid requests with an append-only decision
+  trail, a duty ledger of recurring chores with credit tracking, short voice notes
+  recorded right on the kiosk, and launch sequences (templates of guided steps for
+  routines like bedtime or leaving for school).
+- **Settings** — theme (light/dark/auto), accent color, units, timezone, night mode,
+  voice behavior, integration status.
 
 ## Architecture
 
@@ -70,6 +75,12 @@ All settings live in `.env` (see `.env.example`):
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | Spotify app credentials (enables real playback) |
 | `WEATHER_LATITUDE` / `WEATHER_LONGITUDE` | Fixed weather location |
 | `STT_PROVIDER` / `LLM_PROVIDER` / `TTS_PROVIDER` | Voice providers (`local` = no keys needed) |
+| `VOICE_NOTE_DIR` | Directory storing voice-note audio (default `./var/voice-notes`; `/data/voice-notes` in Docker) |
+| `VOICE_NOTE_MAX_BYTES` | Voice-note upload cap in bytes (default 8 MiB; nginx allows 12 MiB bodies) |
+| `VOICE_NOTE_RETENTION_DAYS` | Days before voice notes are pruned, lazily on list (default 30) |
+
+Timezone is not an env var: set it in **Settings** (stored in the settings
+table as an IANA zone, default `UTC`) so handoff alerts fire at local hours.
 
 ## Commands
 
@@ -96,6 +107,10 @@ Containerized deployment is available via `docker compose up --build`.
 - Actions are risk-classified: read-only, reversible, sensitive, destructive.
 - Sensitive/destructive actions (locks, doors) require on-screen confirmation.
 - All actions are audit-logged; device changes are confirmed by read-back.
+- Voice notes are stored locally only (on-disk under `VOICE_NOTE_DIR`) — never
+  uploaded to a third party — and expire after `VOICE_NOTE_RETENTION_DAYS`.
+- Permission decisions are an append-only audit trail: every kid request keeps
+  its full decision history in the `permission_decisions` table.
 
 ## License
 
