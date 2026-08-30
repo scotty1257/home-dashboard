@@ -38,6 +38,7 @@ export const Events = {
   householdChanged: "household:changed",
   permissionChanged: "permission:changed",
   dutyChanged: "duty:changed",
+  launchChanged: "launch:changed",
   voiceNoteChanged: "voice-note:changed",
   voiceTurn: "voice:turn",
 } as const;

@@ -23,6 +23,8 @@ import { PermissionRepository } from "./modules/permissions/repository.js";
 import { permissionRoutes } from "./modules/permissions/routes.js";
 import { DutyRepository } from "./modules/duties/repository.js";
 import { dutyRoutes } from "./modules/duties/routes.js";
+import { LaunchRepository } from "./modules/launch/repository.js";
+import { launchRoutes } from "./modules/launch/routes.js";
 import { VoiceNoteStorage } from "./modules/voice-notes/storage.js";
 import { VoiceNoteRepository } from "./modules/voice-notes/repository.js";
 import { voiceNoteRoutes } from "./modules/voice-notes/routes.js";
@@ -39,6 +41,7 @@ export interface AppContext {
   handoffs: HandoffRepository;
   permissions: PermissionRepository;
   duties: DutyRepository;
+  launch: LaunchRepository;
   voiceNotes: VoiceNoteRepository;
 }
 
@@ -61,6 +64,7 @@ export function buildApp(config: Config): AppContext {
   const handoffs = new HandoffRepository(db, calendar, household, settings);
   const permissions = new PermissionRepository(db, household, settings);
   const duties = new DutyRepository(db, household, settings);
+  const launch = new LaunchRepository(db, household, settings);
   const voiceNoteStorage = new VoiceNoteStorage(config.voiceNotes.dir);
   const voiceNotes = new VoiceNoteRepository(db, voiceNoteStorage, new RealClock(), config.voiceNotes.retentionDays);
   const tools = new ToolRegistry({ calendar, spotify, home, weather: weatherDeps });
@@ -123,7 +127,8 @@ export function buildApp(config: Config): AppContext {
   handoffRoutes(app, handoffs);
   permissionRoutes(app, permissions);
   dutyRoutes(app, duties);
+  launchRoutes(app, launch);
   voiceNoteRoutes(app, { repo: voiceNotes, storage: voiceNoteStorage, maxBytes: config.voiceNotes.maxBytes });
 
-  return { app, db, calendar, home, spotify, settings, tools, household, handoffs, permissions, duties, voiceNotes };
+  return { app, db, calendar, home, spotify, settings, tools, household, handoffs, permissions, duties, launch, voiceNotes };
 }
