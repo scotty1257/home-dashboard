@@ -84,14 +84,26 @@ export async function fetchOpenMeteo(opts: WeatherProviderOptions): Promise<Weat
   const data = (await res.json()) as OpenMeteoResponse;
 
   const current = data.current;
+  // Open-Meteo returns the hourly series from midnight local time, so the raw
+  // head of the array is in the past for most of the day. Start at the hour
+  // containing "now" — the dashboard's strip leads with "Now" and must not
+  // show this morning's weather at lunchtime.
+  const nowMs = Date.now();
+  const firstFutureHour = data.hourly.time.findIndex(
+    (time) => new Date(time).getTime() + 3_600_000 > nowMs,
+  );
+  const startHour = firstFutureHour === -1 ? 0 : firstFutureHour;
   const hourly: HourlyForecast[] = data.hourly.time
-    .slice(0, 24)
-    .map((time, i) => ({
-      time: new Date(time).toISOString(),
-      temperature: data.hourly.temperature_2m[i] ?? 0,
-      condition: mapCode(data.hourly.weather_code[i] ?? 0),
-      precipitationProbability: data.hourly.precipitation_probability[i] ?? 0,
-    }));
+    .slice(startHour, startHour + 24)
+    .map((time, offset) => {
+      const i = startHour + offset;
+      return {
+        time: new Date(time).toISOString(),
+        temperature: data.hourly.temperature_2m[i] ?? 0,
+        condition: mapCode(data.hourly.weather_code[i] ?? 0),
+        precipitationProbability: data.hourly.precipitation_probability[i] ?? 0,
+      };
+    });
 
   const daily: DailyForecast[] = data.daily.time.map((date, i) => ({
     date,
