@@ -12,8 +12,9 @@ vi.mock("../../lib/api", () => ({
   },
 }));
 
-import { FamilyAlertBanner } from "./FamilyAlertBanner";
-import { useNavStore } from "../../lib/store";
+import { NotificationDrawer } from "./NotificationDrawer";
+import { NotificationBell } from "./NotificationBell";
+import { useNavStore, useNotificationStore } from "../../lib/store";
 
 const stamp = "2026-01-01T00:00:00.000Z";
 
@@ -67,6 +68,7 @@ const PLANNED = boardItem({ attentionState: "planned" });
 
 beforeEach(() => {
   useNavStore.setState({ view: "today" });
+  useNotificationStore.setState({ open: true });
   boardMock.mockReset().mockResolvedValue({ items: [], from: stamp, to: stamp });
 });
 
@@ -74,33 +76,35 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("FamilyAlertBanner", () => {
+describe("NotificationDrawer", () => {
   it("shows a night-before unclaimed handoff with a Go to Family action", async () => {
     const user = userEvent.setup();
     boardMock.mockResolvedValue({ items: [NIGHT_BEFORE], from: stamp, to: stamp });
 
-    renderWithProviders(<FamilyAlertBanner />);
+    renderWithProviders(<NotificationDrawer />);
 
     expect(await screen.findByText(/still unclaimed/i)).toBeInTheDocument();
     const go = screen.getByRole("button", { name: "Go to Family" });
     await user.click(go);
     expect(useNavStore.getState().view).toBe("family");
+    expect(useNotificationStore.getState().open).toBe(false);
   });
 
-  it("stays hidden when nothing needs attention (claimed, resolved, planned)", async () => {
+  it("shows an empty state when nothing needs attention (claimed, resolved, planned)", async () => {
     boardMock.mockResolvedValue({ items: [CLAIMED, RESOLVED, PLANNED], from: stamp, to: stamp });
 
-    renderWithProviders(<FamilyAlertBanner />);
+    renderWithProviders(<NotificationDrawer />);
     await waitFor(() => expect(boardMock).toHaveBeenCalled());
 
     expect(screen.queryByText(/unclaimed/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Go to Family" })).not.toBeInTheDocument();
+    expect(await screen.findByText(/nothing needs an adult/i)).toBeInTheDocument();
   });
 
   it("lists urgent items above night-before items", async () => {
     boardMock.mockResolvedValue({ items: [NIGHT_BEFORE, URGENT], from: stamp, to: stamp });
 
-    renderWithProviders(<FamilyAlertBanner />);
+    renderWithProviders(<NotificationDrawer />);
 
     const urgent = await screen.findByText(/^Now: .* unclaimed$/);
     const nightBefore = screen.getByText(/^Tomorrow's .* still unclaimed$/);
@@ -113,7 +117,7 @@ describe("FamilyAlertBanner", () => {
     const queryClient = makeQueryClient();
     boardMock.mockResolvedValue({ items: [NIGHT_BEFORE], from: stamp, to: stamp });
 
-    renderWithProviders(<FamilyAlertBanner />, { queryClient });
+    renderWithProviders(<NotificationDrawer />, { queryClient });
 
     expect(await screen.findByText(/still unclaimed/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Dismiss" }));
@@ -140,5 +144,62 @@ describe("FamilyAlertBanner", () => {
     const rows = await screen.findAllByText(/still unclaimed/i);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toHaveTextContent("Dentist pickup");
+  });
+  it("collapses handoffs that say the same thing into one counted row", async () => {
+    // The same pickup entered twice (different obligation ids, identical
+    // message) must not stack up as separate alerts.
+    const twin = boardItem({ id: "handoff-twin", eventId: "evt-twin" });
+    boardMock.mockResolvedValue({ items: [NIGHT_BEFORE, twin], from: stamp, to: stamp });
+
+    renderWithProviders(<NotificationDrawer />);
+
+    const rows = await screen.findAllByText(/still unclaimed/i);
+    expect(rows).toHaveLength(1);
+    expect(await screen.findByText("×2")).toBeInTheDocument();
+  });
+
+  it("closes on Escape", async () => {
+    const user = userEvent.setup();
+    boardMock.mockResolvedValue({ items: [NIGHT_BEFORE], from: stamp, to: stamp });
+
+    renderWithProviders(<NotificationDrawer />);
+    expect(await screen.findByText(/still unclaimed/i)).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    expect(useNotificationStore.getState().open).toBe(false);
+  });
+
+  it("closes from the close button", async () => {
+    const user = userEvent.setup();
+    boardMock.mockResolvedValue({ items: [NIGHT_BEFORE], from: stamp, to: stamp });
+
+    renderWithProviders(<NotificationDrawer />);
+    expect(await screen.findByText(/still unclaimed/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Close notifications" }));
+    expect(useNotificationStore.getState().open).toBe(false);
+  });
+});
+
+describe("NotificationBell", () => {
+  it("badges the number of handoffs needing an adult and opens the drawer", async () => {
+    const user = userEvent.setup();
+    useNotificationStore.setState({ open: false });
+    boardMock.mockResolvedValue({ items: [NIGHT_BEFORE, URGENT], from: stamp, to: stamp });
+
+    renderWithProviders(<NotificationBell />);
+
+    const bell = await screen.findByRole("button", { name: /2 needing attention/i });
+    expect(bell).toBeInTheDocument();
+    await user.click(bell);
+    expect(useNotificationStore.getState().open).toBe(true);
+  });
+
+  it("shows no badge when nothing needs attention", async () => {
+    boardMock.mockResolvedValue({ items: [CLAIMED, RESOLVED, PLANNED], from: stamp, to: stamp });
+
+    renderWithProviders(<NotificationBell />);
+
+    expect(await screen.findByRole("button", { name: "Notifications" })).toBeInTheDocument();
   });
 });

@@ -230,7 +230,7 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
                 aria-label={c}
                 onClick={() => setColor(c as ColorToken)}
                 className={cn(
-                  "h-8 w-8 rounded-full transition-transform active:scale-90",
+                  "h-8 w-8 rounded-pill transition-transform active:scale-90",
                   color === c && "ring-2 ring-ink ring-offset-2 ring-offset-panel",
                 )}
                 style={{ backgroundColor: colorOf(c) }}

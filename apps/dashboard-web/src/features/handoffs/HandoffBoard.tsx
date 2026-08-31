@@ -57,7 +57,7 @@ function Chip({ icon: Icon, label, className }: { icon: LucideIcon; label: strin
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-meta font-medium",
+        "inline-flex shrink-0 items-center gap-1 rounded-pill border px-2 py-0.5 text-meta font-medium",
         className,
       )}
     >

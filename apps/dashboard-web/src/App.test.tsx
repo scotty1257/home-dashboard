@@ -172,14 +172,17 @@ describe("App view switching", () => {
     expect(screen.getByRole("heading", { name: /^Duties$/ })).toBeInTheDocument();
   });
 
-  it("switches to the full-screen Launch sequence from the Launch tab", async () => {
+  it("renders the launch sequence inside the Family tab, not as its own tab", async () => {
     const user = userEvent.setup();
     renderWithProviders(<App />);
 
-    await user.click(screen.getByRole("button", { name: /^Launch$/ }));
+    // Launch no longer owns a tab.
+    expect(screen.queryByRole("button", { name: /^Launch$/ })).not.toBeInTheDocument();
 
-    // No active run on a fresh database → the quiet exit state.
+    await user.click(screen.getByRole("button", { name: /^Family$/ }));
+
+    // No active run on a fresh database → the quiet state, beside the board.
     expect(await screen.findByText("No launch right now")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^Exit$/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^Handoffs$/ })).toBeInTheDocument();
   });
 });

@@ -157,7 +157,7 @@ describe("VoiceNoteTile", () => {
     Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: undefined });
   });
 
-  it("child actor: renders exactly one 88px hold-to-reply button and the notes addressed to them", async () => {
+  it("child actor: renders one hold-to-reply button and, once expanded, the notes addressed to them", async () => {
     useActorStore.setState({ actorId: "member-kid" });
     listMock.mockResolvedValue({
       notes: [
@@ -168,17 +168,22 @@ describe("VoiceNoteTile", () => {
 
     const { container } = renderWithProviders(<VoiceNoteTile />);
 
+    // The tile is compact until expanded: the list is behind the disclosure.
+    const show = await screen.findByRole("button", { name: "Show voice notes" });
+    const user0 = userEvent.setup();
+    await user0.click(show);
+
     // Notes addressed to the kid render with their senders.
     expect(await screen.findByText("Partner")).toBeTruthy();
     expect(screen.getByText("You")).toBeTruthy();
     expect(listMock).toHaveBeenCalledWith("member-kid");
 
-    // Class contract: exactly one 88px hold button.
-    const sized = container.querySelectorAll('[class*="h-[88px]"][class*="w-[88px]"]');
+    // Class contract: exactly one round hold button.
+    const sized = container.querySelectorAll('[class*="h-16"][class*="w-16"]');
     expect(sized).toHaveLength(1);
     const hold = screen.getByRole("button", { name: "Hold to reply" });
-    expect(hold.className).toContain("h-[88px]");
-    expect(hold.className).toContain("w-[88px]");
+    expect(hold.className).toContain("h-16");
+    expect(hold.className).toContain("w-16");
 
     // Unread badge only on the unread note.
     expect(screen.getAllByTitle("Unread")).toHaveLength(1);
@@ -195,6 +200,29 @@ describe("VoiceNoteTile", () => {
     expect(uploadMock).not.toHaveBeenCalled();
   });
 
+  it("stays compact until expanded, and hides the list again on collapse", async () => {
+    useActorStore.setState({ actorId: "member-kid" });
+    listMock.mockResolvedValue({
+      notes: [makeNote({ id: "note-1", readAt: null }), makeNote({ id: "note-2", readAt: stamp })],
+    });
+
+    renderWithProviders(<VoiceNoteTile />);
+    const user = userEvent.setup();
+
+    // Collapsed: the recorder is there, the note list is not.
+    const show = await screen.findByRole("button", { name: "Show voice notes" });
+    expect(screen.queryByRole("list", { name: "Voice notes" })).not.toBeInTheDocument();
+    // The toggle summarises what is waiting (2 notes, 1 unread).
+    expect(show).toHaveTextContent("2");
+    expect(show).toHaveTextContent("1 new");
+
+    await user.click(show);
+    expect(screen.getByRole("list", { name: "Voice notes" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Hide voice notes" }));
+    expect(screen.queryByRole("list", { name: "Voice notes" })).not.toBeInTheDocument();
+  });
+
   it("marks a note read when playback starts, but only if it is unread", async () => {
     useActorStore.setState({ actorId: "member-kid" });
     listMock.mockResolvedValue({
@@ -205,10 +233,11 @@ describe("VoiceNoteTile", () => {
     });
 
     renderWithProviders(<VoiceNoteTile />);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Show voice notes" }));
+
     const playButtons = await screen.findAllByRole("button", { name: "Play voice note" });
     expect(playButtons).toHaveLength(2);
-
-    const user = userEvent.setup();
     await user.click(playButtons[0]!);
     await waitFor(() => expect(markReadMock).toHaveBeenCalledWith("note-unread"));
 
@@ -227,10 +256,12 @@ describe("VoiceNoteTile", () => {
     listMock.mockResolvedValue({ notes: [bare] });
 
     renderWithProviders(<VoiceNoteTile />);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Show voice notes" }));
 
     expect(await screen.findByText("Partner")).toBeTruthy();
-    expect(screen.getByText("Voice note")).toBeTruthy();
     expect(screen.getByTitle(stamp)).toBeTruthy();
+    // No transcript to show — the waveform and play button carry the note.
     expect(screen.getByRole("button", { name: "Play voice note" })).toBeTruthy();
   });
 });

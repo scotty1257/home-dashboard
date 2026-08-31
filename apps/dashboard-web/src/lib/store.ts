@@ -11,10 +11,22 @@ export const useVoiceStore = create<VoiceState>((set) => ({
 }));
 
 /**
- * The six nav tabs map to today/calendar/family/launch/home/media; settings is
- * reachable from the header gear, not the tab bar.
+ * The five nav tabs map to today/calendar/family/home/media; settings is
+ * reachable from the header gear, not the tab bar. The launch sequence lives
+ * inside the Family tab rather than owning a tab of its own.
  */
-export type View = "today" | "calendar" | "family" | "launch" | "home" | "media" | "settings";
+export type View = "today" | "calendar" | "family" | "home" | "media" | "settings";
+
+interface NotificationState {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+/** Drives the header bell and the slide-over notification drawer. */
+export const useNotificationStore = create<NotificationState>((set) => ({
+  open: false,
+  setOpen: (open) => set({ open }),
+}));
 
 interface NavState {
   view: View;

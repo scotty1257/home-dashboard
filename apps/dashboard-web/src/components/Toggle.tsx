@@ -26,13 +26,13 @@ export function Toggle({ checked, onChange, label, disabled }: Props) {
     >
       <span
         className={cn(
-          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors",
+          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-pill border transition-colors",
           checked ? "bg-accent border-transparent" : "bg-surface border-line-strong",
         )}
       >
         <span
           className={cn(
-            "inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform",
+            "inline-block h-4 w-4 transform rounded-pill bg-white shadow transition-transform",
             checked ? "translate-x-6" : "translate-x-1",
           )}
         />

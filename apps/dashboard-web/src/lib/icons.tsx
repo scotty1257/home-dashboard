@@ -1,6 +1,8 @@
 import {
   Sun,
+  Moon,
   CloudSun,
+  CloudMoon,
   Cloud,
   CloudFog,
   CloudRain,
@@ -32,12 +34,12 @@ import {
  * are tinted via `text-*`/`text-ink-*` utilities and inherit the current color.
  */
 
-export const weatherIcon = (condition: string): LucideIcon => {
+export const weatherIcon = (condition: string, isDay = true): LucideIcon => {
   switch (condition) {
     case "clear":
-      return Sun;
+      return isDay ? Sun : Moon;
     case "partly-cloudy":
-      return CloudSun;
+      return isDay ? CloudSun : CloudMoon;
     case "cloudy":
       return Cloud;
     case "fog":

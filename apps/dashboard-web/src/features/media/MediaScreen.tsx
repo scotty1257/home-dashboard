@@ -32,7 +32,7 @@ export function MediaScreen() {
       {/* Album art + glow */}
       <div className="relative flex items-center justify-center">
         <div
-          className="absolute h-[130%] w-[130%] rounded-full opacity-70 blur-3xl"
+          className="absolute h-[130%] w-[130%] rounded-pill opacity-70 blur-3xl"
           style={{ background: "radial-gradient(circle, var(--color-teal) 0%, var(--color-indigo) 45%, transparent 70%)", animation: "artGlow 8s ease-in-out infinite" } as CSSProperties}
           aria-hidden
         />
@@ -58,8 +58,8 @@ export function MediaScreen() {
 
       {/* Progress */}
       <div className="w-full max-w-2xl">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-surface">
-          <div className="h-full rounded-full bg-gradient-to-r from-teal to-accent" style={{ width: `${progress * 100}%` }} />
+        <div className="h-2 w-full overflow-hidden rounded-pill bg-surface">
+          <div className="h-full rounded-pill bg-gradient-to-r from-teal to-accent" style={{ width: `${progress * 100}%` }} />
         </div>
         <div className="mt-2 flex justify-between text-body tabular-nums text-ink-3">
           <span>{formatDuration(elapsedMs)}</span>

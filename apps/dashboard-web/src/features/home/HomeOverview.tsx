@@ -35,10 +35,10 @@ export function HomeOverview({ favoritesOnly = false, max }: Props) {
               key={scene.id}
               type="button"
               onClick={() => command.mutate({ entityId: scene.id, action: "turn_on", params: {} })}
-              className="flex shrink-0 items-center gap-2 rounded-md border border-line bg-panel px-3.5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-raised"
+              className="flex shrink-0 items-center gap-2 rounded-inner border border-line bg-panel px-3.5 py-2.5 text-body font-medium text-ink transition-colors hover:bg-raised"
             >
               <span
-                className="h-2 w-2 rounded-full"
+                className="h-2 w-2 rounded-pill"
                 style={{ backgroundColor: colorOf(scene.color) }}
                 aria-hidden
               />
@@ -55,7 +55,7 @@ export function HomeOverview({ favoritesOnly = false, max }: Props) {
       </div>
 
       {!connected && (
-        <div className="rounded-md bg-warning/15 px-4 py-2.5 text-sm font-medium text-warning">
+        <div className="rounded-inner bg-warning/15 px-4 py-2.5 text-body font-medium text-warning">
           Home Assistant unreachable — showing last known state.
         </div>
       )}

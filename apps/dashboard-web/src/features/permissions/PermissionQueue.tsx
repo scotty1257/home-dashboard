@@ -68,7 +68,7 @@ export function Chip({ label, className }: { label: string; className?: string }
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-meta font-medium",
+        "inline-flex shrink-0 items-center rounded-pill border px-2 py-0.5 text-meta font-medium",
         className,
       )}
     >

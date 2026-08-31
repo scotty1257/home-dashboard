@@ -28,7 +28,7 @@ describe("Panel", () => {
   it("keeps the card treatment (radius, border, panel bg, shadow, blur)", () => {
     const { section } = renderPanel();
     for (const cls of [
-      "rounded-lg",
+      "rounded-xl",
       "border-line",
       "bg-panel",
       "shadow-panel",

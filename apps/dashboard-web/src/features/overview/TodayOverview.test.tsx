@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, within } from "@testing-library/react";
 import type { HouseholdMember } from "@home-dashboard/contracts";
 import { renderWithProviders } from "../../test/renderWithProviders";
 
@@ -14,6 +13,7 @@ const dutySummaryMock = vi.hoisted(() => vi.fn());
 const weatherMock = vi.hoisted(() => vi.fn());
 const mediaMock = vi.hoisted(() => vi.fn());
 const activityMock = vi.hoisted(() => vi.fn());
+const calendarMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../../lib/api", () => ({
   api: {
@@ -33,6 +33,7 @@ vi.mock("../../lib/api", () => ({
     media: mediaMock,
     mediaCommand: vi.fn(),
     activity: activityMock,
+    calendar: { list: calendarMock, create: vi.fn(), update: vi.fn(), remove: vi.fn() },
   },
 }));
 
@@ -121,6 +122,7 @@ beforeEach(() => {
   weatherMock.mockReset().mockResolvedValue(WEATHER);
   mediaMock.mockReset().mockResolvedValue(null);
   activityMock.mockReset().mockResolvedValue({ items: [], updatedAt: stamp });
+  calendarMock.mockReset().mockResolvedValue({ events: [] });
 });
 
 afterEach(() => {
@@ -128,31 +130,56 @@ afterEach(() => {
 });
 
 describe("TodayOverview", () => {
-  it("renders all six grid regions with their panel headings", async () => {
+  it("renders the five glanceable panels", async () => {
     renderWithProviders(<TodayOverview />);
 
-    // Row 1: handoffs, permissions, voice notes.
-    expect(await screen.findByRole("heading", { name: /^Handoffs$/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /^Permissions$/ })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /^Weather$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Voice notes$/ })).toBeInTheDocument();
-
-    // Row 2: launch, duties, and the context rail (weather + media + activity).
-    expect(screen.getByRole("heading", { name: /^Launch$/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /^Duties$/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /^Weather$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Now Playing$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Now & Upcoming" })).toBeInTheDocument();
+    // The compact calendar widget is back on Today.
+    expect(screen.getByRole("heading", { name: /20\d\d/ })).toBeInTheDocument();
   });
 
-  it("routes the tiles' open affordances to the Family screen", async () => {
-    const user = userEvent.setup();
+  it("keeps family coordination off the home screen", async () => {
+    renderWithProviders(<TodayOverview />);
+    await screen.findByRole("heading", { name: /^Weather$/ });
+
+    // Handoffs, permissions, duties, and launch live on the Family tab only.
+    for (const heading of [/^Handoffs$/, /^Permissions$/, /^Duties$/, /^Launch$/]) {
+      expect(screen.queryByRole("heading", { name: heading })).not.toBeInTheDocument();
+    }
+    // The unclaimed-handoff alerts moved to the notification drawer.
+    expect(screen.queryByRole("button", { name: "Go to Family" })).not.toBeInTheDocument();
+  });
+
+  it("lists only scheduled items in Now & Upcoming — never the current track", async () => {
+    activityMock.mockResolvedValue({
+      items: [
+        {
+          id: "media-now",
+          kind: "media",
+          title: "Golden Hour",
+          subtitle: "Atlas Bloom — playing now",
+          at: stamp,
+          severity: "info",
+        },
+        {
+          id: "evt-1",
+          kind: "event-upcoming",
+          title: "Soccer practice",
+          at: new Date(Date.now() + 45 * 60_000).toISOString(),
+          severity: "info",
+        },
+      ],
+      updatedAt: stamp,
+    });
+
     renderWithProviders(<TodayOverview />);
 
-    // Both the permissions tile and the duties tile expose "View all";
-    // clicking either one navigates to the Family screen.
-    const viewAll = await screen.findAllByRole("button", { name: /^View all$/ });
-    expect(viewAll.length).toBeGreaterThanOrEqual(2);
-    await user.click(viewAll[0]!);
-    expect(useNavStore.getState().view).toBe("family");
+    expect(await screen.findByText("Soccer practice")).toBeInTheDocument();
+    // The player already sits on this screen; the feed must not repeat it.
+    const feed = screen.getByRole("heading", { name: "Now & Upcoming" }).closest("section")!;
+    expect(within(feed).queryByText("Golden Hour")).not.toBeInTheDocument();
   });
 });

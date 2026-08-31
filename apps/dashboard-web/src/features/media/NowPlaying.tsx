@@ -46,7 +46,7 @@ export function NowPlaying() {
         <div className="relative shrink-0">
           <div
             aria-hidden
-            className="absolute -inset-3 rounded-full bg-[radial-gradient(circle,var(--color-teal)_0%,transparent_65%)] opacity-40 blur-2xl animate-[artGlow_8s_ease-in-out_infinite]"
+            className="absolute -inset-3 rounded-pill bg-[radial-gradient(circle,var(--color-teal)_0%,transparent_65%)] opacity-40 blur-2xl animate-[artGlow_8s_ease-in-out_infinite]"
           />
           <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-xl shadow-panel">
             <div
@@ -71,9 +71,9 @@ export function NowPlaying() {
           </div>
 
           <div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
+            <div className="h-1.5 w-full overflow-hidden rounded-pill bg-surface">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-teal to-accent transition-[width] duration-500 ease-linear"
+                className="h-full rounded-pill bg-gradient-to-r from-teal to-accent transition-[width] duration-500 ease-linear"
                 style={{ width: `${progress * 100}%` }}
               />
             </div>

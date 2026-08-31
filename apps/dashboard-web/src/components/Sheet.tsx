@@ -40,8 +40,8 @@ export function Sheet({ open, onClose, title, children, size = "md" }: Props) {
         aria-label={title}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-line-strong" />
-        {title && <h2 className="px-6 pt-4 text-lg font-semibold text-ink">{title}</h2>}
+        <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-pill bg-line-strong" />
+        {title && <h2 className="px-6 pt-4 text-metric font-semibold text-ink">{title}</h2>}
         <div className="overflow-y-auto px-6 pb-6 pt-4">{children}</div>
       </div>
     </div>

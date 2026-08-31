@@ -90,7 +90,7 @@ export function ActorSwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex min-h-12 items-center gap-2 rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-raised"
+        className="inline-flex min-h-touch items-center gap-2 rounded-inner border border-line bg-surface px-4 text-body font-medium text-ink transition-colors hover:bg-raised"
       >
         <TriggerIcon
           size={16}
@@ -98,7 +98,7 @@ export function ActorSwitcher() {
           aria-hidden
           style={{ color: `var(--color-${actor.color})` }}
         />
-        <span className="text-sm">{actor.displayName}</span>
+        <span className="text-body">{actor.displayName}</span>
       </button>
 
       {open && (
@@ -121,7 +121,7 @@ export function ActorSwitcher() {
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex min-h-12 w-full items-center gap-3 rounded-md px-3 text-left transition-colors",
+                  "flex min-h-touch w-full items-center gap-3 rounded-inner px-3 text-left transition-colors",
                   isActive ? "bg-raised" : "hover:bg-raised",
                 )}
               >
@@ -132,8 +132,8 @@ export function ActorSwitcher() {
                   style={{ color: `var(--color-${member.color})` }}
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-ink">{member.displayName}</span>
-                  <span className="block text-xs capitalize text-ink-3">{member.role}</span>
+                  <span className="block truncate text-body font-medium text-ink">{member.displayName}</span>
+                  <span className="block text-meta capitalize text-ink-3">{member.role}</span>
                 </span>
                 {isActive && <Check size={16} aria-hidden className="shrink-0 text-ink-3" />}
               </button>

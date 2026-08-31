@@ -41,7 +41,7 @@ describe("RangeControl", () => {
   it("keeps a 48px interactive hit area on the input", () => {
     render(<StatefulRangeControl />);
     const input = screen.getByRole("slider", { name: "Volume" });
-    expect(input.className).toContain("h-12");
+    expect(input.className).toContain("h-touch");
     expect(input.className).toContain("w-full");
   });
 

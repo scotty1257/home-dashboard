@@ -9,6 +9,8 @@ const contactsMock = vi.hoisted(() => vi.fn());
 const queueMock = vi.hoisted(() => vi.fn());
 const rulesMock = vi.hoisted(() => vi.fn());
 const dutySummaryMock = vi.hoisted(() => vi.fn());
+const launchCurrentMock = vi.hoisted(() => vi.fn());
+const launchTemplatesMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../../lib/api", () => ({
   api: {
@@ -24,6 +26,13 @@ vi.mock("../../lib/api", () => ({
     permissions: { queue: queueMock, decide: vi.fn(), create: vi.fn(), reopen: vi.fn() },
     permissionRules: { list: rulesMock, create: vi.fn(), update: vi.fn() },
     duties: { summary: dutySummaryMock, logEntry: vi.fn(), undoEntry: vi.fn() },
+    launch: {
+      current: launchCurrentMock,
+      templates: launchTemplatesMock,
+      toggleStep: vi.fn(),
+      chimePlayed: vi.fn(),
+      reset: vi.fn(),
+    },
   },
 }));
 
@@ -81,6 +90,10 @@ beforeEach(() => {
   contactsMock.mockReset().mockResolvedValue({ contacts: [] });
   queueMock.mockReset().mockResolvedValue({ pending: [], recent: [] });
   rulesMock.mockReset().mockResolvedValue({ rules: [] });
+  launchCurrentMock
+    .mockReset()
+    .mockResolvedValue({ run: null, template: null, steps: [], nowIso: stamp });
+  launchTemplatesMock.mockReset().mockResolvedValue({ templates: [] });
   dutySummaryMock
     .mockReset()
     .mockResolvedValue({ windowStart: stamp, windowEnd: stamp, duties: [], recentEntries: [] });
@@ -91,12 +104,14 @@ afterEach(() => {
 });
 
 describe("FamilyScreen", () => {
-  it("exposes all three module columns by heading", async () => {
+  it("exposes every family module by heading, launch included", async () => {
     renderWithProviders(<FamilyScreen />);
 
     expect(await screen.findByRole("heading", { name: /^Handoffs$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Permissions$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Duties$/ })).toBeInTheDocument();
+    // Launch moved here from its own tab.
+    expect(screen.getByRole("heading", { name: /^Launch$/ })).toBeInTheDocument();
   });
 
   it("renders each module's empty state for a fresh household", async () => {

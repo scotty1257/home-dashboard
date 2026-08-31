@@ -108,7 +108,7 @@ describe("ActorSwitcher", () => {
     );
     const trigger = await screen.findByRole("button", { name: "Active person" });
     expect(trigger.textContent).toContain("You");
-    expect(trigger.className).toContain("min-h-12");
+    expect(trigger.className).toContain("min-h-touch");
     expect(probe.actor?.id).toBe("member-you");
   });
 
@@ -156,7 +156,7 @@ describe("ActorSwitcher", () => {
     const rows = within(menu).getAllByRole("menuitem");
     expect(rows).toHaveLength(3);
     for (const row of rows) {
-      expect(row.className).toContain("min-h-12");
+      expect(row.className).toContain("min-h-touch");
     }
     const activeRow = within(menu).getByRole("menuitem", { name: /You/ });
     expect(activeRow.getAttribute("aria-current")).toBe("true");

@@ -153,11 +153,11 @@ export function VoiceNoteTile() {
                   <>
                     <span
                       aria-hidden
-                      className="absolute inset-0 rounded-full bg-accent/30 animate-[recordPulse_1.8s_ease-out_infinite]"
+                      className="absolute inset-0 rounded-pill bg-accent/30 animate-[recordPulse_1.8s_ease-out_infinite]"
                     />
                     <span
                       aria-hidden
-                      className="absolute inset-0 rounded-full bg-accent/30 animate-[recordPulse_1.8s_ease-out_infinite] [animation-delay:0.6s]"
+                      className="absolute inset-0 rounded-pill bg-accent/30 animate-[recordPulse_1.8s_ease-out_infinite] [animation-delay:0.6s]"
                     />
                   </>
                 )}
@@ -173,7 +173,7 @@ export function VoiceNoteTile() {
                   onPointerCancel={() => recorder.cancel()}
                   onPointerLeave={() => recorder.cancel()}
                   className={cn(
-                    "relative h-16 w-16 touch-none select-none rounded-full",
+                    "relative h-16 w-16 touch-none select-none rounded-pill",
                     "flex items-center justify-center border-2 border-accent-2/50",
                     "bg-accent text-white shadow-panel transition-transform active:scale-95",
                     "disabled:pointer-events-none disabled:opacity-40",
@@ -267,7 +267,7 @@ export function VoiceNoteTile() {
                           <span
                             aria-label="Unread"
                             title="Unread"
-                            className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-meta font-semibold leading-none text-white"
+                            className="shrink-0 rounded-pill bg-accent px-2 py-0.5 text-meta font-semibold leading-none text-white"
                           >
                             New
                           </span>

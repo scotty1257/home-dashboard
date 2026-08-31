@@ -139,7 +139,7 @@ export function LaunchScreen() {
                 <span
                   data-check
                   aria-hidden
-                  className="absolute right-3 top-3 inline-flex rounded-full bg-accent p-1.5 text-white"
+                  className="absolute right-3 top-3 inline-flex rounded-pill bg-accent p-1.5 text-white"
                 >
                   <Check size={18} strokeWidth={2.5} />
                 </span>
@@ -152,9 +152,9 @@ export function LaunchScreen() {
       {/* Bottom: progress, controls, chime status */}
       <footer className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-2 flex-1 overflow-hidden rounded-full bg-raised">
+          <div className="h-2 flex-1 overflow-hidden rounded-pill bg-raised">
             <div
-              className="h-full rounded-full bg-accent transition-all"
+              className="h-full rounded-pill bg-accent transition-all"
               style={{
                 width: `${activeSteps.length > 0 ? (completed / activeSteps.length) * 100 : 0}%`,
               }}

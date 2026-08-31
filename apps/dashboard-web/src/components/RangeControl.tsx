@@ -18,7 +18,7 @@ interface Props
  * Touch-friendly range slider.
  *
  * The 6px visual track and 24px thumb come from the global range CSS in
- * styles/app.css; the input itself is 48px tall (`h-12`) so the interactive
+ * styles/app.css; the input itself is 48px tall (`h-touch`) so the interactive
  * hit area always meets the 48px touch target. Keyboard stepping mirrors the
  * native behavior (arrows step by `step`, Home/End jump to the bounds) so it
  * also works where the browser default action is unavailable (e.g. jsdom);
@@ -65,7 +65,7 @@ export function RangeControl({
   return (
     <input
       type="range"
-      className={cn("h-12 w-full cursor-pointer", className)}
+      className={cn("h-touch w-full cursor-pointer", className)}
       value={value}
       min={min}
       max={max}

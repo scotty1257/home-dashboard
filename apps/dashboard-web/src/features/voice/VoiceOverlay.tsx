@@ -106,7 +106,7 @@ export function VoiceOverlay() {
       aria-label="Voice assistant"
     >
       <button
-        className="absolute right-6 top-6 flex h-12 w-12 items-center justify-center rounded-md border border-line bg-panel text-ink-3 transition-colors hover:text-ink"
+        className="absolute right-6 top-6 flex h-touch w-touch items-center justify-center rounded-inner border border-line bg-panel text-ink-3 transition-colors hover:text-ink"
         onClick={() => setOpen(false)}
         aria-label="Close"
       >
@@ -116,7 +116,7 @@ export function VoiceOverlay() {
       <div className="flex flex-col items-center gap-3">
         <div
           className={cn(
-            "flex h-24 w-24 items-center justify-center rounded-full border border-line bg-panel text-accent",
+            "flex h-24 w-24 items-center justify-center rounded-pill border border-line bg-panel text-accent",
             state === "listening" && "animate-[pulse_1.4s_ease-in-out_infinite] border-accent/40",
             state === "speaking" && "text-teal",
             state === "error" && "text-danger",
@@ -128,15 +128,15 @@ export function VoiceOverlay() {
             <StateIcon size={36} strokeWidth={1.75} />
           )}
         </div>
-        <span className="text-base font-medium text-ink">{stateLabel(state)}</span>
+        <span className="text-body-lg font-medium text-ink">{stateLabel(state)}</span>
       </div>
 
-      {turn?.transcript && <div className="max-w-xl text-center text-sm italic text-ink-2">“{turn.transcript}”</div>}
-      {turn?.reply && <div className="max-w-2xl text-center text-2xl font-semibold leading-snug text-ink">{turn.reply}</div>}
+      {turn?.transcript && <div className="max-w-xl text-center text-body italic text-ink-2">“{turn.transcript}”</div>}
+      {turn?.reply && <div className="max-w-2xl text-center text-countdown font-semibold leading-snug text-ink">{turn.reply}</div>}
 
       {turn?.requiresConfirmation && (
         <div className="flex flex-col items-center gap-3">
-          <span className="text-sm font-medium text-warning">This action needs your OK.</span>
+          <span className="text-body font-medium text-warning">This action needs your OK.</span>
           <div className="flex gap-3">
             <TouchButton variant="primary" icon={HelpCircle} onClick={() => submit(lastText, true)}>
               Confirm
@@ -148,7 +148,7 @@ export function VoiceOverlay() {
 
       <div className="flex w-full max-w-xl items-center gap-2">
         <input
-          className="h-12 flex-1 rounded-md border border-line-strong bg-panel px-4 text-sm text-ink placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50"
+          className="h-touch flex-1 rounded-inner border border-line-strong bg-panel px-4 text-body text-ink placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit(input)}
@@ -160,8 +160,8 @@ export function VoiceOverlay() {
       </div>
 
       {!SpeechRecognition && (
-        <div className="flex items-center gap-2 text-xs text-ink-3">
-          <Sparkles size={13} /> Voice input needs Chrome — type instead.
+        <div className="flex items-center gap-2 text-meta text-ink-3">
+          <Sparkles size={14} /> Voice input needs Chrome — type instead.
         </div>
       )}
     </div>
