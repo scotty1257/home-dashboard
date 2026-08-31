@@ -31,6 +31,27 @@ first; each corresponds to one focused commit.
   and status chips. Calendar weekday headers (SUN/MON) stay uppercase — that is
   conventional calendar notation, not decoration.
 
+### Rebuilt "Now & Upcoming"
+- Relative time now sits with its event instead of stranded in a far-right
+  column several hundred pixels away, and reads as a countdown ("in 25m") for
+  imminent items, clock time further out.
+- Icons differentiate by event type (call, pickup, school, appointment, meal)
+  instead of one sparkle for everything. The activity contract has no category
+  field, so the type is inferred from the words the family actually uses.
+- Day dividers (Today / Tomorrow / weekday) so a multi-day list reads as a
+  schedule, and a real all-clear empty state rather than a bare shrug.
+- Drops the API's subtitle when it is just the formatted start date, which the
+  countdown already says better.
+
+### Replaced every native `<select>` with a touch picker
+- New `components/Select.tsx`: listbox pattern, trigger and options on the
+  56px touch target, full keyboard support, closes on outside pointerdown.
+- Swapped all 11 native selects across 7 files. Zero native select, range,
+  checkbox, or radio styling remains anywhere in the app.
+- Registered the z-index and elevation scales in Tailwind, so `shadow-raised`
+  and `shadow-floating` resolve to the real tokens rather than Tailwind's
+  built-in shadow defaults.
+
 ### Fixed: hourly forecast started at midnight
 - `openMeteo.ts` sliced the hourly series from index 0, which is midnight local
   time, so the strip showed 1 AM–5 AM at lunchtime. It now starts at the hour
