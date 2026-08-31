@@ -7,10 +7,10 @@ import { expect, test, type Page } from "@playwright/test";
  *   panel content inset 24px (first Panel body).
  * - no panel may escape main's box at 1920×1080 (no clipping).
  * - no horizontal overflow at either viewport.
- * - every visible button/input/select is at least 48px tall.
- * - no computed 11px/13px font on any visible text node.
- * - RangeControl hit areas are 48px tall.
- * - calendar chips: 12px type, ≥24px chip, readable title at 1280.
+ * - every visible button/input/select is at least 56px tall.
+ * - every computed font size sits on the canonical type scale.
+ * - RangeControl hit areas are 56px tall.
+ * - calendar chips: metadata type, ≥24px chip, readable title at 1280.
  *
  * Themes are forced deterministically with the `?theme=` URL param (see
  * lib/theme.ts) — the app otherwise follows the clock.
@@ -19,7 +19,6 @@ import { expect, test, type Page } from "@playwright/test";
 const SCREENS = [
   { name: "today", tab: "Today" },
   { name: "family", tab: "Family" },
-  { name: "launch", tab: "Launch" },
 ] as const;
 
 const THEMES = ["light", "dark"] as const;
@@ -34,7 +33,6 @@ type Screen = (typeof SCREENS)[number];
 const GRID_SELECTOR: Record<Screen["name"], string> = {
   today: '[data-testid="today-grid"]',
   family: '[data-testid="family-grid"]',
-  launch: '[data-testid="launch-root"]',
 };
 
 /** Opens a screen by nav tab with the theme forced via the URL param. */
@@ -54,16 +52,14 @@ async function settle(page: Page, screen: Screen) {
   switch (screen.name) {
     case "today":
       await expect(page.getByRole("heading", { name: "Voice notes" })).toBeVisible();
-      await expect(page.getByRole("group", { name: "Summary window" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Weather" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Now & Upcoming" })).toBeVisible();
       break;
     case "family":
-      for (const heading of ["Handoffs", "Permissions", "Duties"]) {
+      // Launch now shares this screen with the three coordination modules.
+      for (const heading of ["Handoffs", "Permissions", "Duties", "Launch"]) {
         await expect(page.getByRole("heading", { name: new RegExp(`^${heading}$`) })).toBeVisible();
       }
-      break;
-    case "launch":
-      // Fresh DB → either the quiet state or a live run with step cards.
-      await expect(page.locator("main button").first()).toBeVisible();
       break;
   }
   // Let late queries (duty cards, activity) settle before measuring.
@@ -107,7 +103,7 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
     // reachable by scrolling, so it is not "clipped" — only panels in a
     // non-scrolling context escaping main are real defects.
     const panelsOutsideMain: string[] = [];
-    for (const section of main.querySelectorAll("section.rounded-lg")) {
+    for (const section of main.querySelectorAll("section.rounded-xl")) {
       const rect = section.getBoundingClientRect();
       if (rect.bottom <= mainRect.bottom + 1 && rect.right <= mainRect.right + 1) continue;
       const inScroller = !!section.parentElement?.closest(
@@ -121,14 +117,14 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
       }
     }
 
-    // Touch targets: every visible button/input/select ≥48px tall.
+    // Touch targets: every visible button/input/select ≥56px tall.
     const smallControls: { tag: string; name: string; height: number }[] = [];
     for (const el of document.querySelectorAll("button, input, select, [role='slider']")) {
       const html = el as HTMLElement;
       if (html.getClientRects().length === 0) continue;
       if (html.closest("[hidden]")) continue;
       const height = html.getBoundingClientRect().height;
-      if (height < 47.5) {
+      if (height < 55.5) {
         smallControls.push({
           tag: html.tagName.toLowerCase(),
           name:
@@ -141,7 +137,9 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
       }
     }
 
-    // Type scale: no 11px/13px on any visible text node.
+    // Type scale: every visible text node must sit on the canonical scale
+    // (meta 16, body 18, bodyLg 20, metric 24, countdown 32, clock 40, hero 64).
+    const ON_SCALE = ["16px", "18px", "20px", "24px", "32px", "40px", "64px"];
     const offScaleText: { tag: string; text: string; fontSize: string }[] = [];
     for (const el of document.querySelectorAll<HTMLElement>("*")) {
       if (el.tagName === "OPTION" || el.tagName === "OPTGROUP") continue;
@@ -151,7 +149,7 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
       if (!hasText) continue;
       if (el.getClientRects().length === 0) continue;
       const fontSize = getComputedStyle(el).fontSize;
-      if (fontSize === "11px" || fontSize === "13px") {
+      if (!ON_SCALE.includes(fontSize)) {
         offScaleText.push({
           tag: el.tagName.toLowerCase(),
           text: (el.textContent || "").trim().slice(0, 40),
@@ -174,7 +172,7 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
 
 test.describe("1920×1080 layout (both themes)", () => {
   for (const screen of SCREENS) {
-    test(`${screen.name}: 24px gutters/gaps, no clipping, 48px controls, on-scale type`, async ({
+    test(`${screen.name}: 24px gutters/gaps, no clipping, 56px controls, on-scale type`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 1920, height: 1080 });
@@ -185,14 +183,10 @@ test.describe("1920×1080 layout (both themes)", () => {
         // Page gutter.
         expect(audit.mainPadding, `${theme} main padding`).toBe("24px");
 
-        // Primary grid gap (launch renders its root only when a run exists).
-        if (screen.name === "launch") {
-          if (audit.gridGap !== null) expect(audit.gridGap).toBe("24px");
-        } else {
-          expect(audit.gridGap, `${theme} ${screen.name} grid gap`).toBe("24px");
-        }
+        // Primary grid gap.
+        expect(audit.gridGap, `${theme} ${screen.name} grid gap`).toBe("24px");
 
-        // Panel content inset (launch has no panels in the quiet state).
+        // Panel content inset.
         if (audit.panelInset) {
           expect(audit.panelInset.left).toBe("24px");
           expect(audit.panelInset.right).toBe("24px");
@@ -207,7 +201,7 @@ test.describe("1920×1080 layout (both themes)", () => {
         // Touch targets.
         expect(
           audit.smallControls,
-          `${theme} ${screen.name} sub-48px controls`,
+          `${theme} ${screen.name} sub-56px controls`,
         ).toEqual([]);
 
         // Type scale.
@@ -219,7 +213,7 @@ test.describe("1920×1080 layout (both themes)", () => {
 
 test.describe("1280×720 layout (both themes)", () => {
   for (const screen of SCREENS) {
-    test(`${screen.name}: scrollable, no horizontal overflow, 48px controls, on-scale type`, async ({
+    test(`${screen.name}: scrollable, no horizontal overflow, 56px controls, on-scale type`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 1280, height: 720 });
@@ -234,7 +228,7 @@ test.describe("1280×720 layout (both themes)", () => {
         expect(audit.horizontalOverflow, `${theme} horizontal overflow`).toBeLessThanOrEqual(0);
 
         // Touch targets + type scale hold at the small viewport too.
-        expect(audit.smallControls, `${theme} ${screen.name} sub-48px controls`).toEqual([]);
+        expect(audit.smallControls, `${theme} ${screen.name} sub-56px controls`).toEqual([]);
         expect(audit.offScaleText, `${theme} ${screen.name} off-scale text`).toEqual([]);
 
         // The stacked screen must scroll (or exactly fit) — never clip.
@@ -258,7 +252,7 @@ test.describe("1280×720 layout (both themes)", () => {
 
 test.describe("range controls (RangeControl hit areas)", () => {
   for (const vp of VIEWPORTS) {
-    test(`sliders are 48px tall on Home and Music at ${vp.name}`, async ({ page }) => {
+    test(`sliders are 56px tall on Home and Music at ${vp.name}`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto("/?theme=light");
 
@@ -276,13 +270,13 @@ test.describe("range controls (RangeControl hit areas)", () => {
             .map((el) => el.getBoundingClientRect().height),
         );
         expect(heights.length, `${tab} visible sliders`).toBeGreaterThan(0);
-        for (const height of heights) expect(height, `${tab} slider hit area`).toBeGreaterThanOrEqual(48);
+        for (const height of heights) expect(height, `${tab} slider hit area`).toBeGreaterThanOrEqual(56);
       }
     });
   }
 });
 
-test("calendar chips: 12px type, 24px minimum, readable title at 1280×720", async ({
+test("calendar chips: metadata type, 24px minimum, readable title at 1280×720", async ({
   page,
   request,
 }) => {
@@ -329,15 +323,61 @@ test("calendar chips: 12px type, 24px minimum, readable title at 1280×720", asy
   if (chip.timeWidth > 0) {
     expect(chip.titleWidth, "chip title width with time visible").toBeGreaterThan(0);
   }
-  // 12px metadata type and the 24px chip-height floor.
-  expect(chip.titleFontSize).toBe("12px");
+  // Metadata type (14px on the kiosk scale) and the 24px chip-height floor.
+  expect(chip.titleFontSize).toBe("14px");
   expect(chip.chipHeight, "chip minimum height").toBeGreaterThanOrEqual(24);
 
   // Day cells stay 48px+ touch targets and the calendar keeps on-scale type.
   const audit = await auditLayout(page, '[data-testid="event-chip"]');
-  expect(audit.smallControls, "calendar sub-48px controls").toEqual([]);
+  expect(audit.smallControls, "calendar sub-56px controls").toEqual([]);
   expect(audit.offScaleText, "calendar off-scale text").toEqual([]);
   expect(audit.horizontalOverflow).toBeLessThanOrEqual(0);
+});
+
+test("Today fits: no tile scrolls or clips, collapsed or expanded", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+
+  // Audit every panel body for content taller than its box. `overflow: hidden`
+  // means a too-tall panel silently crops its own controls, so scrollHeight is
+  // the honest signal here — not whether a scrollbar appears.
+  const audit = () =>
+    page.evaluate(() => {
+      const bad: { panel: string; overflow: number }[] = [];
+      for (const section of document.querySelectorAll<HTMLElement>("main section.rounded-xl")) {
+        const body = section.querySelector<HTMLElement>("header + div");
+        if (!body) continue;
+        const overflow = body.scrollHeight - body.clientHeight;
+        if (overflow > 1) {
+          bad.push({
+            panel: section.querySelector("h2")?.textContent?.trim() ?? "section",
+            overflow,
+          });
+        }
+      }
+      const main = document.querySelector("main")!;
+      return { bad, mainOverflow: main.scrollHeight - main.clientHeight };
+    });
+
+  for (const theme of THEMES) {
+    await page.goto(`/?theme=${theme}`);
+    await expect(page.getByRole("heading", { name: "Weather" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Now Playing" })).toBeVisible();
+    await page.waitForTimeout(400);
+
+    const collapsed = await audit();
+    expect(collapsed.bad, `${theme} collapsed: clipped panels`).toEqual([]);
+    expect(collapsed.mainOverflow, `${theme} collapsed: main scrolls`).toBeLessThanOrEqual(0);
+
+    // Expanding the voice notes must not squeeze the player's controls away.
+    const show = page.getByRole("button", { name: "Show voice notes" });
+    if (await show.count()) {
+      await show.click();
+      await page.waitForTimeout(400);
+      const expanded = await audit();
+      expect(expanded.bad, `${theme} expanded: clipped panels`).toEqual([]);
+      expect(expanded.mainOverflow, `${theme} expanded: main scrolls`).toBeLessThanOrEqual(0);
+    }
+  }
 });
 
 test("settings splits into two columns at 1920×1080", async ({ page }) => {

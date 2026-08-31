@@ -111,6 +111,18 @@
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
+  /* Canonical type scale -> `text-meta`, `text-body`, `text-hero`, ... The
+     primitives are namespaced `--type-*` in design-tokens so these entries
+     don't reference themselves. Use these instead of Tailwind's default
+     text-xs/sm/base steps, which don't line up with the scale. */
+  --text-meta: var(--type-meta);
+  --text-body: var(--type-body);
+  --text-body-lg: var(--type-body-lg);
+  --text-metric: var(--type-metric);
+  --text-countdown: var(--type-countdown);
+  --text-clock: var(--type-clock);
+  --text-hero: var(--type-hero);
+
   /* Semantic accent family (calendar events, device colors) — fixed brights. */
   --color-coral: #ff7a5c;
   --color-amber: #f5a623;
@@ -123,6 +135,20 @@
   --color-slate: #8b94a6;
 
   --shadow-panel: var(--shadow-panel);
+
+  /* Canonical radius scale -> `rounded-inner`, `rounded-control`,
+     `rounded-panel`, `rounded-pill`. Registering these is what lets the app
+     stop reaching for Tailwind's off-scale `rounded-inner`/`rounded-lg` steps.
+     Nested elements always take a smaller step than their container. */
+  /* Touch targets -> `min-h-touch`, `h-touch`, `w-touch`, `min-w-touch`
+     (56px floor) and `*-touch-lg` (72px) for hero/primary actions. */
+  --spacing-touch: var(--touch-target);
+  --spacing-touch-lg: var(--touch-control-lg);
+
+  --radius-inner: var(--radius-inner);
+  --radius-control: var(--radius-control);
+  --radius-panel: var(--radius-panel);
+  --radius-pill: var(--radius-pill);
 }
 
 /* Base ---------------------------------------------------------------- */
@@ -160,22 +186,22 @@ body {
 }
 *::-webkit-scrollbar-thumb {
   background: var(--line-strong);
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
 }
 
 /* Range inputs (volume / brightness / fan) — 6px visual track, 24px thumb,
-   48px-tall interactive hit area (see components/RangeControl.tsx). */
+   56px-tall interactive hit area (see components/RangeControl.tsx). */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 48px;
+  height: var(--touch-target);
   background: transparent;
   outline: none;
   cursor: pointer;
 }
 input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background: var(--line-strong);
 }
 input[type="range"]::-webkit-slider-thumb {
@@ -191,7 +217,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 input[type="range"]::-moz-range-track {
   height: 6px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background: var(--line-strong);
 }
 input[type="range"]::-moz-range-thumb {
@@ -360,4 +386,265 @@ input[type="range"]::-moz-range-thumb {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Overlay entrances. `fadeIn`/`slideUp` back the bottom Sheet; `slideInRight`
+   backs the notification drawer. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Weather scene ------------------------------------------------------------
+   Condition visuals behind the weather readout. Decorative only — the
+   condition is always also given as an icon and a label — and the global
+   reduced-motion rule freezes every one of these. */
+@keyframes rainFall {
+  from {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(150%);
+    opacity: 0;
+  }
+}
+
+@keyframes snowFall {
+  from {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--drift, 8px), 150%);
+    opacity: 0;
+  }
+}
+
+@keyframes cloudDrift {
+  from {
+    transform: translateX(-6%);
+  }
+  to {
+    transform: translateX(10%);
+  }
+}
+
+@keyframes fogDrift {
+  from {
+    transform: translateX(-6%);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateX(6%);
+    opacity: 0.9;
+  }
+}
+
+@keyframes windGust {
+  from {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120vw);
+    opacity: 0;
+  }
+}
+
+@keyframes weatherGlow {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes lightningFlash {
+  0%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  93% {
+    opacity: 0.5;
+  }
+  95% {
+    opacity: 0.1;
+  }
+  96% {
+    opacity: 0.42;
+  }
+  98% {
+    opacity: 0;
+  }
+}
+
+/* Voice-note record button: expanding rings while the mic is live. */
+@keyframes recordPulse {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+/* =========================================================================
+   Interaction & motion flair
+   =========================================================================
+   Everything below animates transform/opacity only (plus a couple of
+   CSS-custom-property angle sweeps that only affect paint, never layout),
+   so it holds 60fps on the kiosk and is fully frozen by the global
+   prefers-reduced-motion rule above. */
+
+/* Press squish — the shared feel for every button/control. The spring curve
+   overshoots slightly so a tap reads as a physical "give", not a tween. */
+.pressable {
+  transition:
+    transform var(--dur-fast) var(--ease-spring),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.pressable:active {
+  transform: scale(0.94);
+}
+
+/* Ripple — a glow that blooms from the exact tap point and fades. Spawned in
+   JS (TouchButton) at the pointer coords; this keyframe does the bloom. */
+@keyframes tapRipple {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.45;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+.ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-ink {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--ripple-color, var(--accent)) 0%, transparent 70%);
+  animation: tapRipple var(--dur-slow) var(--ease-out) forwards;
+}
+
+/* Entrance: rise + settle for list items, staggered by a per-index delay
+   (cascade). */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.stagger-item {
+  opacity: 0;
+  animation: riseIn var(--dur-base) var(--ease-out) forwards;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+/* View transition: the whole screen slides up a hair and fades on entry,
+   moving real elements rather than crossfading them away. Translate + opacity
+   only — no scale, so 48px touch targets never dip below 48 during the move. */
+@keyframes viewIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.view-enter {
+  animation: viewIn var(--dur-base) var(--ease-out);
+}
+
+/* Conic glow ring for the active card — a pseudo-element ring whose gradient
+   angle sweeps continuously. The angle is a registered custom property, so it
+   only repaints (no layout, no box rotation). */
+@property --conic-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes conicSpin {
+  to {
+    --conic-angle: 360deg;
+  }
+}
+.conic-glow {
+  position: relative;
+}
+.conic-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--conic-angle, 0deg),
+    var(--accent),
+    var(--violet),
+    var(--teal),
+    var(--accent)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: conicSpin 6s linear infinite;
 }

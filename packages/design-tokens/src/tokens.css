@@ -19,26 +19,33 @@
   --space-7: 56px;
   --space-8: 64px;
 
-  /* Radii. control = buttons/inputs (Tailwind rounded-md, 6px);
-     panel = cards/panels (Tailwind rounded-lg, 8px). */
-  --radius-control: 6px;
-  --radius-panel: 8px;
+  /* Radii. inner = elements nested inside a control (6px, always smaller
+     than its container); control = buttons/inputs (Tailwind rounded-lg, 8px);
+     panel = cards/panels (Tailwind rounded-xl, 12px). */
+  --radius-inner: 6px;
+  --radius-control: 8px;
+  --radius-panel: 12px;
   --radius-pill: 999px;
 
-  /* Touch targets. 48px minimum interactive size; 64px for hero controls. */
-  --touch-target: 48px;
-  --touch-control-lg: 64px;
+  /* Touch targets. 56px minimum interactive size for a finger-driven kiosk;
+     72px for hero/primary actions (Assistant, record). */
+  --touch-target: 56px;
+  --touch-control-lg: 72px;
 
-  /* Typography — Space Grotesk, matching the web app. */
+  /* Typography — Space Grotesk, matching the web app.
+     Namespaced `--type-*` so the web app's `@theme inline` block can map them
+     onto Tailwind's `--text-*` utilities without a self-referencing var.
+     Sizes are tuned for a wall-mounted touch kiosk: 16px is the floor, so
+     secondary emphasis comes from color and weight rather than smaller type. */
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --text-meta: 12px;
-  --text-body: 14px;
-  --text-body-lg: 16px;
-  --text-metric: 20px;
-  --text-countdown: 28px;
-  --text-clock: 32px;
-  --text-hero: 40px;
+  --type-meta: 16px;
+  --type-body: 18px;
+  --type-body-lg: 20px;
+  --type-metric: 24px;
+  --type-countdown: 32px;
+  --type-clock: 40px;
+  --type-hero: 64px;
 
   /* Elevation */
   --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.2);

@@ -34,27 +34,32 @@ export const space = {
   s8: 64,
 } as const;
 
-/** Radii: control = buttons/inputs (rounded-md, 6px), panel = cards
- *  (rounded-lg, 8px), pill for fully-rounded chips. */
+/** Radii: control = buttons/inputs (rounded-lg, 8px), panel = cards
+ *  (rounded-xl, 12px), pill for fully-rounded chips. `inner` (6px) is for
+ *  elements nested inside a control — always smaller than their container. */
 export const radii = {
-  control: 6,
-  panel: 8,
+  inner: 6,
+  control: 8,
+  panel: 12,
   pill: 9999,
 } as const;
 
-/** Touch targets: 48px minimum interactive size, 64px for hero controls. */
+/** Touch targets: 56px minimum interactive size for a finger-driven kiosk,
+ *  72px for hero/primary actions (Assistant, record). */
 export const touch = {
-  target: 48,
-  lg: 64,
+  target: 56,
+  lg: 72,
 } as const;
 
-/** Canonical type scale in px. */
+/** Canonical type scale in px, tuned for a wall-mounted touch kiosk.
+ *  16px floor: nothing on a screen read from across a room goes below it,
+ *  so `meta` is 16 and secondary emphasis comes from color/weight, not size. */
 export const typeScale = {
-  meta: 12,
-  body: 14,
-  bodyLg: 16,
-  metric: 20,
-  countdown: 28,
-  clock: 32,
-  hero: 40,
+  meta: 16,
+  body: 18,
+  bodyLg: 20,
+  metric: 24,
+  countdown: 32,
+  clock: 40,
+  hero: 64,
 } as const;
