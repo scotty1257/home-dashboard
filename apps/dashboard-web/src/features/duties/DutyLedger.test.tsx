@@ -25,7 +25,6 @@ vi.mock("../../lib/api", () => ({
 }));
 
 import { DutyLedger } from "./DutyLedger";
-import { DutyLedgerTile } from "./DutyLedgerTile";
 import { useActorStore } from "../../lib/store";
 
 const stamp = "2026-01-01T00:00:00.000Z";
@@ -173,7 +172,7 @@ describe("DutyLedger", () => {
   });
 
   it("9. quick-logs as the active adult with performedBy = actor id", async () => {
-    renderWithProviders(<DutyLedgerTile />);
+    renderWithProviders(<DutyLedger />);
 
     const bedtime = await screen.findByRole("button", { name: /bedtime/i });
     await user.click(bedtime);
@@ -186,7 +185,7 @@ describe("DutyLedger", () => {
   it("9b. shows read-only cards and a hint for the child actor, with no log call", async () => {
     useActorStore.setState({ actorId: "member-kid" });
 
-    renderWithProviders(<DutyLedgerTile />);
+    renderWithProviders(<DutyLedger />);
 
     expect(await screen.findByText("You 3 · Partner 5")).toBeInTheDocument();
     // Cards are not buttons for a child: nothing to tap, nothing to call.
@@ -196,7 +195,7 @@ describe("DutyLedger", () => {
   });
 
   it("10. offers Undo after logging and calls undoEntry exactly once", async () => {
-    renderWithProviders(<DutyLedgerTile />);
+    renderWithProviders(<DutyLedger />);
 
     const bedtime = await screen.findByRole("button", { name: /bedtime/i });
     await user.click(bedtime);
