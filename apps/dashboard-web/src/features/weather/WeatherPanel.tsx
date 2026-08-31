@@ -66,7 +66,7 @@ export function WeatherPanel() {
       className="relative isolate overflow-hidden"
       headerClassName="relative z-10 bg-transparent"
       backdrop={<WeatherScene condition={current.condition} isDay={current.isDay} />}
-      bodyClassName="relative z-10 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
+      bodyClassName="relative z-10 flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       actions={
         stale ? (
           <span className="flex items-center gap-2 text-meta font-medium text-warning">
@@ -110,7 +110,7 @@ export function WeatherPanel() {
 
       {/* Next hours — a fixed set of columns that share the width, so the strip
           never needs to scroll sideways. */}
-      <div className="grid shrink-0 grid-cols-6 gap-1 border-t border-line/70 pt-3">
+      <div className="grid shrink-0 grid-cols-6 gap-1 border-t border-line/70 pt-2">
         {hourly.slice(0, 6).map((h, i) => {
           const Icon = weatherIcon(h.condition, current.isDay);
           return (
