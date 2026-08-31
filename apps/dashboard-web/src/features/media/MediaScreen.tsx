@@ -4,7 +4,7 @@ import { TouchButton } from "../../components/TouchButton";
 import { RangeControl } from "../../components/RangeControl";
 import { formatDuration } from "../../lib/format";
 import { cn } from "../../lib/cn";
-import { usePlayer } from "./usePlayer";
+import { usePlayer, useSmoothProgress } from "./usePlayer";
 
 /** Full-screen player: large album art with a glow, dominant controls. */
 export function MediaScreen() {
@@ -22,7 +22,10 @@ export function MediaScreen() {
   }
 
   const { track, isPlaying, progressMs, volume, shuffle, repeat, devices } = data;
-  const progress = track ? Math.min(1, progressMs / track.durationMs) : 0;
+  // Same smoothing as the compact tile: media is polled every 10s, so a raw
+  // progressMs makes the scrubber jump a tenth of a track at a time.
+  const elapsedMs = useSmoothProgress(progressMs, isPlaying, track?.durationMs);
+  const progress = track ? Math.min(1, elapsedMs / track.durationMs) : 0;
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-8">
@@ -59,7 +62,7 @@ export function MediaScreen() {
           <div className="h-full rounded-full bg-gradient-to-r from-teal to-accent" style={{ width: `${progress * 100}%` }} />
         </div>
         <div className="mt-2 flex justify-between text-body tabular-nums text-ink-3">
-          <span>{formatDuration(progressMs)}</span>
+          <span>{formatDuration(elapsedMs)}</span>
           <span>{track ? formatDuration(track.durationMs) : "0:00"}</span>
         </div>
       </div>
