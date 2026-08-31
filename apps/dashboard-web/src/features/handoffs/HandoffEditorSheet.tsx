@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { BackupContact, BackupContactInput, HandoffBoardItem } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { Sheet } from "../../components/Sheet";
+import { Select } from "../../components/Select";
 import { TouchButton } from "../../components/TouchButton";
 import { Toggle } from "../../components/Toggle";
 import { useActiveActor } from "../household/ActorSwitcher";
@@ -108,19 +109,18 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <span className={label}>Contact</span>
-            <select
-              className={field}
-              aria-label="Backup contact"
+            <Select
+              label="Backup contact"
               value={contactId}
-              onChange={(e) => setContactId(e.target.value)}
-            >
-              <option value="">No specific contact</option>
-              {contacts.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} · {c.relationship}
-                </option>
-              ))}
-            </select>
+              onChange={setContactId}
+              options={[
+                { value: "", label: "No specific contact" },
+                ...contacts.map((c) => ({
+                  value: c.id,
+                  label: `${c.name} · ${c.relationship}`,
+                })),
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">

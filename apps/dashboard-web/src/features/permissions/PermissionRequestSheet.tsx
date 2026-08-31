@@ -4,6 +4,7 @@ import type { PermissionCategory, PermissionRequestInput } from "@home-dashboard
 import { api } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { Sheet } from "../../components/Sheet";
+import { Select } from "../../components/Select";
 import { TouchButton } from "../../components/TouchButton";
 import { useActiveActor } from "../household/ActorSwitcher";
 import { CATEGORY_LABEL } from "./PermissionQueue";
@@ -89,35 +90,26 @@ export function PermissionRequestSheet({ open, onClose }: Props) {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <span className={label}>Child</span>
-          <select
-            className={field}
-            aria-label="Child"
+          <Select
+            label="Child"
             value={childId}
-            onChange={(e) => setChildId(e.target.value)}
-          >
-            {children.length === 0 && <option value="">No children in household</option>}
-            {children.map((child) => (
-              <option key={child.id} value={child.id}>
-                {child.displayName}
-              </option>
-            ))}
-          </select>
+            onChange={setChildId}
+            options={
+              children.length === 0
+                ? [{ value: "", label: "No children in household" }]
+                : children.map((child) => ({ value: child.id, label: child.displayName }))
+            }
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <span className={label}>Category</span>
-          <select
-            className={field}
-            aria-label="Category"
+          <Select
+            label="Category"
             value={category}
-            onChange={(e) => setCategory(e.target.value as PermissionCategory)}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORY_LABEL[c]}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setCategory(v as PermissionCategory)}
+            options={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABEL[c] }))}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">

@@ -134,12 +134,25 @@
   --color-rose: #ff7ab8;
   --color-slate: #8b94a6;
 
+  /* Elevation. Three levels, each a surface + shadow pairing:
+     `shadow-panel` (flat cards), `shadow-raised` (popovers, menus),
+     `shadow-floating` (sheets, overlays). Named so they cannot collide with
+     Tailwind's own shadow-sm/md/lg defaults. */
   --shadow-panel: var(--shadow-panel);
+  --shadow-raised: var(--shadow-md);
+  --shadow-floating: var(--shadow-lg);
 
   /* Canonical radius scale -> `rounded-inner`, `rounded-control`,
      `rounded-panel`, `rounded-pill`. Registering these is what lets the app
      stop reaching for Tailwind's off-scale `rounded-inner`/`rounded-lg` steps.
      Nested elements always take a smaller step than their container. */
+  /* Z-index scale -> `z-panel`, `z-header`, `z-overlay`, `z-sheet`, `z-toast`. */
+  --z-index-panel: var(--z-panel);
+  --z-index-header: var(--z-header);
+  --z-index-overlay: var(--z-overlay);
+  --z-index-sheet: var(--z-sheet);
+  --z-index-toast: var(--z-toast);
+
   /* Touch targets -> `min-h-touch`, `h-touch`, `w-touch`, `min-w-touch`
      (56px floor) and `*-touch-lg` (72px) for hero/primary actions. */
   --spacing-touch: var(--touch-target);

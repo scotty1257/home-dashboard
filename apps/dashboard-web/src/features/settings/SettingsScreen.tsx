@@ -20,6 +20,7 @@ import { memberIcon, useActiveActor } from "../household/ActorSwitcher";
 import { Panel } from "../../components/Panel";
 import { Toggle } from "../../components/Toggle";
 import { TouchButton } from "../../components/TouchButton";
+import { Select } from "../../components/Select";
 import { cn } from "../../lib/cn";
 
 const row = "flex items-center justify-between gap-4 py-3 border-b border-line last:border-0";
@@ -64,21 +65,19 @@ function MemberEditor({
           onKeyDown={(e) => {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
-          className="min-h-12 w-full max-w-56 rounded-md border border-line bg-surface px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
+          className="min-h-touch w-full max-w-56 rounded-inner border border-line bg-surface px-3 text-body text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
         />
       </div>
-      <select
-        aria-label={`${member.displayName} icon`}
+      <Select
+        label={`${member.displayName} icon`}
+        className="w-44"
         value={member.icon}
-        onChange={(e) => onSave(member.id, { icon: e.target.value as HouseholdMember["icon"] })}
-        className="min-h-12 rounded-md border border-line bg-surface px-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
-      >
-        {ICON_KEYS.map((key) => (
-          <option key={key} value={key}>
-            {key}
-          </option>
-        ))}
-      </select>
+        onChange={(v) => onSave(member.id, { icon: v as HouseholdMember["icon"] })}
+        options={ICON_KEYS.map((key) => ({
+          value: key,
+          label: key.charAt(0).toUpperCase() + key.slice(1),
+        }))}
+      />
     </div>
   );
 }
@@ -105,9 +104,9 @@ function HouseholdPanel() {
   return (
     <Panel title="Household" icon={Users} accent="indigo">
       {actor?.role === "child" && (
-        <div className="pb-3 text-xs text-ink-3">Adults only — kid profiles can view but not edit members</div>
+        <div className="pb-3 text-meta text-ink-3">Adults only — kid profiles can view but not edit members</div>
       )}
-      {error && <div className="pb-3 text-xs text-danger">{error}</div>}
+      {error && <div className="pb-3 text-meta text-danger">{error}</div>}
       {members.map((member) => (
         <MemberEditor
           key={member.id}
@@ -127,8 +126,8 @@ function Field({ title, hint, children }: { title: string; hint: string; childre
   return (
     <div className={row}>
       <div>
-        <div className="text-sm font-medium text-ink">{title}</div>
-        <div className="text-xs text-ink-3">{hint}</div>
+        <div className="text-body font-medium text-ink">{title}</div>
+        <div className="text-meta text-ink-3">{hint}</div>
       </div>
       {children}
     </div>
@@ -173,7 +172,7 @@ function FamilyPanel({
     });
 
   const numberInput =
-    "min-h-12 w-24 rounded-md border border-line bg-surface px-3 text-sm tabular-nums text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60";
+    "min-h-touch w-24 rounded-inner border border-line bg-surface px-3 text-body tabular-nums text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60";
 
   return (
     <Panel title="Family" icon={HeartHandshake} accent="rose">
@@ -183,7 +182,7 @@ function FamilyPanel({
           aria-label="Handoff alert time"
           value={handoffAlertTime}
           onChange={(e) => setHandoffAlertTime(e.target.value)}
-          className="min-h-12 rounded-md border border-line bg-surface px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
+          className="min-h-touch rounded-inner border border-line bg-surface px-3 text-body text-ink focus:outline-none focus:ring-2 focus:ring-accent-2/60"
         />
       </Field>
       <Field title="Travel buffer" hint="Minutes before an event blocked for travel">
@@ -251,17 +250,17 @@ export function SettingsScreen() {
       <Panel title="Units" icon={Thermometer} accent="sky">
         <div className={cn(row, "pt-1")}>
           <div>
-            <div className="text-sm font-medium text-ink">Temperature</div>
-            <div className="text-xs text-ink-3">Displayed in weather and climate controls</div>
+            <div className="text-body font-medium text-ink">Temperature</div>
+            <div className="text-meta text-ink-3">Displayed in weather and climate controls</div>
           </div>
-          <div className="flex rounded-md border border-line bg-surface p-0.5">
+          <div className="flex rounded-inner border border-line bg-surface p-0.5">
             {(["imperial", "metric"] as const).map((u) => (
               <button
                 key={u}
                 type="button"
                 onClick={() => set({ temperatureUnits: u })}
                 className={cn(
-                  "rounded px-4 py-1.5 text-sm font-medium transition-colors",
+                  "rounded px-4 py-1.5 text-body font-medium transition-colors",
                   settings.temperatureUnits === u ? "bg-accent text-white" : "text-ink-3 hover:text-ink",
                 )}
               >
@@ -272,18 +271,18 @@ export function SettingsScreen() {
         </div>
         <div className={row}>
           <div>
-            <div className="text-sm font-medium text-ink">Theme</div>
-            <div className="text-xs text-ink-3">Automatically light by day, dark by night</div>
+            <div className="text-body font-medium text-ink">Theme</div>
+            <div className="text-meta text-ink-3">Automatically light by day, dark by night</div>
           </div>
-          <span className="text-sm text-ink-3">Auto (time of day)</span>
+          <span className="text-body text-ink-3">Auto (time of day)</span>
         </div>
       </Panel>
 
       <Panel title="Voice Assistant" icon={Mic} accent="rose">
         <div className={cn(row, "pt-1")}>
           <div>
-            <div className="text-sm font-medium text-ink">Push to talk</div>
-            <div className="text-xs text-ink-3">Tap the microphone to speak</div>
+            <div className="text-body font-medium text-ink">Push to talk</div>
+            <div className="text-meta text-ink-3">Tap the microphone to speak</div>
           </div>
           <Toggle
             checked={settings.voice.pushToTalkEnabled}
@@ -293,8 +292,8 @@ export function SettingsScreen() {
         </div>
         <div className={row}>
           <div>
-            <div className="text-sm font-medium text-ink">Confirm high-risk actions</div>
-            <div className="text-xs text-ink-3">Require a tap before locks and doors change</div>
+            <div className="text-body font-medium text-ink">Confirm high-risk actions</div>
+            <div className="text-meta text-ink-3">Require a tap before locks and doors change</div>
           </div>
           <Toggle
             checked={settings.voice.confirmHighRisk}
@@ -309,18 +308,18 @@ export function SettingsScreen() {
           <div className="flex items-center gap-3">
             <ShieldCheck size={18} className="text-ink-3" />
             <div>
-              <div className="text-sm font-medium text-ink">Home Assistant</div>
-              <div className="text-xs text-ink-3">Configure via HA_URL / HA_TOKEN in the environment</div>
+              <div className="text-body font-medium text-ink">Home Assistant</div>
+              <div className="text-meta text-ink-3">Configure via HA_URL / HA_TOKEN in the environment</div>
             </div>
           </div>
-          <span className="text-sm text-ink-3">API</span>
+          <span className="text-body text-ink-3">API</span>
         </div>
         <div className={row}>
           <div className="flex items-center gap-3">
             <Music2 size={18} className="text-ink-3" />
             <div>
-              <div className="text-sm font-medium text-ink">Spotify</div>
-              <div className="text-xs text-ink-3">
+              <div className="text-body font-medium text-ink">Spotify</div>
+              <div className="text-meta text-ink-3">
                 {spotify?.authorized ? "Connected" : spotify?.configured ? "Not authorized" : "Demo mode (not configured)"}
               </div>
             </div>

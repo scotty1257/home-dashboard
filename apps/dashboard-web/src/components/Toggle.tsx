@@ -7,7 +7,7 @@ interface Props {
   disabled?: boolean;
 }
 
-/** Compact switch with a 48px tap target. Accent-colored when on. */
+/** Compact switch on the canonical touch target. Accent-colored when on. */
 export function Toggle({ checked, onChange, label, disabled }: Props) {
   return (
     <button
@@ -18,7 +18,7 @@ export function Toggle({ checked, onChange, label, disabled }: Props) {
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
-        "inline-flex h-12 w-12 items-center justify-center rounded-md",
+        "inline-flex h-touch w-touch items-center justify-center rounded-inner",
         "transition-colors hover:bg-raised/60",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60",
         disabled && "opacity-40 pointer-events-none",

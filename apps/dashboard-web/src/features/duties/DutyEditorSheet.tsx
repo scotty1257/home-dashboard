@@ -4,6 +4,7 @@ import type { ColorToken, DutyIconKey } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { Sheet } from "../../components/Sheet";
+import { Select } from "../../components/Select";
 import { TouchButton } from "../../components/TouchButton";
 import { Toggle } from "../../components/Toggle";
 import { useActiveActor } from "../household/ActorSwitcher";
@@ -92,34 +93,25 @@ export function DutyEditorSheet({ open, onClose }: Props) {
 
         <div className="flex flex-col gap-1.5">
           <span className={label}>Icon</span>
-          <select
-            className={field}
-            aria-label="Duty icon"
+          <Select
+            label="Duty icon"
             value={icon}
-            onChange={(e) => setIcon(e.target.value as DutyIconKey)}
-          >
-            {ICON_KEYS.map((key) => (
-              <option key={key} value={key}>
-                {DUTY_ICON_LABELS[key]}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setIcon(v as DutyIconKey)}
+            options={ICON_KEYS.map((key) => ({ value: key, label: DUTY_ICON_LABELS[key] }))}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <span className={label}>Color</span>
-          <select
-            className={field}
-            aria-label="Duty color"
+          <Select
+            label="Duty color"
             value={color}
-            onChange={(e) => setColor(e.target.value as ColorToken)}
-          >
-            {COLOR_TOKENS.map((token) => (
-              <option key={token} value={token}>
-                <span className="capitalize">{token}</span>
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setColor(v as ColorToken)}
+            options={COLOR_TOKENS.map((token) => ({
+              value: token,
+              label: token.charAt(0).toUpperCase() + token.slice(1),
+            }))}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">

@@ -9,6 +9,7 @@ import type {
 import { api } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { Sheet } from "../../components/Sheet";
+import { Select } from "../../components/Select";
 import { TouchButton } from "../../components/TouchButton";
 import { Toggle } from "../../components/Toggle";
 import { useActiveActor } from "../household/ActorSwitcher";
@@ -158,30 +159,24 @@ export function StandingRulesSheet({ open, onClose }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <span className={label}>Category</span>
-              <select
-                className={field}
-                aria-label="Rule category"
+              <Select
+                label="Rule category"
                 value={category}
-                onChange={(e) => setCategory(e.target.value as PermissionCategory)}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {CATEGORY_LABEL[c]}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setCategory(v as PermissionCategory)}
+                options={CATEGORIES.map((c) => ({ value: c, label: CATEGORY_LABEL[c] }))}
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <span className={label}>Auto decision</span>
-              <select
-                className={field}
-                aria-label="Rule outcome"
+              <Select
+                label="Rule outcome"
                 value={outcome}
-                onChange={(e) => setOutcome(e.target.value as "approved" | "denied")}
-              >
-                <option value="approved">Approve</option>
-                <option value="denied">Deny</option>
-              </select>
+                onChange={(v) => setOutcome(v as "approved" | "denied")}
+                options={[
+                  { value: "approved", label: "Approve" },
+                  { value: "denied", label: "Deny" },
+                ]}
+              />
             </div>
           </div>
 

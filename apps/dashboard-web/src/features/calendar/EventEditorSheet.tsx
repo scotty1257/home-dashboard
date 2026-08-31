@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import type { CalendarEvent, ColorToken } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { Sheet } from "../../components/Sheet";
+import { Select } from "../../components/Select";
 import { TouchButton } from "../../components/TouchButton";
 import { Toggle } from "../../components/Toggle";
 import { colorList, colorOf } from "../../lib/colors";
@@ -145,34 +146,28 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <span className={label}>Owner</span>
-            <select
-              className={field}
-              aria-label="Owner"
+            <Select
+              label="Owner"
               value={ownerId}
-              onChange={(e) => setOwnerId(e.target.value)}
-            >
-              <option value="">No owner</option>
-              {members.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.displayName}
-                </option>
-              ))}
-            </select>
+              onChange={setOwnerId}
+              options={[
+                { value: "", label: "No owner" },
+                ...members.map((m) => ({ value: m.id, label: m.displayName })),
+              ]}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <span className={label}>Schedule kind</span>
-            <select
-              className={field}
-              aria-label="Schedule kind"
+            <Select
+              label="Schedule kind"
               value={scheduleKind}
-              onChange={(e) =>
-                setScheduleKind(e.target.value as CalendarEvent["scheduleKind"])
-              }
-            >
-              <option value="general">General</option>
-              <option value="adult-commitment">Adult commitment</option>
-              <option value="child-commitment">Child commitment</option>
-            </select>
+              onChange={(v) => setScheduleKind(v as CalendarEvent["scheduleKind"])}
+              options={[
+                { value: "general", label: "General" },
+                { value: "adult-commitment", label: "Adult commitment" },
+                { value: "child-commitment", label: "Child commitment" },
+              ]}
+            />
           </div>
         </div>
 

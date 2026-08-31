@@ -57,14 +57,14 @@ describe("EventEditorSheet family scheduling fields", () => {
       <EventEditorSheet open initial={{ date: new Date(2026, 7, 15) }} onClose={() => {}} />,
     );
 
-    const owner = await screen.findByLabelText("Owner");
-    expect(owner).toBeInTheDocument();
-    const kind = screen.getByLabelText("Schedule kind");
+    expect(await screen.findByRole("combobox", { name: "Owner" })).toBeInTheDocument();
+    const kind = screen.getByRole("combobox", { name: "Schedule kind" });
     expect(kind).toBeInTheDocument();
     // General events have no handoff semantics, so the toggle stays hidden.
     expect(screen.queryByRole("switch", { name: /needs handoff/i })).not.toBeInTheDocument();
 
-    await user.selectOptions(kind, "child-commitment");
+    await user.click(kind);
+    await user.click(await screen.findByRole("option", { name: "Child commitment" }));
     expect(await screen.findByRole("switch", { name: /needs handoff/i })).toBeInTheDocument();
   });
 
@@ -73,10 +73,10 @@ describe("EventEditorSheet family scheduling fields", () => {
       <EventEditorSheet open initial={{ date: new Date(2026, 7, 15) }} onClose={() => {}} />,
     );
 
-    await screen.findByLabelText("Owner");
-    await screen.findByRole("option", { name: "Kid" });
-    await user.selectOptions(screen.getByLabelText("Owner"), "member-kid");
-    await user.selectOptions(screen.getByLabelText("Schedule kind"), "child-commitment");
+    await user.click(await screen.findByRole("combobox", { name: "Owner" }));
+    await user.click(await screen.findByRole("option", { name: "Kid" }));
+    await user.click(screen.getByRole("combobox", { name: "Schedule kind" }));
+    await user.click(await screen.findByRole("option", { name: "Child commitment" }));
     await user.click(screen.getByRole("switch", { name: /needs handoff/i }));
     await user.type(screen.getByPlaceholderText(/what's happening/i), "Soccer");
     await user.click(screen.getByRole("button", { name: "Create" }));
