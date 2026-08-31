@@ -52,6 +52,23 @@ first; each corresponds to one focused commit.
   and `shadow-floating` resolve to the real tokens rather than Tailwind's
   built-in shadow defaults.
 
+### Tab bar constrained to a centered cluster
+- Five tabs stretched edge to edge across 1920px, leaving the targets hundreds
+  of pixels apart. They now sit in a centered cluster with a maximum width, and
+  icons grew from 24px to 28px for distance viewing.
+- The active state is one indicator that slides between tabs on a transform
+  (compositor-friendly, honours `prefers-reduced-motion`) instead of an element
+  appearing and disappearing per tab.
+
+### Density fallout from the larger type, resolved
+- The weather card shows four forecast days rather than five: at the 16px floor
+  a fifth row overflowed its cell. Content gave way, not the type scale.
+- Calendar day cells are the one documented exemption from the 56px control
+  floor. A month grid is six rows of squares sized by the grid; forcing 56px
+  each stretches the calendar into mostly-empty space with clipped chips (tried,
+  looked worse, reverted). They carry a 44px floor, marked with
+  `data-calendar-day` in the component and asserted separately in the contract.
+
 ### Fixed: hourly forecast started at midnight
 - `openMeteo.ts` sliced the hourly series from index 0, which is midnight local
   time, so the strip showed 1 AM–5 AM at lunchtime. It now starts at the hour
