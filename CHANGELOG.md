@@ -77,6 +77,23 @@ first; each corresponds to one focused commit.
   looked worse, reverted). They carry a 44px floor, marked with
   `data-calendar-day` in the component and asserted separately in the contract.
 
+### Consolidated the drifted accent palette
+- The semantic palette was defined in three places. `packages/design-tokens`
+  disagreed with the app on amber, lime, and teal, so runtime code and rendered
+  utilities reported different colors and nothing failed.
+- The package is now the single source; `lib/colors.ts` re-exports it, and a
+  test pins the TS palette to the CSS `--color-*` entries so the two cannot
+  drift apart again. (Verified by deliberately reintroducing the drift and
+  watching the test fail.)
+
+### Removed dead code and fixed a media inconsistency
+- Deleted three tiles left unmounted by an earlier refactor:
+  `HandoffSummaryTile`, `PermissionQueueTile`, `DutyLedgerTile`. Their tests
+  now exercise `DutyLedger`, which is what actually ships.
+- `MediaScreen` read raw `progressMs` while the compact tile smoothed it, so
+  the full-screen scrubber jumped a tenth of a track every 10s poll. Both now
+  share `useSmoothProgress`.
+
 ### Fixed: hourly forecast started at midnight
 - `openMeteo.ts` sliced the hourly series from index 0, which is midnight local
   time, so the strip showed 1 AM–5 AM at lunchtime. It now starts at the hour
