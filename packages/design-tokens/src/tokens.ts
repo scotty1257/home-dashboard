@@ -1,11 +1,18 @@
 /** Design tokens mirrored to TypeScript for runtime access (charts, canvas, etc.). */
 
-/** Fixed hex values for the semantic color family (calendar events, devices). */
+/**
+ * Fixed hex values for the semantic color family (calendar events, devices).
+ *
+ * This is the single source. These same values are mirrored into Tailwind as
+ * `--color-*` in the web app's styles/app.css `@theme` block; the two must stay
+ * in step. They previously disagreed on amber, lime, and teal, with the app
+ * rendering one set and this module reporting another.
+ */
 export const colors = {
   coral: "#ff7a5c",
-  amber: "#ffb454",
-  lime: "#a8e05f",
-  teal: "#3fd0c0",
+  amber: "#f5a623",
+  lime: "#9fd356",
+  teal: "#3fc6b2",
   sky: "#5db8ff",
   indigo: "#7c8cff",
   violet: "#b58cff",

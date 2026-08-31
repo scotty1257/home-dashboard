@@ -1,19 +1,14 @@
-/** Fixed hex values for the semantic color tokens (calendar events, devices). */
-export const colors = {
-  coral: "#ff7a5c",
-  amber: "#f5a623",
-  lime: "#9fd356",
-  teal: "#3fc6b2",
-  sky: "#5db8ff",
-  indigo: "#7c8cff",
-  violet: "#b58cff",
-  rose: "#ff7ab8",
-  slate: "#8b94a6",
-} as const;
+/**
+ * Semantic color tokens (calendar events, devices).
+ *
+ * Re-exported from @home-dashboard/design-tokens rather than redefined here.
+ * This file used to carry its own copy of the palette, which is how the package
+ * drifted to different amber, lime, and teal values without anything failing.
+ */
+import { colors, colorList, type ColorToken } from "@home-dashboard/design-tokens/ts";
 
-export type ColorToken = keyof typeof colors;
-
-export const colorList = Object.keys(colors) as ColorToken[];
+export { colors, colorList };
+export type { ColorToken };
 
 export function colorOf(token?: string | null): string {
   if (token && token in colors) return colors[token as ColorToken];
