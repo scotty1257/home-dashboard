@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Droplets, Wind, RefreshCw } from "lucide-react";
+import { Droplets, RefreshCw, Wind } from "lucide-react";
 import { api } from "../../lib/api";
 import { Panel } from "../../components/Panel";
+import { AnimatedNumber } from "../../components/AnimatedNumber";
 import { weatherIcon } from "../../lib/icons";
+import { WeatherScene } from "./WeatherScene";
 import { conditionLabel } from "../../lib/format";
 import { cn } from "../../lib/cn";
 
@@ -23,21 +25,31 @@ function conditionTint(condition: string): string {
   }
 }
 
-interface Props {
-  /**
-   * Rail variant for the Today context column: current conditions plus the
-   * 5-day outlook only (no hourly strip), compacted to share a short column.
-   */
-  compact?: boolean;
+/** Weekday label for a YYYY-MM-DD key, read at local noon to dodge TZ edges. */
+function weekday(date: string): string {
+  return new Date(`${date}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" });
 }
 
-export function WeatherPanel({ compact = false }: Props) {
+/**
+ * Weather for the Today screen.
+ *
+ * The whole card is one surface: the animated scene sits behind the header as
+ * well as the body (the header is transparent), so there is no seam between
+ * the two. Nothing scrolls — the hourly strip and the day rows are sized to
+ * fit the cell, and the row counts are chosen to fill it exactly.
+ *
+ * The forecast is the point of this tile, so the day names, condition icons,
+ * and temperatures are set large enough to read from across the room — the
+ * daily strip carries a 26px icon and metric-scale numbers, not the cramped
+ * metadata scale it used to.
+ */
+export function WeatherPanel() {
   const { data, isLoading } = useQuery({ queryKey: ["weather"], queryFn: api.weather });
 
   if (isLoading && !data) {
     return (
-      <Panel title="Weather" accent="sky" density={compact ? "compact" : "default"}>
-        <div className={cn("text-center text-sm text-ink-3", compact ? "py-4" : "py-8")}>Loading…</div>
+      <Panel title="Weather" accent="sky">
+        <div className="py-8 text-center text-body text-ink-3">Loading…</div>
       </Panel>
     );
   }
@@ -45,119 +57,104 @@ export function WeatherPanel({ compact = false }: Props) {
 
   const { current, hourly, daily, stale, units } = data;
   const unit = units === "imperial" ? "°F" : "°C";
-  const CurrentIcon = weatherIcon(current.condition);
-
-  const days = daily.slice(0, 5);
+  const CurrentIcon = weatherIcon(current.condition, current.isDay);
 
   return (
     <Panel
       title="Weather"
       accent="sky"
-      density={compact ? "compact" : "default"}
-      bodyClassName={compact ? "pb-2 pt-0" : undefined}
+      className="relative isolate overflow-hidden"
+      headerClassName="relative z-10 bg-transparent"
+      backdrop={<WeatherScene condition={current.condition} isDay={current.isDay} />}
+      bodyClassName="relative z-10 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
       actions={
         stale ? (
-          <span className="flex items-center gap-1.5 text-xs font-medium text-warning">
-            <RefreshCw size={12} /> offline
+          <span className="flex items-center gap-2 text-meta font-medium text-warning">
+            <RefreshCw size={14} /> offline
           </span>
         ) : undefined
       }
     >
-      <div className={cn("flex items-center", compact ? "gap-3" : "gap-4")}>
+      {/* Current conditions. */}
+      <div className="flex shrink-0 items-center gap-4">
         <CurrentIcon
-          size={compact ? 28 : 40}
-          strokeWidth={1.75}
+          size={48}
+          strokeWidth={1.5}
           className={cn("shrink-0", conditionTint(current.condition))}
         />
-        <div className="flex items-baseline gap-1">
-          <span
-            className={cn(
-              "font-semibold leading-none tracking-tight tabular-nums",
-              compact ? "text-2xl" : "text-[40px]",
-            )}
-          >
-            {Math.round(current.temperature)}
-            <span className={compact ? "text-sm" : "text-xl"}>{unit}</span>
-          </span>
+        <div className="flex items-start leading-none">
+          <AnimatedNumber
+            value={Math.round(current.temperature)}
+            className="text-hero font-semibold tracking-tight tabular-nums"
+          />
+          <span className="mt-1 text-metric font-medium text-ink-2">{unit}</span>
         </div>
-        <div className={cn("ml-auto flex flex-col items-end gap-0.5 text-sm text-ink-2", compact && "text-xs")}>
-          <span className={cn("font-medium text-ink", compact && "text-xs")}>
-            {conditionLabel(current.condition)}
+        <div className="ml-auto flex flex-col items-end gap-1 text-body text-ink-2">
+          <span className="font-medium text-ink">{conditionLabel(current.condition)}</span>
+          <span className="text-meta">
+            Feels like {Math.round(current.feelsLike)}
+            {unit}
           </span>
-          <span>
-            Feels like {Math.round(current.feelsLike)}{unit}
-          </span>
-          <span className="flex items-center gap-3 text-ink-3">
-            <span className="flex items-center gap-1">
-              <Droplets size={13} />
+          <span className="flex items-center gap-3 text-meta text-ink-3">
+            <span className="flex items-center gap-1.5">
+              <Droplets size={14} aria-hidden />
               {current.humidity}%
             </span>
-            <span className="flex items-center gap-1">
-              <Wind size={13} />
+            <span className="flex items-center gap-1.5">
+              <Wind size={14} aria-hidden />
               {Math.round(current.windSpeed)}
             </span>
           </span>
         </div>
       </div>
 
-      {/* Hourly strip: full panel only — the compact rail keeps to current + 5-day. */}
-      {!compact && (
-        <div className="mt-4 flex gap-1 overflow-x-auto pb-1">
-          {hourly.slice(0, 12).map((h, i) => {
-            const Icon = weatherIcon(h.condition);
-            return (
-              <div key={h.time} className="flex min-w-[52px] flex-col items-center gap-1 rounded-md px-1 py-2">
-                <span className="text-xs text-ink-3 tabular-nums">{i === 0 ? "Now" : new Date(h.time).getHours()}</span>
-                <Icon size={16} strokeWidth={1.75} className={conditionTint(h.condition)} />
-                <span className="text-xs font-medium tabular-nums">{Math.round(h.temperature)}°</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* Next hours — a fixed set of columns that share the width, so the strip
+          never needs to scroll sideways. */}
+      <div className="grid shrink-0 grid-cols-6 gap-1 border-t border-line/70 pt-3">
+        {hourly.slice(0, 6).map((h, i) => {
+          const Icon = weatherIcon(h.condition, current.isDay);
+          return (
+            <div key={h.time} className="flex flex-col items-center gap-1.5">
+              <span className="text-meta text-ink-3 tabular-nums">
+                {i === 0 ? "Now" : new Date(h.time).toLocaleTimeString([], { hour: "numeric" })}
+              </span>
+              <Icon size={22} strokeWidth={1.75} className={conditionTint(h.condition)} aria-hidden />
+              <span className="text-body-lg font-medium tabular-nums">{Math.round(h.temperature)}°</span>
+            </div>
+          );
+        })}
+      </div>
 
-      {compact ? (
-        // Two columns of tight day rows so the 5-day fits a short rail cell.
-        <div className="mt-1 grid grid-cols-2 gap-x-2">
-          {days.map((d) => {
-            const Icon = weatherIcon(d.condition);
-            return (
-              <div key={d.date} className="flex items-center gap-1.5 rounded-md px-1 py-0.5 text-xs">
-                <span className="w-8 shrink-0 text-ink-3">
-                  {new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" })}
-                </span>
-                <Icon size={13} strokeWidth={1.75} className={cn("shrink-0", conditionTint(d.condition))} />
-                <span className="shrink-0 text-right font-medium text-sky">
-                  {d.precipitationProbability > 10 ? `${d.precipitationProbability}%` : ""}
-                </span>
-                <span className="ml-auto shrink-0 tabular-nums text-ink-3">
-                  <span className="font-semibold text-ink">{Math.round(d.high)}°</span> / {Math.round(d.low)}°
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="mt-2 flex flex-col">
-          {days.map((d) => {
-            const Icon = weatherIcon(d.condition);
-            return (
-              <div key={d.date} className="grid grid-cols-[44px_28px_36px_1fr] items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-surface">
-                <span className="text-ink-3">
-                  {new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" })}
-                </span>
-                <Icon size={16} strokeWidth={1.75} className={conditionTint(d.condition)} />
-                <span className="text-right text-xs font-medium text-sky">
-                  {d.precipitationProbability > 10 ? `${d.precipitationProbability}%` : ""}
-                </span>
-                <span className="text-right tabular-nums text-ink-3">
-                  <span className="font-semibold text-ink">{Math.round(d.high)}°</span> / {Math.round(d.low)}°
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* Rest of the week. The list takes the remaining height and distributes
+          it across the rows, so the card ends flush with its cell. Four days at
+          the 16px-floor type scale is what fits without clipping; a fifth row
+          would overflow the cell rather than shrink the text below the floor. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-0.5 border-t border-line/70 pt-2">
+        {daily.slice(0, 4).map((d) => {
+          const Icon = weatherIcon(d.condition, true);
+          return (
+            <div
+              key={d.date}
+              className="grid flex-1 grid-cols-[3.5rem_2rem_3rem_1fr] items-center gap-3 rounded-lg px-1 text-body"
+            >
+              <span className="text-body-lg font-medium text-ink-2">{weekday(d.date)}</span>
+              <Icon
+                size={26}
+                strokeWidth={1.75}
+                className={cn("shrink-0", conditionTint(d.condition))}
+                aria-hidden
+              />
+              <span className="text-body font-medium text-sky tabular-nums">
+                {d.precipitationProbability > 10 ? `${d.precipitationProbability}%` : ""}
+              </span>
+              <span className="text-right tabular-nums text-ink-3">
+                <span className="text-metric font-semibold text-ink">{Math.round(d.high)}°</span>{" "}
+                <span className="text-body-lg">/ {Math.round(d.low)}°</span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </Panel>
   );
 }

@@ -77,6 +77,12 @@ export function CalendarPanel({ compact = false, className }: Props) {
             <button
               key={cell.key}
               type="button"
+              // A month cell is a grid square sized by the 6-row month, not a
+              // control in a row. It carries its own 44px floor (see
+              // e2e/layout.spec.ts) rather than the 56px control target, which
+              // six rows cannot satisfy without stretching the grid into dead
+              // space. Chips inside stay on the canonical type scale.
+              data-calendar-day
               onClick={() => setEditing({ date: cell.date })}
               className={cn(
                 "flex min-h-0 flex-col items-stretch gap-1 overflow-hidden bg-panel p-1.5 text-left",

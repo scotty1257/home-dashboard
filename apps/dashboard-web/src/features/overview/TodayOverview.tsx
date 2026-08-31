@@ -47,16 +47,16 @@ export function TodayOverview() {
           <WeatherPanel />
         </div>
 
-        {/* Compact calendar — a single cell; the month grid fits a half-height
-            cell with readable chips. */}
+        {/* Compact calendar — a single cell. A month grid given the full column
+            height just stretches its rows into empty space; half a column with
+            dense, readable cells is the better read at a glance. */}
         <div className={cn(CELL, "2xl:col-span-4")}>
           <CalendarPanel compact />
         </div>
 
-        {/* Now & Upcoming — the schedule list takes the full right column. It
-            spans both rows because a schedule is the one tile that genuinely
-            grows: it carries a multi-day horizon with day dividers, and an
-            explicit all-clear state when there is nothing to show. */}
+        {/* Now & Upcoming — the schedule takes the full right column. It is the
+            one tile that genuinely grows: a multi-day horizon with day
+            dividers, and an explicit all-clear when there is nothing to show. */}
         <div className={cn(CELL, "2xl:col-span-4 2xl:row-span-2")}>
           <ActivityFeed />
         </div>

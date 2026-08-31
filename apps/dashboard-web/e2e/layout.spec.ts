@@ -118,13 +118,19 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
     }
 
     // Touch targets: every visible button/input/select ≥56px tall.
+    //
+    // Calendar day cells are the one documented exemption: a month grid is six
+    // rows of squares whose height is set by the grid, and forcing 56px each
+    // stretches the calendar into mostly-empty space. They carry a 44px floor
+    // instead, asserted separately below.
     const smallControls: { tag: string; name: string; height: number }[] = [];
     for (const el of document.querySelectorAll("button, input, select, [role='slider']")) {
       const html = el as HTMLElement;
       if (html.getClientRects().length === 0) continue;
       if (html.closest("[hidden]")) continue;
       const height = html.getBoundingClientRect().height;
-      if (height < 55.5) {
+      const floor = html.hasAttribute("data-calendar-day") ? 43.5 : 55.5;
+      if (height < floor) {
         smallControls.push({
           tag: html.tagName.toLowerCase(),
           name:
@@ -276,7 +282,7 @@ test.describe("range controls (RangeControl hit areas)", () => {
   }
 });
 
-test("calendar chips: metadata type, 24px minimum, readable title at 1280×720", async ({
+test("calendar chips: metadata type, 28px minimum, readable title at 1280×720", async ({
   page,
   request,
 }) => {
@@ -323,11 +329,11 @@ test("calendar chips: metadata type, 24px minimum, readable title at 1280×720",
   if (chip.timeWidth > 0) {
     expect(chip.titleWidth, "chip title width with time visible").toBeGreaterThan(0);
   }
-  // Metadata type (14px on the kiosk scale) and the 24px chip-height floor.
-  expect(chip.titleFontSize).toBe("14px");
-  expect(chip.chipHeight, "chip minimum height").toBeGreaterThanOrEqual(24);
+  // Metadata type (16px on the kiosk scale) and the 28px chip-height floor.
+  expect(chip.titleFontSize).toBe("16px");
+  expect(chip.chipHeight, "chip minimum height").toBeGreaterThanOrEqual(28);
 
-  // Day cells stay 48px+ touch targets and the calendar keeps on-scale type.
+  // Day cells stay on the touch target and the calendar keeps on-scale type.
   const audit = await auditLayout(page, '[data-testid="event-chip"]');
   expect(audit.smallControls, "calendar sub-56px controls").toEqual([]);
   expect(audit.offScaleText, "calendar off-scale text").toEqual([]);
