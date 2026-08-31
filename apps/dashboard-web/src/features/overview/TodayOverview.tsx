@@ -1,63 +1,74 @@
-import { useNavStore } from "../../lib/store";
 import { cn } from "../../lib/cn";
-import { HandoffSummaryTile } from "../handoffs/HandoffSummaryTile";
-import { PermissionQueueTile } from "../permissions/PermissionQueueTile";
 import { VoiceNoteTile } from "../voice-notes/VoiceNoteTile";
-import { LaunchSummaryTile } from "../launch/LaunchSummaryTile";
-import { DutyLedgerTile } from "../duties/DutyLedgerTile";
-import { ContextRail } from "./ContextRail";
-import { FamilyAlertBanner } from "./FamilyAlertBanner";
+import { WeatherPanel } from "../weather/WeatherPanel";
+import { NowPlaying } from "../media/NowPlaying";
+import { ActivityFeed } from "./ActivityFeed";
+import { CalendarPanel } from "../calendar/CalendarPanel";
 
 /**
  * A grid cell. Below 2xl the cell keeps a comfortable minimum height so the
- * stacked 1-col layout never collapses (main scrolls instead). At 2xl the
- * cell is pinned to its grid row and the tile inside is pinned to the cell —
- * the panel body scrolls internally, so no panel extends below main at
- * 1920×1080. (Every tile renders a `section` at its root.)
+ * stacked 1-col layout never collapses (main scrolls instead). At 2xl the panel
+ * fills its cell exactly: the body becomes a flex column that takes the
+ * remaining height, and each panel lays its own content out to fit. Nothing
+ * scrolls inside a tile — a panel that needs more room gets a bigger cell, or
+ * shows less. (Every tile renders a `section` at its root.)
  */
 const CELL =
   "min-h-[300px] 2xl:min-h-0 " +
   "[&>section]:min-h-0 2xl:[&>section]:h-full 2xl:[&>section]:flex " +
   "2xl:[&>section]:flex-col 2xl:[&>section>header]:shrink-0 " +
-  "2xl:[&>section>div]:min-h-0 2xl:[&>section>div]:flex-1 2xl:[&>section>div]:overflow-y-auto";
+  "2xl:[&>section>div]:min-h-0 2xl:[&>section>div]:flex-1";
 
 /**
- * The Today screen: a 12-column, 2-row grid at 2xl — handoffs, permissions,
- * and voice notes on the first row; launch, duties, and the context rail on
- * the second. Below 2xl it degrades to a scrollable single-column stack.
+ * The Today screen — the at-a-glance surface for a wall-mounted kiosk. Family
+ * coordination (handoffs, permissions, duties, launch) lives on the Family tab;
+ * unclaimed-handoff alerts live in the header's notification drawer. What is
+ * left is what you actually want to see walking past: weather, the calendar,
+ * voice notes, what's playing, and what's next.
+ *
+ * At 2xl it is a 12-column, 2-row grid. Weather and voice notes sit in the top
+ * row, the player and Now & Upcoming beneath them, and the compact calendar
+ * runs the full height of the middle column (a month grid needs the vertical
+ * room to stay readable). Below 2xl it degrades to a scrollable single-column
+ * stack.
  */
 export function TodayOverview() {
-  const setView = useNavStore((s) => s.setView);
-
   return (
     <div className="flex h-full min-h-0 flex-col gap-6">
-      {/* Live family alerts — renders nothing when the household is on top of
-          things, and takes its height out of the grid (never an overlay). */}
-      <FamilyAlertBanner />
       <div
         data-testid="today-grid"
-        className="grid grid-cols-1 gap-6 2xl:min-h-0 2xl:flex-1 2xl:grid-cols-12 2xl:grid-rows-2"
+        className={cn(
+          "grid grid-cols-1 gap-6",
+          "2xl:min-h-0 2xl:flex-1 2xl:grid-cols-12 2xl:grid-rows-[minmax(0,1fr)_minmax(0,1fr)]",
+        )}
       >
-        {/* Row 1: coordination summaries + the voice note drop. */}
-        <div className={cn(CELL, "2xl:col-span-5")}>
-          <HandoffSummaryTile onOpen={() => setView("family")} />
-        </div>
+        {/* Weather — one cell, with the forecast given room to breathe. */}
         <div className={cn(CELL, "2xl:col-span-4")}>
-          <PermissionQueueTile onOpen={() => setView("family")} />
+          <WeatherPanel />
         </div>
-        <div className={cn(CELL, "2xl:col-span-3")}>
+
+        {/* Compact calendar — a single cell; the month grid fits a half-height
+            cell with readable chips. */}
+        <div className={cn(CELL, "2xl:col-span-4")}>
+          <CalendarPanel compact />
+        </div>
+
+        {/* Now & Upcoming — the schedule list takes the full right column. It
+            spans both rows because a schedule is the one tile that genuinely
+            grows: it carries a multi-day horizon with day dividers, and an
+            explicit all-clear state when there is nothing to show. */}
+        <div className={cn(CELL, "2xl:col-span-4 2xl:row-span-2")}>
+          <ActivityFeed />
+        </div>
+
+        {/* Voice notes — compact until expanded. */}
+        <div className={cn(CELL, "min-h-0 2xl:col-span-4")}>
           <VoiceNoteTile />
         </div>
 
-        {/* Row 2: launch + duties + the weather/media/activity context rail. */}
-        <div className={cn(CELL, "2xl:col-span-5")}>
-          <LaunchSummaryTile />
-        </div>
+        {/* The player — one cell, sized to its content. */}
         <div className={cn(CELL, "2xl:col-span-4")}>
-          <DutyLedgerTile onOpen={() => setView("family")} />
-        </div>
-        <div className="min-h-[300px] 2xl:min-h-0 2xl:col-span-3">
-          <ContextRail />
+          <NowPlaying />
         </div>
       </div>
     </div>
