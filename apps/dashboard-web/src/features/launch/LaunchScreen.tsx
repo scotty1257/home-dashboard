@@ -7,19 +7,19 @@ import {
   Check,
   Footprints,
   GlassWater,
+  Rocket,
   RotateCcw,
   Shirt,
   Star,
-  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { LaunchIconKey } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
 import { cn } from "../../lib/cn";
-import { useNavStore } from "../../lib/store";
+import { Panel } from "../../components/Panel";
 import { TouchButton } from "../../components/TouchButton";
 import { useActiveActor } from "../household/ActorSwitcher";
-import { launchCountdown, useNow } from "./LaunchSummaryTile";
+import { launchCountdown, useNow } from "./launchTime";
 import { useLaunchChime } from "./useLaunchChime";
 
 const STEP_ICONS: Record<LaunchIconKey, LucideIcon> = {
@@ -33,14 +33,14 @@ const STEP_ICONS: Record<LaunchIconKey, LucideIcon> = {
 };
 
 /**
- * Full-screen launch sequence: hero countdown up top, large tap-to-toggle
- * step cards in the middle (completed cards grey out with a check but stay
- * tappable to undo), progress + Reset/Exit + chime status at the bottom.
- * Occupies all of main — deliberately no Panel chrome.
+ * The launch sequence, rendered as the Family screen's top row: hero countdown,
+ * large tap-to-toggle step cards (completed cards grey out with a check but
+ * stay tappable to undo), and progress + Reset + chime status at the bottom.
+ * An active run is deliberately bare — no Panel chrome — so the step cards get
+ * the full width; the quiet state collapses into a normal Panel.
  */
 export function LaunchScreen() {
   const queryClient = useQueryClient();
-  const setView = useNavStore((s) => s.setView);
   const { members, actor } = useActiveActor();
   const { data } = useQuery({ queryKey: ["launch"], queryFn: () => api.launch.current() });
   const now = useNow();
@@ -88,12 +88,9 @@ export function LaunchScreen() {
 
   if (!run) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
-        <p className="text-lg text-ink-3">No launch right now</p>
-        <TouchButton variant="soft" icon={X} onClick={() => setView("today")}>
-          Exit
-        </TouchButton>
-      </div>
+      <Panel title="Launch" icon={Rocket}>
+        <p className="py-2 text-metric text-ink-3">No launch right now</p>
+      </Panel>
     );
   }
 
@@ -103,13 +100,18 @@ export function LaunchScreen() {
     : null;
 
   return (
-    <div data-testid="launch-root" className="flex h-full flex-col gap-6">
-      {/* Top: who is launching + hero countdown */}
+    <div data-testid="launch-root" className="flex flex-col gap-6">
+      {/* Top: who is launching + hero countdown. The heading matches the other
+          Family modules so the section is identifiable while a run is live. */}
       <header className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-ink-3">
+        <div className="flex items-center gap-2.5">
+          <Rocket size={16} strokeWidth={2} className="shrink-0 text-accent" aria-hidden />
+          <h2 className="text-body font-semibold text-ink-2">Launch</h2>
+        </div>
+        <p className="mt-2 text-body font-medium text-ink-3">
           {childName ?? "Child"} · {template?.name ?? "Launch"}
         </p>
-        <p className="text-4xl font-semibold tracking-tight text-ink">{hero}</p>
+        <p className="text-hero font-semibold tracking-tight text-ink">{hero}</p>
       </header>
 
       {/* Center: large step cards */}
@@ -132,7 +134,7 @@ export function LaunchScreen() {
               )}
             >
               <Icon size={44} strokeWidth={1.75} aria-hidden />
-              <span className="text-xl font-medium text-ink">{step.label}</span>
+              <span className="text-countdown font-medium text-ink">{step.label}</span>
               {done && (
                 <span
                   data-check
@@ -158,28 +160,25 @@ export function LaunchScreen() {
               }}
             />
           </div>
-          <span className="text-sm font-medium text-ink-2">
+          <span className="text-body font-medium text-ink-2">
             {completed}/{activeSteps.length}
           </span>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-h-12 items-center">
+          <div className="flex min-h-touch items-center">
             {run.chimePlayedAt != null || chimeState === "played" ? (
-              <p className="text-xs text-ink-3">Chime played</p>
+              <p className="text-meta text-ink-3">Chime played</p>
             ) : chimeState === "blocked" ? (
               <TouchButton variant="primary" onClick={enableChime}>
                 Tap to enable chime
               </TouchButton>
             ) : chimeState === "armed" ? (
-              <p className="text-xs text-ink-3">Chime ready</p>
+              <p className="text-meta text-ink-3">Chime ready</p>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
             <TouchButton variant="danger" icon={RotateCcw} disabled={reset.isPending} onClick={onReset}>
               Reset
-            </TouchButton>
-            <TouchButton variant="soft" icon={X} onClick={() => setView("today")}>
-              Exit
             </TouchButton>
           </div>
         </div>

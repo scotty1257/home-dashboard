@@ -23,10 +23,10 @@ function defaultStart(date: Date): Date {
 }
 
 const field =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-inner border border-line-strong bg-surface px-3 py-2.5 text-body text-ink " +
   "placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50";
 
-const label = "text-xs font-semibold uppercase tracking-wide text-ink-3";
+const label = "text-meta font-medium text-ink-3";
 
 interface Props {
   open: boolean;
@@ -129,7 +129,7 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
         <div className="flex flex-col gap-1.5">
           <span className={label}>Title</span>
           <input
-            className={cn(field, "text-base font-medium")}
+            className={cn(field, "text-body-lg font-medium")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What's happening?"
@@ -137,8 +137,8 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
-          <span className="text-sm text-ink-2">All day</span>
+        <div className="flex items-center justify-between rounded-inner border border-line bg-surface px-3 py-2">
+          <span className="text-body text-ink-2">All day</span>
           <Toggle checked={allDay} onChange={setAllDay} label="All day" />
         </div>
 
@@ -177,8 +177,8 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
         </div>
 
         {scheduleKind === "child-commitment" && (
-          <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
-            <span className="text-sm text-ink-2">Needs handoff</span>
+          <div className="flex items-center justify-between rounded-inner border border-line bg-surface px-3 py-2">
+            <span className="text-body text-ink-2">Needs handoff</span>
             <Toggle checked={requiresHandoff} onChange={setRequiresHandoff} label="Needs handoff" />
           </div>
         )}
@@ -263,7 +263,7 @@ export function EventEditorSheet({ open, initial, onClose }: Props) {
             {mutation.isPending ? "Saving…" : isEdit ? "Save" : "Create"}
           </TouchButton>
         </div>
-        {mutation.isError && <p className="text-sm text-danger">Couldn't save. Try again.</p>}
+        {mutation.isError && <p className="text-body text-danger">Couldn't save. Try again.</p>}
       </div>
     </Sheet>
   );

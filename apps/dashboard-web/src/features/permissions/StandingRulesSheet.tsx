@@ -15,10 +15,10 @@ import { useActiveActor } from "../household/ActorSwitcher";
 import { CATEGORY_LABEL, Chip } from "./PermissionQueue";
 
 const field =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-inner border border-line-strong bg-surface px-3 py-2.5 text-body text-ink " +
   "placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50";
 
-const label = "text-xs font-semibold uppercase tracking-wide text-ink-3";
+const label = "text-meta font-medium text-ink-3";
 
 /** Literal list (a derived one would touch the circularly-imported label map at module scope). */
 const CATEGORIES: PermissionCategory[] = [
@@ -198,7 +198,7 @@ export function StandingRulesSheet({ open, onClose }: Props) {
                     aria-label={DAY_NAMES[day]}
                     onClick={() => toggleWeekday(day)}
                     className={cn(
-                      "min-h-12 min-w-12 rounded-md border text-sm font-medium transition-colors",
+                      "min-h-touch min-w-touch rounded-inner border text-body font-medium transition-colors",
                       selected
                         ? "border-transparent bg-accent text-white"
                         : "border-line bg-surface text-ink-3 hover:bg-raised",
@@ -257,10 +257,10 @@ export function StandingRulesSheet({ open, onClose }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
+          <div className="flex items-center justify-between rounded-inner border border-line bg-surface px-3 py-2">
             <div className="flex flex-col">
-              <span className="text-sm text-ink-2">Priority</span>
-              <span className="text-xs text-ink-3">Higher wins ties</span>
+              <span className="text-body text-ink-2">Priority</span>
+              <span className="text-meta text-ink-3">Higher wins ties</span>
             </div>
             <input
               className={cn(field, "w-20 text-center")}
@@ -272,8 +272,8 @@ export function StandingRulesSheet({ open, onClose }: Props) {
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
-            <span className="text-sm text-ink-2">Active</span>
+          <div className="flex items-center justify-between rounded-inner border border-line bg-surface px-3 py-2">
+            <span className="text-body text-ink-2">Active</span>
             <Toggle checked={active} onChange={setActive} label="Rule active" />
           </div>
 
@@ -287,7 +287,7 @@ export function StandingRulesSheet({ open, onClose }: Props) {
             </TouchButton>
           </div>
           {save.isError && (
-            <p className="text-sm text-danger" role="alert">
+            <p className="text-body text-danger" role="alert">
               {save.error instanceof Error && save.error.message
                 ? `Couldn't save the rule — ${save.error.message}`
                 : "Couldn't save the rule. Try again."}
@@ -301,17 +301,17 @@ export function StandingRulesSheet({ open, onClose }: Props) {
   return (
     <Sheet open={open} onClose={onClose} title="Standing rules" size="lg">
       <div className="flex flex-col gap-3">
-        {rules.length === 0 && <p className="text-sm text-ink-3">No standing rules yet.</p>}
+        {rules.length === 0 && <p className="text-body text-ink-3">No standing rules yet.</p>}
         {rules.map((rule) => (
           <button
             key={rule.id}
             type="button"
             disabled={!isAdult}
             onClick={() => setEditing(rule)}
-            className="flex min-h-12 w-full flex-col gap-1.5 rounded-md border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-raised disabled:pointer-events-none disabled:opacity-60"
+            className="flex min-h-touch w-full flex-col gap-1.5 rounded-inner border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-raised disabled:pointer-events-none disabled:opacity-60"
           >
             <span className="flex items-center justify-between gap-2">
-              <span className="min-w-0 truncate text-sm font-medium text-ink">{rule.name}</span>
+              <span className="min-w-0 truncate text-body font-medium text-ink">{rule.name}</span>
               <Chip
                 label={rule.outcome === "approved" ? "Approve" : "Deny"}
                 className={
@@ -321,7 +321,7 @@ export function StandingRulesSheet({ open, onClose }: Props) {
                 }
               />
             </span>
-            <span className="flex flex-wrap items-center gap-1.5 text-xs text-ink-3">
+            <span className="flex flex-wrap items-center gap-1.5 text-meta text-ink-3">
               <span>{CATEGORY_LABEL[rule.category]}</span>
               <span className="flex gap-1" aria-label="Active weekdays">
                 {rule.weekdays.map((day) => (
@@ -351,7 +351,7 @@ export function StandingRulesSheet({ open, onClose }: Props) {
             Add rule
           </TouchButton>
         ) : (
-          <p className="text-sm text-ink-3">Adults only</p>
+          <p className="text-body text-ink-3">Adults only</p>
         )}
       </div>
     </Sheet>

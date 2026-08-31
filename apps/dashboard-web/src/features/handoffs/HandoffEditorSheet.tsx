@@ -9,10 +9,10 @@ import { useActiveActor } from "../household/ActorSwitcher";
 import { cn } from "../../lib/cn";
 
 const field =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-inner border border-line-strong bg-surface px-3 py-2.5 text-body text-ink " +
   "placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50";
 
-const label = "text-xs font-semibold uppercase tracking-wide text-ink-3";
+const label = "text-meta font-medium text-ink-3";
 
 interface Props {
   open: boolean;
@@ -148,9 +148,9 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
               {requestBackup.isPending ? "Sending…" : "Request backup"}
             </TouchButton>
           </div>
-          {!isAdult && <p className="text-sm text-ink-3">Adults only</p>}
+          {!isAdult && <p className="text-body text-ink-3">Adults only</p>}
           {requestBackup.isError && (
-            <p className="text-sm text-danger">Couldn't request backup. Try again.</p>
+            <p className="text-body text-danger">Couldn't request backup. Try again.</p>
           )}
         </div>
       </Sheet>
@@ -207,8 +207,8 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
-          <span className="text-sm text-ink-2">Active</span>
+        <div className="flex items-center justify-between rounded-inner border border-line bg-surface px-3 py-2">
+          <span className="text-body text-ink-2">Active</span>
           <Toggle checked={active} onChange={setActive} label="Active" />
         </div>
 
@@ -237,9 +237,9 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
             {saveContact.isPending ? "Saving…" : contact ? "Save" : "Add"}
           </TouchButton>
         </div>
-        {!isAdult && <p className="text-sm text-ink-3">Adults only</p>}
+        {!isAdult && <p className="text-body text-ink-3">Adults only</p>}
         {saveContact.isError && (
-          <p className="text-sm text-danger">Couldn't save the contact. Try again.</p>
+          <p className="text-body text-danger">Couldn't save the contact. Try again.</p>
         )}
       </div>
     </Sheet>

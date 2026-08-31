@@ -10,10 +10,10 @@ import { useActiveActor } from "../household/ActorSwitcher";
 import { DUTY_ICON_LABELS } from "./DutyLedger";
 
 const field =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-inner border border-line-strong bg-surface px-3 py-2.5 text-body text-ink " +
   "placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50";
 
-const label = "text-xs font-semibold uppercase tracking-wide text-ink-3";
+const label = "text-meta font-medium text-ink-3";
 
 const ICON_KEYS: DutyIconKey[] = [
   "bedtime",
@@ -134,8 +134,8 @@ export function DutyEditorSheet({ open, onClose }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between rounded-md border border-line bg-surface px-3 py-2">
-          <span className="text-sm text-ink-2">Active</span>
+        <div className="flex items-center justify-between rounded-inner border border-line bg-surface px-3 py-2">
+          <span className="text-body text-ink-2">Active</span>
           <Toggle checked={active} onChange={setActive} label="Active" />
         </div>
 
@@ -152,8 +152,8 @@ export function DutyEditorSheet({ open, onClose }: Props) {
             {create.isPending ? "Adding…" : "Add duty"}
           </TouchButton>
         </div>
-        {!isAdult && <p className="text-sm text-ink-3">Adults only</p>}
-        {create.isError && <p className="text-sm text-danger">Couldn't add the duty. Try again.</p>}
+        {!isAdult && <p className="text-body text-ink-3">Adults only</p>}
+        {create.isError && <p className="text-body text-danger">Couldn't add the duty. Try again.</p>}
       </div>
     </Sheet>
   );

@@ -68,7 +68,7 @@ export function Chip({ label, className }: { label: string; className?: string }
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+        "inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-meta font-medium",
         className,
       )}
     >
@@ -91,8 +91,8 @@ function PendingCard({ request, memberById, isAdult, decidePending, onDecide }: 
     <article className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-base font-semibold text-ink">{request.question}</h3>
-          <p className="text-sm text-ink-3">
+          <h3 className="text-body-lg font-semibold text-ink">{request.question}</h3>
+          <p className="text-body text-ink-3">
             {child}
             {request.occursAt ? ` · ${formatEventTime(request.occursAt)}` : ""}
           </p>
@@ -103,7 +103,7 @@ function PendingCard({ request, memberById, isAdult, decidePending, onDecide }: 
       {request.ruleConflict && (
         <div
           data-conflict
-          className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 p-2.5 text-sm text-warning"
+          className="flex items-start gap-2 rounded-inner border border-warning/30 bg-warning/10 p-2.5 text-body text-warning"
         >
           <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden />
           <p>{request.ruleConflict}</p>
@@ -131,7 +131,7 @@ function PendingCard({ request, memberById, isAdult, decidePending, onDecide }: 
             </TouchButton>
           </>
         ) : (
-          <span className="text-xs text-ink-3">Adults only</span>
+          <span className="text-meta text-ink-3">Adults only</span>
         )}
       </div>
     </article>
@@ -153,8 +153,8 @@ function RecentCard({ request, nameOf, ruleById }: RecentCardProps) {
     <article className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-ink">{request.question}</h3>
-          <p className="text-xs text-ink-3">
+          <h3 className="truncate text-body font-semibold text-ink">{request.question}</h3>
+          <p className="text-meta text-ink-3">
             {nameOf(request.childId) ?? "Child"} · {CATEGORY_LABEL[request.category]}
           </p>
         </div>
@@ -166,9 +166,9 @@ function RecentCard({ request, nameOf, ruleById }: RecentCardProps) {
         // visible in order, with the reopen itself marked.
         <ul aria-label="Decision history" className="flex flex-col gap-1">
           {request.decisions.map((decision) => (
-            <li key={decision.id} className="flex items-center gap-1.5 text-sm text-ink-3">
+            <li key={decision.id} className="flex items-center gap-1.5 text-body text-ink-3">
               {decision.outcome === "reopened" && (
-                <RotateCcw size={13} className="shrink-0" aria-hidden />
+                <RotateCcw size={14} className="shrink-0" aria-hidden />
               )}
               <span>{decisionLine(decision, nameOf)}</span>
             </li>
@@ -177,9 +177,9 @@ function RecentCard({ request, nameOf, ruleById }: RecentCardProps) {
       ) : (
         latest && (
           <>
-            <p className="text-sm text-ink-2">{decisionLine(latest, nameOf)}</p>
+            <p className="text-body text-ink-2">{decisionLine(latest, nameOf)}</p>
             {latest.source === "standing-rule" && latest.ruleId && (
-              <p className="text-xs text-ink-3">
+              <p className="text-meta text-ink-3">
                 Standing rule · {ruleById(latest.ruleId)?.name ?? "removed rule"}
               </p>
             )}
@@ -237,8 +237,8 @@ export function PermissionQueue() {
         </div>
 
         <section className="flex flex-col gap-3" aria-label="Pending requests">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-3">Pending</h3>
-          {pending.length === 0 && <p className="text-sm text-ink-3">No pending requests.</p>}
+          <h3 className="text-body font-semibold text-ink-2">Pending</h3>
+          {pending.length === 0 && <p className="text-body text-ink-3">No pending requests.</p>}
           {pending.map((request) => (
             <PendingCard
               key={request.id}
@@ -252,10 +252,10 @@ export function PermissionQueue() {
         </section>
 
         <section className="flex flex-col gap-3" aria-label="Recent decisions">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-3">
+          <h3 className="text-body font-semibold text-ink-2">
             Recent decisions
           </h3>
-          {recent.length === 0 && <p className="text-sm text-ink-3">No decisions yet.</p>}
+          {recent.length === 0 && <p className="text-body text-ink-3">No decisions yet.</p>}
           {recent.map((request) => (
             <RecentCard key={request.id} request={request} nameOf={nameOf} ruleById={ruleById} />
           ))}

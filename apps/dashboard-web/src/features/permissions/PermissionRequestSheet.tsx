@@ -9,10 +9,10 @@ import { useActiveActor } from "../household/ActorSwitcher";
 import { CATEGORY_LABEL } from "./PermissionQueue";
 
 const field =
-  "w-full rounded-md border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink " +
+  "w-full rounded-inner border border-line-strong bg-surface px-3 py-2.5 text-body text-ink " +
   "placeholder:text-ink-4 focus:outline-none focus:ring-2 focus:ring-accent-2/50";
 
-const label = "text-xs font-semibold uppercase tracking-wide text-ink-3";
+const label = "text-meta font-medium text-ink-3";
 
 /** Literal list (a derived one would touch the circularly-imported label map at module scope). */
 const CATEGORIES: PermissionCategory[] = [
@@ -165,7 +165,7 @@ export function PermissionRequestSheet({ open, onClose }: Props) {
           </TouchButton>
         </div>
         {create.isError && (
-          <p className="text-sm text-danger" role="alert">
+          <p className="text-body text-danger" role="alert">
             {create.error instanceof Error && create.error.message
               ? `Couldn't submit the request — ${create.error.message}`
               : "Couldn't submit the request. Try again."}

@@ -15,7 +15,7 @@ export function MediaScreen() {
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-ink-3">
           <Music2 size={48} strokeWidth={1.5} />
-          <span className="text-sm">Nothing playing</span>
+          <span className="text-body">Nothing playing</span>
         </div>
       </div>
     );
@@ -46,11 +46,11 @@ export function MediaScreen() {
 
       {/* Track info */}
       <div className="flex flex-col items-center gap-1 text-center">
-        <h1 className="max-w-2xl truncate text-4xl font-bold tracking-tight text-ink">
+        <h1 className="max-w-2xl truncate text-hero font-bold tracking-tight text-ink">
           {track?.name ?? "Nothing playing"}
         </h1>
-        <p className="text-lg text-ink-2">{track?.artists.join(", ") ?? "—"}</p>
-        <p className="text-sm uppercase tracking-widest text-ink-4">{track?.album}</p>
+        <p className="text-metric text-ink-2">{track?.artists.join(", ") ?? "—"}</p>
+        <p className="text-body text-ink-4">{track?.album}</p>
       </div>
 
       {/* Progress */}
@@ -58,7 +58,7 @@ export function MediaScreen() {
         <div className="h-2 w-full overflow-hidden rounded-full bg-surface">
           <div className="h-full rounded-full bg-gradient-to-r from-teal to-accent" style={{ width: `${progress * 100}%` }} />
         </div>
-        <div className="mt-2 flex justify-between text-sm tabular-nums text-ink-3">
+        <div className="mt-2 flex justify-between text-body tabular-nums text-ink-3">
           <span>{formatDuration(progressMs)}</span>
           <span>{track ? formatDuration(track.durationMs) : "0:00"}</span>
         </div>
@@ -115,7 +115,7 @@ export function MediaScreen() {
                 type="button"
                 onClick={() => command.mutate({ action: "transfer", deviceId: d.id })}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "rounded-lg px-3 py-2 text-body font-medium transition-colors",
                   d.isActive
                     ? "bg-accent-soft text-accent ring-1 ring-accent/40"
                     : "bg-surface text-ink-3 hover:bg-raised",

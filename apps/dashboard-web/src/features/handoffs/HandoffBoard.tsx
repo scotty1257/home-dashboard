@@ -57,7 +57,7 @@ function Chip({ icon: Icon, label, className }: { icon: LucideIcon; label: strin
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+        "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-meta font-medium",
         className,
       )}
     >
@@ -109,10 +109,10 @@ function ObligationCard({
     <article className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate text-base font-semibold text-ink">
+          <h3 className="truncate text-body-lg font-semibold text-ink">
             {item.eventSummary?.title ?? "Handoff"}
           </h3>
-          <p className="text-sm text-ink-3">{subtitle}</p>
+          <p className="text-body text-ink-3">{subtitle}</p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
           <Chip icon={statusChip.icon} label={status} className={statusChip.className} />
@@ -125,7 +125,7 @@ function ObligationCard({
       {item.conflictReason && (
         <div
           data-conflict
-          className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger/10 p-2.5 text-sm text-danger"
+          className="flex items-start gap-2 rounded-inner border border-danger/30 bg-danger/10 p-2.5 text-body text-danger"
         >
           <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden />
           <p>{item.conflictReason}</p>
@@ -135,7 +135,7 @@ function ObligationCard({
       {item.availability.length > 0 && (
         <ul className="flex flex-col gap-1.5">
           {item.availability.map((a) => (
-            <li key={a.memberId} className="flex items-start gap-2 text-sm">
+            <li key={a.memberId} className="flex items-start gap-2 text-body">
               {a.state === "available" ? (
                 <Check size={14} className="mt-0.5 shrink-0 text-success" aria-hidden />
               ) : (
@@ -160,7 +160,7 @@ function ObligationCard({
       )}
 
       {item.recommendedMemberId && item.status !== "resolved" && (
-        <p className="text-sm font-medium text-accent-2">
+        <p className="text-body font-medium text-accent-2">
           Suggest: {memberById(item.recommendedMemberId)?.displayName ?? "an adult"}
         </p>
       )}
@@ -175,7 +175,7 @@ function ObligationCard({
             >
               Claim
             </TouchButton>
-            {!isAdult && <span className="text-xs text-ink-3">Adults only</span>}
+            {!isAdult && <span className="text-meta text-ink-3">Adults only</span>}
           </>
         )}
         {showResolve && (
@@ -209,12 +209,12 @@ interface ContactRowProps {
 
 function ContactRow({ contact }: ContactRowProps) {
   return (
-    <div className="flex min-h-12 items-center justify-between gap-3 rounded-md border border-line bg-surface px-4">
+    <div className="flex min-h-touch items-center justify-between gap-3 rounded-inner border border-line bg-surface px-4">
       <div className="min-w-0 py-1.5">
-        <p className="truncate text-sm font-medium text-ink">
+        <p className="truncate text-body font-medium text-ink">
           {contact.name} · {contact.relationship}
         </p>
-        <p className="text-xs text-ink-3">
+        <p className="text-meta text-ink-3">
           {contact.phone}
           {contact.active ? "" : " · inactive"}
         </p>
@@ -223,7 +223,7 @@ function ContactRow({ contact }: ContactRowProps) {
         <a
           href={`tel:${contact.phone}`}
           aria-label={`Call ${contact.name}`}
-          className="inline-flex min-h-12 min-w-12 shrink-0 items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-raised hover:text-ink"
+          className="inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-inner text-ink-2 transition-colors hover:bg-raised hover:text-ink"
         >
           <Phone size={18} aria-hidden />
         </a>
@@ -276,7 +276,7 @@ export function HandoffBoard() {
     <Panel title="Handoffs">
       <div className="flex flex-col gap-4">
         {items.length === 0 && (
-          <p className="text-sm text-ink-3">No handoffs in the next two weeks.</p>
+          <p className="text-body text-ink-3">No handoffs in the next two weeks.</p>
         )}
         {items.map((item) => (
           <ObligationCard
@@ -294,7 +294,7 @@ export function HandoffBoard() {
 
         <section className="flex flex-col gap-2" aria-label="Backup contacts">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-3">
+            <h3 className="text-body font-semibold text-ink-2">
               Backup contacts
             </h3>
             <TouchButton
@@ -307,7 +307,7 @@ export function HandoffBoard() {
             </TouchButton>
           </div>
           {contacts.length === 0 && (
-            <p className="text-sm text-ink-3">No backup contacts yet.</p>
+            <p className="text-body text-ink-3">No backup contacts yet.</p>
           )}
           {contacts.map((contact) => (
             <ContactRow key={contact.id} contact={contact} />

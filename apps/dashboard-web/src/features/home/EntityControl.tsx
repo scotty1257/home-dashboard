@@ -42,11 +42,11 @@ export function EntityControl({ entity, large = false }: Props) {
     >
       <div className="flex items-center gap-2.5">
         <Icon size={20} strokeWidth={1.9} style={{ color: accent }} className="shrink-0" />
-        <span className="truncate text-sm font-medium text-ink">{label}</span>
-        <span className="ml-auto text-xs capitalize text-ink-3">{unavailable ? "unavailable" : stateLabel(entity)}</span>
+        <span className="truncate text-body font-medium text-ink">{label}</span>
+        <span className="ml-auto text-meta capitalize text-ink-3">{unavailable ? "unavailable" : stateLabel(entity)}</span>
       </div>
 
-      <div className="flex min-h-12 items-center gap-3">
+      <div className="flex min-h-touch items-center gap-3">
         {isToggleable && (
           <Toggle
             checked={isOn}
@@ -77,7 +77,7 @@ export function EntityControl({ entity, large = false }: Props) {
               aria-label="Cooler"
               onClick={() => send("set_temperature", { temperature: (Number(entity.attributes.temperature ?? 70)) - 1, hvac_mode: "heat" })}
             />
-            <span className="min-w-[48px] text-center text-base font-semibold tabular-nums">
+            <span className="min-w-[48px] text-center text-body-lg font-semibold tabular-nums">
               {Number(entity.attributes.temperature ?? entity.state)}°
             </span>
             <TouchButton
@@ -131,7 +131,7 @@ export function EntityControl({ entity, large = false }: Props) {
         )}
 
         {(entity.domain === "sensor" || entity.domain === "binary_sensor") && (
-          <span className="text-xs uppercase tracking-wide text-ink-4">read-only</span>
+          <span className="text-meta text-ink-4">read-only</span>
         )}
       </div>
     </div>

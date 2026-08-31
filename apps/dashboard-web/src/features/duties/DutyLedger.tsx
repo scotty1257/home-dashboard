@@ -102,13 +102,13 @@ export function DutyGrid({ summary, actor }: DutyGridProps) {
           const cardBody = (
             <>
               <Icon size={20} strokeWidth={2} aria-hidden style={{ color: `var(--color-${tally.color})` }} />
-              <span className="w-full truncate text-sm font-semibold text-ink">{tally.name}</span>
-              {counts && <span className="w-full truncate text-xs text-ink-3">{counts}</span>}
-              {streak && <span className="w-full truncate text-xs font-medium text-accent-2">{streak}</span>}
+              <span className="w-full truncate text-body font-semibold text-ink">{tally.name}</span>
+              {counts && <span className="w-full truncate text-meta text-ink-3">{counts}</span>}
+              {streak && <span className="w-full truncate text-meta font-medium text-accent-2">{streak}</span>}
             </>
           );
           const cardClass =
-            "flex min-h-12 w-full flex-col items-start gap-1 rounded-lg border border-line bg-surface p-3 text-left";
+            "flex min-h-touch w-full flex-col items-start gap-1 rounded-lg border border-line bg-surface p-3 text-left";
           return (
             <li key={tally.dutyId}>
               {isAdult ? (
@@ -128,14 +128,14 @@ export function DutyGrid({ summary, actor }: DutyGridProps) {
         })}
       </ul>
 
-      {!isAdult && <p className="text-xs text-ink-3">Adults only</p>}
+      {!isAdult && <p className="text-meta text-ink-3">Adults only</p>}
 
       {toast && (
         <div
           role="status"
-          className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface p-2"
+          className="flex items-center justify-between gap-3 rounded-inner border border-line bg-surface p-2"
         >
-          <p className="min-w-0 truncate text-sm text-ink">Logged {toast.dutyName}</p>
+          <p className="min-w-0 truncate text-body text-ink">Logged {toast.dutyName}</p>
           <TouchButton
             variant="soft"
             disabled={undo.isPending}
@@ -184,11 +184,11 @@ export function DutyLedger() {
         <DutyGrid summary={summary} actor={actor} />
 
         <section className="flex flex-col gap-1.5" aria-label="Recent duty log">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-3">Recent</h3>
-          {recent.length === 0 && <p className="text-sm text-ink-3">No duties logged yet.</p>}
+          <h3 className="text-body font-semibold text-ink-2">Recent</h3>
+          {recent.length === 0 && <p className="text-body text-ink-3">No duties logged yet.</p>}
           <ul className="flex flex-col gap-1">
             {recent.map((entry) => (
-              <li key={entry.id} className="flex min-h-12 items-center rounded-md px-2 text-sm">
+              <li key={entry.id} className="flex min-h-touch items-center rounded-inner px-2 text-body">
                 {/* One readable line: "<Performer> logged <Duty> at <time>". */}
                 <span className="min-w-0 truncate text-ink-2">
                   {`${entry.performerName} logged ${entry.dutyName} at ${formatEventTime(entry.occurredAt)}`}

@@ -13,6 +13,14 @@ interface Props {
   actions?: ReactNode;
   className?: string;
   bodyClassName?: string;
+  /** Extra header classes — e.g. to let a full-bleed backdrop show through. */
+  headerClassName?: string;
+  /**
+   * Full-bleed layer behind the whole card, header included. Rendered as the
+   * section's first child, so an absolutely-positioned backdrop covers the
+   * header too rather than starting below it.
+   */
+  backdrop?: ReactNode;
 }
 
 const headerDensity = {
@@ -25,7 +33,12 @@ const bodyDensity = {
   compact: "px-4 pb-4 pt-1",
 } as const;
 
-/** Clean card: tight radius, hairline border, consistent internal spacing. */
+/** Clean card: tight radius, hairline border, consistent internal spacing.
+ *
+ * Titles are sentence case at body size, not tracked-out ALL-CAPS eyebrows —
+ * a card whose content already says what it is (a 74° and a sun icon) does not
+ * need a sign reading WEATHER above it. Panels where the title would be
+ * redundant pass no `title` at all. */
 export function Panel({
   title,
   icon: Icon,
@@ -35,19 +48,23 @@ export function Panel({
   actions,
   className,
   bodyClassName,
+  headerClassName,
+  backdrop,
 }: Props) {
   return (
     <section
       className={cn(
-        "rounded-lg border border-line bg-panel shadow-panel backdrop-blur-md",
+        "rounded-xl border border-line bg-panel shadow-panel backdrop-blur-md",
         className,
       )}
     >
+      {backdrop}
       {(title || actions) && (
         <header
           className={cn(
             "flex items-center justify-between gap-3",
             headerDensity[density],
+            headerClassName,
           )}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -61,7 +78,7 @@ export function Panel({
               />
             )}
             {title && (
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-3 truncate">
+              <h2 className="truncate text-body font-semibold text-ink-2">
                 {title}
               </h2>
             )}
