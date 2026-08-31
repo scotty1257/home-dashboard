@@ -52,6 +52,14 @@ first; each corresponds to one focused commit.
   and `shadow-floating` resolve to the real tokens rather than Tailwind's
   built-in shadow defaults.
 
+### Header rebalanced
+- Three status clusters (a dot, a 14px icon, and a word each, capitalised
+  inconsistently as "Demo" beside "demo") collapse into one badge that appears
+  only when something is running on demo data and says so in plain language.
+  The weather dot was hardcoded to "ok" and told the reader nothing; it is gone.
+- The Assistant button is the primary action on the screen and is now sized
+  like one: 72px, on the hero touch target rather than the 56px floor.
+
 ### Tab bar constrained to a centered cluster
 - Five tabs stretched edge to edge across 1920px, leaving the targets hundreds
   of pixels apart. They now sit in a centered cluster with a maximum width, and
