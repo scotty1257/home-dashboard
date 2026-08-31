@@ -64,13 +64,13 @@ export function CalendarPanel({ compact = false, className }: Props) {
     >
       <div className="grid grid-cols-7 gap-px pb-1">
         {WEEKDAY_NAMES.map((d) => (
-          <div key={d} className="py-1.5 text-center text-xs font-semibold uppercase tracking-wide text-ink-4">
+          <div key={d} className="py-1.5 text-center text-meta font-semibold uppercase tracking-wide text-ink-4">
             {d}
           </div>
         ))}
       </div>
 
-      <div className="grid flex-1 grid-cols-7 grid-rows-6 gap-px overflow-hidden rounded-md border border-line bg-line">
+      <div className="grid min-h-0 flex-1 grid-cols-7 grid-rows-6 gap-px overflow-hidden rounded-panel border border-line bg-line">
         {cells.map((cell) => {
           const dayEvents = eventsOnDay(events, cell.date);
           return (
@@ -79,14 +79,14 @@ export function CalendarPanel({ compact = false, className }: Props) {
               type="button"
               onClick={() => setEditing({ date: cell.date })}
               className={cn(
-                "flex min-h-0 flex-col items-stretch gap-1 bg-panel p-1.5 text-left",
+                "flex min-h-0 flex-col items-stretch gap-1 overflow-hidden bg-panel p-1.5 text-left",
                 "transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-2/60",
                 !cell.inMonth && "opacity-45",
               )}
             >
               <span
                 className={cn(
-                  "flex h-6 w-6 items-center justify-center self-end rounded-md text-sm font-medium tabular-nums",
+                  "flex h-7 w-7 shrink-0 items-center justify-center self-end rounded-inner text-body font-medium tabular-nums",
                   cell.isToday
                     ? "bg-accent text-white"
                     : cell.inMonth
@@ -96,7 +96,7 @@ export function CalendarPanel({ compact = false, className }: Props) {
               >
                 {cell.date.getDate()}
               </span>
-              <div className="flex flex-col gap-1 overflow-hidden">
+              <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
                 {dayEvents.slice(0, maxChips).map((e) => (
                   <span
                     key={e.id}
@@ -107,7 +107,7 @@ export function CalendarPanel({ compact = false, className }: Props) {
                       ev.stopPropagation();
                       setEditing(e);
                     }}
-                    className="flex min-h-6 items-center gap-1.5 truncate rounded px-1.5 py-0.5 text-xs font-medium leading-tight"
+                    className="flex min-h-7 shrink-0 items-center gap-1.5 truncate rounded-inner px-1.5 py-0.5 text-meta font-medium leading-tight"
                     style={{ backgroundColor: `${colorOf(e.color)}1f`, color: colorOf(e.color) }}
                   >
                     {!e.allDay && <span className="opacity-70 tabular-nums">{timeShort(e.start)}</span>}
@@ -118,7 +118,7 @@ export function CalendarPanel({ compact = false, className }: Props) {
                   </span>
                 ))}
                 {dayEvents.length > maxChips && (
-                  <span className="px-1.5 text-xs font-medium text-ink-4">
+                  <span className="shrink-0 px-1.5 text-meta font-medium text-ink-4">
                     +{dayEvents.length - maxChips}
                   </span>
                 )}
