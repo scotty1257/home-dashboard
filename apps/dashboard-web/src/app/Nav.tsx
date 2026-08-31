@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   CalendarDays,
   Users,
-  Rocket,
   Lightbulb,
   Music,
 } from "lucide-react";
@@ -15,7 +14,6 @@ const TABS: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "today", label: "Today", icon: LayoutDashboard },
   { id: "calendar", label: "Calendar", icon: CalendarDays },
   { id: "family", label: "Family", icon: Users },
-  { id: "launch", label: "Launch", icon: Rocket },
   { id: "home", label: "Home", icon: Lightbulb },
   { id: "media", label: "Music", icon: Music },
 ];
@@ -24,29 +22,53 @@ export function Nav() {
   const view = useNavStore((s) => s.view);
   const setView = useNavStore((s) => s.setView);
 
+  const activeIndex = Math.max(0, TABS.findIndex((tab) => tab.id === view));
+
   return (
-    <nav className="flex h-16 shrink-0 items-stretch border-t border-line bg-panel/60 px-4 backdrop-blur-sm" aria-label="Primary">
-      {TABS.map((tab) => {
-        const active = view === tab.id;
-        const Icon = tab.icon;
-        return (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setView(tab.id)}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-md text-ink-3",
-              "transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60",
-              active && "text-accent",
-            )}
-          >
-            {active && <span className="absolute top-0 h-0.5 w-10 rounded-full bg-accent" />}
-            <Icon size={24} strokeWidth={active ? 2.2 : 2} aria-hidden />
-            <span className={cn("text-[12px] font-medium", active && "font-semibold")}>{tab.label}</span>
-          </button>
-        );
-      })}
+    <nav
+      className="flex shrink-0 justify-center border-t border-line bg-panel/60 px-4 py-2 backdrop-blur-sm"
+      aria-label="Primary"
+    >
+      {/* A centered cluster, not five tabs smeared across 1920px. Constraining
+          the width keeps the targets within one thumb's travel of each other
+          instead of hundreds of pixels apart. */}
+      <div
+        className="relative grid w-full max-w-3xl"
+        style={{ gridTemplateColumns: `repeat(${TABS.length}, minmax(0, 1fr))` }}
+      >
+        {/* One indicator that slides between tabs, rather than an element
+            appearing and disappearing per tab. Transform-only so it composites. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 rounded-control bg-accent-soft transition-transform duration-[var(--dur-base)] ease-[var(--ease-spring)] motion-reduce:transition-none"
+          style={{
+            width: `${100 / TABS.length}%`,
+            transform: `translateX(${activeIndex * 100}%)`,
+          }}
+        />
+        {TABS.map((tab) => {
+          const active = view === tab.id;
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setView(tab.id)}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "pressable relative flex min-h-touch flex-col items-center justify-center gap-1 rounded-control",
+                "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60",
+                active ? "text-accent" : "text-ink-3 hover:text-ink",
+              )}
+            >
+              <Icon size={28} strokeWidth={active ? 2.2 : 2} aria-hidden />
+              <span className={cn("text-meta font-medium", active && "font-semibold")}>
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }
