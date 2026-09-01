@@ -23,3 +23,17 @@ export function softColor(token?: string | null, alpha = 0.14): string {
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/**
+ * The readable TEXT colour for a palette token, as a CSS var reference.
+ *
+ * `colorOf` returns the bright fill, which is what a chip's background and its
+ * left edge use. As a label on that same tint the bright measured ~1.8:1, so
+ * text reads from `--chip-ink-*` instead. It has to be a var rather than a hex
+ * because the value flips with the theme: light darkens each hue, dark keeps
+ * the bright, and inline styles cannot express that on their own.
+ */
+export function inkColorOf(token?: string | null): string {
+  const name = token && token in colors ? token : "slate";
+  return `var(--chip-ink-${name})`;
+}

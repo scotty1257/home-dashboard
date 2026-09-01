@@ -14,7 +14,7 @@
 :root {
   /* Space base — soft blue-white "daylight" cosmos */
   --bg-canvas: #e6ebf6;
-  --bg-panel: rgba(255, 255, 255, 0.5);
+  --bg-panel: rgba(255, 255, 255, 0.88);
   --bg-surface: #eef0f4;
   --bg-raised: #e3e7ee;
 
@@ -23,35 +23,56 @@
 
   --ink: #161a24;
   --ink-2: #3f4756;
-  --ink-3: #6b7385;
-  --ink-4: #98a0b0;
+  --ink-3: #4e5665;
+  --ink-4: #4c5462;
 
   --accent: #5e6ad2;
-  --accent-2: #7170ff;
+  --accent-2: #4f4ed6;
   --accent-soft: rgba(94, 106, 210, 0.14);
+  /* Accent as TEXT on `accent-soft` (active nav tab). The fill accent is
+     too close to its own tint to read — measured 3.37:1. */
+  --accent-ink: #4450ab;
 
-  --success: #16a34a;
-  --warning: #d97706;
-  --danger: #dc2626;
+  --success: #0f7038;
+  --warning: #8d4b08;
+
+  /* Readable text variants of the event palette. The `--color-*` brights are
+     chip fills; as text on a panel they fall well below AA, so anything that
+     renders a palette colour as words uses these instead. */
+  --ink-sky: #15628f;
+  --ink-teal: #0c6459;
+  --ink-amber: #8a5a06;
+  --ink-coral: #b23c22;
+
+  /* Event-palette colours as chip TEXT. A chip is a soft tint of its own
+     colour, so the bright fill value used as the label measured ~1.8:1 on it.
+     These are the same hues darkened until the label clears AA on that tint;
+     the fills themselves (--color-*) are untouched. */
+  --chip-ink-coral: #b31f00;
+  --chip-ink-amber: #7f5006;
+  --chip-ink-lime: #476619;
+  --chip-ink-teal: #1d6459;
+  --chip-ink-sky: #005a9f;
+  --chip-ink-indigo: #2740e0;
+  --chip-ink-violet: #6a24e6;
+  --chip-ink-rose: #b00051;
+  --chip-ink-slate: #515a6b;
+  --danger: #b01818;
 
   --shadow-panel: 0 1px 2px rgba(30, 40, 70, 0.08);
 
-  /* Space elements (daylight — pastel, clearly visible) */
-  --star-a: rgba(124, 140, 255, 0.65);
-  --star-b: rgba(181, 140, 255, 0.6);
-  --star-c: rgba(63, 198, 178, 0.6);
-  --star-d: rgba(255, 122, 184, 0.55);
-  --star-e: rgba(245, 166, 35, 0.55);
-  --orbit: rgba(124, 140, 255, 0.6);
-  --nebula-a: rgba(124, 140, 255, 0.24);
-  --nebula-b: rgba(255, 122, 184, 0.18);
-  --nebula-c: rgba(63, 198, 178, 0.18);
-  --glow-core: rgba(124, 140, 255, 0.3);
+  /* Gradient backdrop (daylight). Pools sit on a pale field, so they stay
+     low-alpha — enough to tint the white, not enough to fight panel text. */
+  --grad-1: rgba(96, 116, 255, 0.34);
+  --grad-2: rgba(0, 206, 178, 0.28);
+  --grad-3: rgba(186, 96, 255, 0.30);
+  --grad-4: rgba(24, 158, 255, 0.30);
+  --grad-grain: 0.035;
 }
 
 .dark {
   --bg-canvas: #05060c;
-  --bg-panel: rgba(13, 14, 20, 0.55);
+  --bg-panel: rgba(13, 14, 20, 0.90);
   --bg-surface: #14161d;
   --bg-raised: #1e212b;
 
@@ -60,29 +81,51 @@
 
   --ink: #f4f6fb;
   --ink-2: #d3d8e4;
-  --ink-3: #8a92a3;
-  --ink-4: #5f6674;
+  /* Secondary/tertiary ink sits on a translucent panel over the dark gradient,
+     which composites far lighter than --bg alone. e2e/contrast.spec.ts photographs
+     that real backdrop: these are the lightest steps that still read as secondary
+     while clearing 4.5:1 against it. */
+  --ink-3: #d4dae3;
+  --ink-4: #d2d8e1;
 
-  --accent: #6d7bff;
-  --accent-2: #8a94ff;
+  --accent: #5262e8;
+  --accent-2: #b4bcff;
   --accent-soft: rgba(109, 123, 255, 0.18);
+  --accent-ink: #8f9bff;
 
-  --success: #10b981;
+  --success: #34d399;
   --warning: #f5a623;
+
+  /* Text variants of the event palette, lightened for the dark panel. */
+  --ink-sky: #7cc8ff;
+  --ink-teal: #55d8c4;
+  --ink-amber: #f0b64a;
+  --ink-coral: #ff9b82;
+
+  /* On the near-black panel the palette brights already clear AA on their own
+     tint (4.95–7.71), so dark keeps them as-is. */
+  --chip-ink-coral: #ff7a5c;
+  --chip-ink-amber: #f5a623;
+  --chip-ink-lime: #9fd356;
+  --chip-ink-teal: #3fc6b2;
+  --chip-ink-sky: #5db8ff;
+  --chip-ink-indigo: #7c8cff;
+  --chip-ink-violet: #b58cff;
+  --chip-ink-rose: #ff7ab8;
+  --chip-ink-slate: #8b94a6;
   --danger: #f2555a;
 
   --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.25);
 
-  --star-a: rgba(255, 255, 255, 0.85);
-  --star-b: rgba(255, 255, 255, 0.6);
-  --star-c: rgba(180, 194, 255, 0.7);
-  --star-d: rgba(255, 255, 255, 0.55);
-  --star-e: rgba(255, 255, 255, 0.5);
-  --orbit: rgba(150, 160, 255, 0.42);
-  --nebula-a: rgba(109, 123, 255, 0.32);
-  --nebula-b: rgba(181, 140, 255, 0.24);
-  --nebula-c: rgba(63, 198, 178, 0.18);
-  --glow-core: rgba(109, 123, 255, 0.42);
+  /* Mesh backdrop (night — light on a near-black field, so everything needs
+     more alpha than daylight to register at all against #05060c). */
+  /* Gradient backdrop (night). Against #05060c a pool needs far more alpha
+     than its daylight twin to register at all. */
+  --grad-1: rgba(116, 130, 255, 0.72);
+  --grad-2: rgba(46, 214, 190, 0.48);
+  --grad-3: rgba(178, 108, 255, 0.62);
+  --grad-4: rgba(48, 140, 255, 0.58);
+  --grad-grain: 0.05;
 }
 
 @theme inline {
@@ -102,12 +145,13 @@
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
 
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
 
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+  --font-sans: "Figtree", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
@@ -118,9 +162,12 @@
   --text-meta: var(--type-meta);
   --text-body: var(--type-body);
   --text-body-lg: var(--type-body-lg);
+  --text-title: var(--type-title);
   --text-metric: var(--type-metric);
+  --text-heading: var(--type-heading);
   --text-countdown: var(--type-countdown);
   --text-clock: var(--type-clock);
+  --text-display: var(--type-display);
   --text-hero: var(--type-hero);
 
   /* Semantic accent family (calendar events, device colors) — fixed brights. */
@@ -133,6 +180,14 @@
   --color-violet: #b58cff;
   --color-rose: #ff7ab8;
   --color-slate: #8b94a6;
+
+  /* Readable text counterparts of the palette above -> `text-ink-sky` etc.
+     The brights are fills; these are what a palette colour looks like as
+     words on a panel, and they flip per theme. */
+  --color-ink-sky: var(--ink-sky);
+  --color-ink-teal: var(--ink-teal);
+  --color-ink-amber: var(--ink-amber);
+  --color-ink-coral: var(--ink-coral);
 
   /* Elevation. Three levels, each a surface + shadow pairing:
      `shadow-panel` (flat cards), `shadow-raised` (popovers, menus),
@@ -243,138 +298,112 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* =========================================================================
-   Space background — nebula gradients, twinkling stars, thin elliptical
-   orbits with orbiting planets.
+   Animated gradient backdrop — broad pools of colour that drift, breathe and
+   overlap into a slowly shifting blend. Pure CSS: no canvas and no render
+   loop, so nothing here runs on the main thread frame by frame.
+
+   Colours come from the `--grad-*` tokens, which are redefined per theme, so
+   the backdrop follows the time-of-day theme with no JS.
    ========================================================================= */
-.space {
+.grad-bg {
   position: fixed;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: var(--z-panel);
+  /* The pools are translucent, so the canvas colour shows through and sets
+     the overall key of the blend. */
+  background: var(--bg-canvas);
 }
 
-.space__nebula {
+/* Each layer is oversized and offset, so a drifting pool never pulls its own
+   edge into frame — you see moving colour, not a moving circle. */
+.grad-bg__layer {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.8;
-  will-change: transform;
+  inset: -35%;
+  will-change: transform, opacity;
 }
 
-.space__nebula--a {
-  width: 55vmax;
-  height: 55vmax;
-  left: -12vmax;
-  top: -18vmax;
-  background: var(--nebula-a);
-  animation: nebulaDrift 46s ease-in-out infinite alternate;
-}
-.space__nebula--b {
-  width: 48vmax;
-  height: 48vmax;
-  right: -14vmax;
-  top: 8vmax;
-  background: var(--nebula-b);
-  animation: nebulaDrift 58s ease-in-out infinite alternate-reverse;
-}
-.space__nebula--c {
-  width: 40vmax;
-  height: 40vmax;
-  left: 18vmax;
-  bottom: -20vmax;
-  background: var(--nebula-c);
-  animation: nebulaDrift 66s ease-in-out infinite alternate;
+.grad-bg__layer--a {
+  background:
+    radial-gradient(32% 34% at 22% 26%, var(--grad-1), transparent 62%),
+    radial-gradient(30% 32% at 78% 72%, var(--grad-2), transparent 64%);
+  animation: gradDriftA 19s ease-in-out infinite alternate;
 }
 
-.space__star {
-  position: absolute;
-  border-radius: 50%;
-  background: var(--star-tone, var(--star-a));
-  animation: twinkle var(--tw-dur, 4s) ease-in-out var(--tw-delay, 0s) infinite;
+.grad-bg__layer--b {
+  background:
+    radial-gradient(34% 30% at 76% 22%, var(--grad-3), transparent 62%),
+    radial-gradient(32% 36% at 26% 78%, var(--grad-4), transparent 64%);
+  animation: gradDriftB 26s ease-in-out infinite alternate;
 }
 
-.space__orbit {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+/* A third, slower layer rotating about the centre. Two drifting layers alone
+   repeat visibly on a screen someone walks past all day; a rotation on a
+   different period keeps the blend from settling into a loop. */
+.grad-bg__layer--c {
+  background:
+    radial-gradient(38% 38% at 50% 50%, var(--grad-3), transparent 60%);
+  opacity: 0.75;
+  animation: gradSwirl 34s linear infinite;
 }
 
-.space__orbit-plane {
+/* Fine grain, so the wide flat blends don't band on a large panel. An inline
+   SVG turbulence keeps it a texture rather than an image asset to load. */
+.grad-bg__grain {
   position: absolute;
   inset: 0;
-  transform-style: preserve-3d;
-  transform: rotateX(var(--orbit-tilt, 62deg)) rotateZ(var(--orbit-azimuth, 0deg));
+  opacity: var(--grad-grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.space__orbit-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid var(--orbit);
-  animation: orbitSpin var(--orbit-dur, 60s) linear infinite;
-}
-
-.space__planet {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  box-shadow: 0 0 10px 1px var(--planet-glow, transparent);
-}
-
-.space__glow {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: 44vmax;
-  height: 44vmax;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, var(--glow-core) 0%, transparent 62%);
-  animation: glowPulse 14s ease-in-out infinite;
-}
-
-@keyframes orbitSpin {
+/* Transform/opacity only — these composite, so the loop stays cheap on a
+   display that is on all day. */
+@keyframes gradDriftA {
   from {
-    transform: rotateZ(0deg);
+    transform: translate3d(-16%, -12%, 0) scale(0.85);
+    opacity: 0.65;
   }
   to {
-    transform: rotateZ(360deg);
+    transform: translate3d(18%, 15%, 0) scale(1.45);
+    opacity: 1;
   }
 }
 
+@keyframes gradDriftB {
+  from {
+    transform: translate3d(17%, 10%, 0) scale(1.4);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(-18%, -14%, 0) scale(0.9);
+    opacity: 0.6;
+  }
+}
+
+@keyframes gradSwirl {
+  0% {
+    transform: rotate(0deg) translate3d(6%, 0, 0) scale(1.1);
+  }
+  50% {
+    transform: rotate(180deg) translate3d(6%, 0, 0) scale(1.35);
+  }
+  100% {
+    transform: rotate(360deg) translate3d(6%, 0, 0) scale(1.1);
+  }
+}
+
+/* Twinkle — used by the weather scene's clear-night sky (WeatherScene.tsx).
+   Predates both the mesh and the gradient backdrops; still in use there. */
 @keyframes twinkle {
   0%,
   100% {
-    opacity: 0.15;
-    transform: scale(0.8);
+    opacity: 0.25;
+    transform: scale(0.85);
   }
   50% {
     opacity: 1;
     transform: scale(1.15);
-  }
-}
-
-@keyframes nebulaDrift {
-  from {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  to {
-    transform: translate3d(4vmax, 3vmax, 0) scale(1.12);
-  }
-}
-
-@keyframes glowPulse {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.08);
   }
 }
 
@@ -660,4 +689,29 @@ input[type="range"]::-moz-range-thumb {
   opacity: 0.9;
   pointer-events: none;
   animation: conicSpin 6s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   Calendar
+   -------------------------------------------------------------------------- */
+
+/* An event that is happening right now. The ring is drawn with an inset shadow
+   layered over the chip's own inset left edge, so it needs no extra element and
+   cannot shift the chip's box. */
+.chip-live {
+  animation: chipPulse 2.4s var(--ease-out) infinite;
+}
+
+@keyframes chipPulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 3px 0 0 currentColor,
+      0 0 0 0 rgb(from currentColor r g b / 0.35);
+  }
+  50% {
+    box-shadow:
+      inset 3px 0 0 currentColor,
+      0 0 0 4px rgb(from currentColor r g b / 0);
+  }
 }
