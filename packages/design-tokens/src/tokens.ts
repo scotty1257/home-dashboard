@@ -60,13 +60,18 @@ export const touch = {
 
 /** Canonical type scale in px, tuned for a wall-mounted touch kiosk.
  *  16px floor: nothing on a screen read from across a room goes below it,
- *  so `meta` is 16 and secondary emphasis comes from color/weight, not size. */
+ *  so `meta` is 16 and secondary emphasis comes from color/weight, not size.
+ *  `title`/`heading`/`display` fill the gaps the original scale left between
+ *  20 and 64, so a dense tile can step down a heading without going off-scale. */
 export const typeScale = {
   meta: 16,
   body: 18,
   bodyLg: 20,
+  title: 22,
   metric: 24,
+  heading: 28,
   countdown: 32,
   clock: 40,
+  display: 48,
   hero: 64,
 } as const;

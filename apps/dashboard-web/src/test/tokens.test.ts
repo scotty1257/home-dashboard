@@ -35,9 +35,12 @@ describe("canonical design tokens (non-color primitives)", () => {
     expect(typeScale.meta).toBe(16);
     expect(typeScale.body).toBe(18);
     expect(typeScale.bodyLg).toBe(20);
+    expect(typeScale.title).toBe(22);
     expect(typeScale.metric).toBe(24);
+    expect(typeScale.heading).toBe(28);
     expect(typeScale.countdown).toBe(32);
     expect(typeScale.clock).toBe(40);
+    expect(typeScale.display).toBe(48);
     expect(typeScale.hero).toBe(64);
   });
 

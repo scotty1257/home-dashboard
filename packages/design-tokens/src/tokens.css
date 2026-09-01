@@ -25,26 +25,31 @@
   --radius-inner: 6px;
   --radius-control: 8px;
   --radius-panel: 12px;
-  --radius-pill: 999px;
+  --radius-pill: 9999px;
 
   /* Touch targets. 56px minimum interactive size for a finger-driven kiosk;
      72px for hero/primary actions (Assistant, record). */
   --touch-target: 56px;
   --touch-control-lg: 72px;
 
-  /* Typography — Space Grotesk, matching the web app.
+  /* Typography — Figtree, matching the web app.
      Namespaced `--type-*` so the web app's `@theme inline` block can map them
      onto Tailwind's `--text-*` utilities without a self-referencing var.
      Sizes are tuned for a wall-mounted touch kiosk: 16px is the floor, so
-     secondary emphasis comes from color and weight rather than smaller type. */
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+     secondary emphasis comes from color and weight rather than smaller type.
+     `title`/`heading`/`display` are the intermediate steps that let dense
+     tiles (weather, week agenda) breathe without dropping below the floor. */
+  --font-sans: "Figtree", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --type-meta: 16px;
   --type-body: 18px;
   --type-body-lg: 20px;
+  --type-title: 22px;
   --type-metric: 24px;
+  --type-heading: 28px;
   --type-countdown: 32px;
   --type-clock: 40px;
+  --type-display: 48px;
   --type-hero: 64px;
 
   /* Elevation */
