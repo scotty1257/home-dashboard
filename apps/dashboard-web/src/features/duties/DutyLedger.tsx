@@ -108,7 +108,7 @@ export function DutyGrid({ summary, actor }: DutyGridProps) {
             </>
           );
           const cardClass =
-            "flex min-h-touch w-full flex-col items-start gap-1 rounded-lg border border-line bg-surface p-3 text-left";
+            "flex min-h-touch w-full flex-col items-start gap-1 rounded-panel border border-line bg-surface p-3 text-left";
           return (
             <li key={tally.dutyId}>
               {isAdult ? (

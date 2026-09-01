@@ -105,7 +105,7 @@ export function ActorSwitcher() {
         <div
           role="menu"
           aria-label="Household members"
-          className="absolute left-0 top-full z-50 mt-2 w-64 rounded-lg border border-line bg-panel p-1.5 shadow-panel"
+          className="absolute left-0 top-full z-overlay mt-2 w-64 rounded-panel border border-line bg-panel p-1.5 shadow-panel"
         >
           {members.map((member) => {
             const RowIcon = memberIcon(member.icon);

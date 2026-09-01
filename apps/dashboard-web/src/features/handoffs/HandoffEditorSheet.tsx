@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { BackupContact, BackupContactInput, HandoffBoardItem } from "@home-dashboard/contracts";
 import { api } from "../../lib/api";
@@ -18,7 +18,7 @@ const label = "text-meta font-medium text-ink-3";
 interface Props {
   open: boolean;
   onClose: () => void;
-  mode: "request-backup" | "contact";
+  mode: "request-backup" | "contact" | "create";
   /** request-backup mode: the obligation to request backup for. */
   obligation?: HandoffBoardItem;
   /** contact mode: pass an existing contact to edit, omit to create one. */
@@ -26,9 +26,14 @@ interface Props {
 }
 
 /**
- * Bottom sheet with two modes: (a) request backup — pick a contact and leave a
- * note; (b) add/edit a backup contact. Both submit through the typed api
- * client and invalidate the handoff/contact caches on success.
+ * Bottom sheet with three modes: (a) request backup — pick a contact and leave
+ * a note; (b) add/edit a backup contact; (c) create a handoff obligation
+ * against a calendar event. All submit through the typed api client and
+ * invalidate the handoff/contact caches on success.
+ *
+ * The create mode exists because POST /api/handoffs was implemented and tested
+ * but had no caller anywhere in the app — obligations could only appear via
+ * calendar events already flagged requiresHandoff.
  */
 export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }: Props) {
   const queryClient = useQueryClient();
@@ -41,6 +46,21 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
   });
   const contacts = (contactsData?.contacts ?? []).filter((c) => c.active);
 
+  // Events in the next fortnight — the same window the board covers.
+  const eventRange = useMemo(() => {
+    const start = new Date();
+    const end = new Date(start.getTime() + 14 * 86_400_000);
+    return { start: start.toISOString(), end: end.toISOString() };
+  }, []);
+
+  const { data: eventsData } = useQuery({
+    queryKey: ["calendar", eventRange.start, eventRange.end],
+    queryFn: () => api.calendar.list(eventRange.start, eventRange.end),
+    enabled: open && mode === "create",
+  });
+  const events = eventsData?.events ?? [];
+
+  const [eventId, setEventId] = useState("");
   const [contactId, setContactId] = useState("");
   const [note, setNote] = useState("");
   const [name, setName] = useState("");
@@ -55,6 +75,8 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
     if (mode === "request-backup") {
       setContactId("");
       setNote("");
+    } else if (mode === "create") {
+      setEventId("");
     } else {
       setName(contact?.name ?? "");
       setRelationship(contact?.relationship ?? "");
@@ -83,6 +105,23 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
     },
   });
 
+  const createHandoff = useMutation({
+    mutationFn: () => {
+      const event = events.find((e) => e.id === eventId);
+      if (!event || !actor) throw new Error("Pick an event first");
+      return api.handoffs.create({
+        eventId: event.id,
+        startsAt: event.start,
+        endsAt: event.end,
+        actorId: actor.id,
+      });
+    },
+    onSuccess: () => {
+      invalidate();
+      onClose();
+    },
+  });
+
   const saveContact = useMutation({
     mutationFn: (input: BackupContactInput) =>
       contact ? api.backupContacts.update(contact.id, input) : api.backupContacts.create(input),
@@ -102,6 +141,63 @@ export function HandoffEditorSheet({ open, onClose, mode, obligation, contact }:
     active,
     notes: notes.trim() || undefined,
   });
+
+  if (mode === "create") {
+    return (
+      <Sheet open={open} onClose={onClose} title="New handoff">
+        <div className="flex flex-col gap-4">
+          {!isAdult && (
+            <p className="rounded-inner bg-warning/15 px-4 py-2.5 text-body font-medium text-warning">
+              Only an adult can create a handoff.
+            </p>
+          )}
+
+          <div className="flex flex-col gap-1.5">
+            <span className={label}>Event</span>
+            <Select
+              label="Event needing a handoff"
+              value={eventId}
+              onChange={setEventId}
+              options={events.map((e) => ({
+                value: e.id,
+                label: `${new Date(e.start).toLocaleDateString(undefined, {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })} · ${e.title}`,
+              }))}
+            />
+            {events.length === 0 && (
+              <p className="text-meta text-ink-4">
+                No events in the next two weeks — add one on the calendar first.
+              </p>
+            )}
+          </div>
+
+          {createHandoff.isError && (
+            <p className="text-body text-danger">
+              {(createHandoff.error as Error).message || "Couldn't create the handoff"}
+            </p>
+          )}
+
+          <div className="flex items-center gap-2 border-t border-line pt-4">
+            <TouchButton variant="ghost" onClick={onClose}>
+              Cancel
+            </TouchButton>
+            <TouchButton
+              variant="primary"
+              className="ml-auto"
+              disabled={!eventId || !isAdult || createHandoff.isPending}
+              onClick={() => createHandoff.mutate()}
+            >
+              {createHandoff.isPending ? "Creating…" : "Create handoff"}
+            </TouchButton>
+          </div>
+        </div>
+      </Sheet>
+    );
+  }
+
 
   if (mode === "request-backup") {
     return (

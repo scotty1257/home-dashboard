@@ -249,6 +249,7 @@ export function HandoffBoard() {
   });
 
   const [backupFor, setBackupFor] = useState<HandoffBoardItem | null>(null);
+  const [creating, setCreating] = useState(false);
   const [contactEditor, setContactEditor] = useState<{ open: boolean; contact?: BackupContact }>({
     open: false,
   });
@@ -273,7 +274,19 @@ export function HandoffBoard() {
   const memberById = (id?: string | null) => members.find((m) => m.id === id);
 
   return (
-    <Panel title="Handoffs">
+    <Panel
+      title="Handoffs"
+      actions={
+        <TouchButton
+          variant="soft"
+          icon={Plus}
+          disabled={!isAdult}
+          onClick={() => setCreating(true)}
+        >
+          New handoff
+        </TouchButton>
+      }
+    >
       <div className="flex flex-col gap-4">
         {items.length === 0 && (
           <p className="text-body text-ink-3">No handoffs in the next two weeks.</p>
@@ -315,6 +328,11 @@ export function HandoffBoard() {
         </section>
       </div>
 
+      <HandoffEditorSheet
+        open={creating}
+        mode="create"
+        onClose={() => setCreating(false)}
+      />
       <HandoffEditorSheet
         open={backupFor !== null}
         mode="request-backup"
