@@ -18,6 +18,7 @@ import type {
 import { api, ApiError } from "../../lib/api";
 import { memberIcon, useActiveActor } from "../household/ActorSwitcher";
 import { Panel } from "../../components/Panel";
+import { HomeEntitiesPanel } from "./HomeEntitiesPanel";
 import { Toggle } from "../../components/Toggle";
 import { TouchButton } from "../../components/TouchButton";
 import { Select } from "../../components/Select";
@@ -244,6 +245,7 @@ export function SettingsScreen() {
   return (
     <div data-testid="settings-grid" className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 xl:grid-cols-2">
       <HouseholdPanel />
+      <HomeEntitiesPanel />
 
       <FamilyPanel family={settings.family} saving={update.isPending} onSave={set} />
 
@@ -260,7 +262,7 @@ export function SettingsScreen() {
                 type="button"
                 onClick={() => set({ temperatureUnits: u })}
                 className={cn(
-                  "rounded px-4 py-1.5 text-body font-medium transition-colors",
+                  "min-h-touch rounded-pill px-5 text-body font-medium transition-colors",
                   settings.temperatureUnits === u ? "bg-accent text-white" : "text-ink-3 hover:text-ink",
                 )}
               >
@@ -268,6 +270,39 @@ export function SettingsScreen() {
               </button>
             ))}
           </div>
+        </div>
+        <div className={row}>
+          <div className="min-w-0 flex-1">
+            <div className="text-body font-medium text-ink">Weather location</div>
+            <div className="text-meta text-ink-3">
+              The place name shown on the weather tile
+            </div>
+          </div>
+          <input
+            type="text"
+            defaultValue={settings.weatherLocation?.label ?? ""}
+            placeholder="e.g. Brooklyn"
+            aria-label="Weather location name"
+            onBlur={(e) => {
+              const label = e.target.value.trim();
+              const existing = settings.weatherLocation;
+              if (label === (existing?.label ?? "")) return;
+              set({
+                weatherLocation: label
+                  ? {
+                      label,
+                      latitude: existing?.latitude ?? 0,
+                      longitude: existing?.longitude ?? 0,
+                    }
+                  : null,
+              });
+            }}
+            className={cn(
+              "min-h-touch w-56 shrink-0 rounded-control border border-line bg-surface px-4",
+              "text-body text-ink placeholder:text-ink-4",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60",
+            )}
+          />
         </div>
         <div className={row}>
           <div>
@@ -309,7 +344,9 @@ export function SettingsScreen() {
             <ShieldCheck size={18} className="text-ink-3" />
             <div>
               <div className="text-body font-medium text-ink">Home Assistant</div>
-              <div className="text-meta text-ink-3">Configure via HA_URL / HA_TOKEN in the environment</div>
+              <div className="text-meta text-ink-3">
+                Connected with HA_URL / HA_TOKEN · choose devices below
+              </div>
             </div>
           </div>
           <span className="text-body text-ink-3">API</span>

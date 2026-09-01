@@ -12,10 +12,13 @@ import type {
   DutyEntryInput,
   DutyEntryView,
   DutySummary,
+  EntityOverrideInput,
   EntityState,
   LaunchCurrentResponse,
   LaunchRun,
+  LaunchStep,
   LaunchTemplate,
+  LaunchTemplateInput,
   HandoffBackupInput,
   HandoffBoardItem,
   HandoffBoardResponse,
@@ -69,6 +72,11 @@ export class ApiError extends Error {
   }
 }
 
+/** A launch template together with its steps, as the template endpoints return. */
+export interface LaunchTemplateWithSteps extends LaunchTemplate {
+  steps: LaunchStep[];
+}
+
 export const api = {
   // Health
   health: () => request<{ services: { service: string; status: string; detail?: string }[] }>("/api/health"),
@@ -92,8 +100,11 @@ export const api = {
   home: () => request<HomeSnapshot>("/api/home"),
   homeCommand: (command: HomeCommand) =>
     request<{ ok: boolean }>("/api/home/command", { method: "POST", body: JSON.stringify(command) }),
-  patchEntity: (id: string, patch: Partial<EntityState>) =>
-    request<{ ok: boolean }>(`/api/home/entities/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  patchEntity: (id: string, patch: EntityOverrideInput) =>
+    request<{ ok: boolean }>(`/api/home/entities/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }),
 
   // Media
   media: () => request<PlaybackState>("/api/spotify/state"),
@@ -239,7 +250,18 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ actorId }),
       }),
-    templates: () => request<{ templates: LaunchTemplate[] }>("/api/launch/templates"),
+    templates: () =>
+      request<{ templates: LaunchTemplateWithSteps[] }>("/api/launch/templates"),
+    createTemplate: (input: LaunchTemplateInput, actorId: string) =>
+      request<LaunchTemplateWithSteps>("/api/launch/templates", {
+        method: "POST",
+        body: JSON.stringify({ ...input, actorId }),
+      }),
+    updateTemplate: (id: string, input: LaunchTemplateInput, actorId: string) =>
+      request<LaunchTemplateWithSteps>(`/api/launch/templates/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...input, actorId }),
+      }),
   },
 
   // Activity
