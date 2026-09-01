@@ -20,6 +20,8 @@ function mapCode(code: number): WeatherCondition {
 }
 
 interface OpenMeteoResponse {
+  /** IANA zone echoed back by the API; the only place name it returns. */
+  timezone?: string;
   current: {
     time: string;
     temperature_2m: number;
@@ -47,6 +49,21 @@ interface OpenMeteoResponse {
     sunrise: string[];
     sunset: string[];
   };
+}
+
+/**
+ * A readable place name for the report.
+ *
+ * Open-Meteo is a coordinates API — it returns no place name, and the panel
+ * showed the raw "40.71, -74.01" it used to put here. The IANA timezone the
+ * response echoes back ("America/New_York") carries the nearest city, which is
+ * a far better default. A precise name can still be set in Settings, which
+ * takes precedence over this.
+ */
+export function placeNameFromTimezone(timezone: string | undefined): string | null {
+  const city = timezone?.split("/").pop();
+  if (!city) return null;
+  return city.replace(/_/g, " ");
 }
 
 export interface WeatherProviderOptions {
@@ -117,7 +134,9 @@ export async function fetchOpenMeteo(opts: WeatherProviderOptions): Promise<Weat
   const sunset = data.daily.sunset[0] ? new Date(data.daily.sunset[0]).toISOString() : undefined;
 
   return {
-    location: `${opts.latitude.toFixed(2)}, ${opts.longitude.toFixed(2)}`,
+    location:
+      placeNameFromTimezone(data.timezone) ??
+      `${opts.latitude.toFixed(2)}, ${opts.longitude.toFixed(2)}`,
     units: opts.units,
     current: {
       temperature: current.temperature_2m,
