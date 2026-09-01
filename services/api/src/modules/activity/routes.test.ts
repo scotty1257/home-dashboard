@@ -157,4 +157,21 @@ describe("activity feed family alerts", () => {
     expect(items.some((i: { kind: string }) => i.kind === "family-alert")).toBe(false);
     expect(items.some((i: { kind: string }) => i.kind === "event-upcoming")).toBe(true);
   });
+
+  it("lists a repeated event once, not once per duplicate row", async () => {
+    const ctx = makeApp();
+    const start = new Date(NOW.getTime() + 3 * 3_600_000).toISOString();
+    const end = new Date(NOW.getTime() + 4 * 3_600_000).toISOString();
+    // The same meeting entered several times (as a household's calendar can
+    // end up) must not fill "what's next" with one title repeated.
+    for (let i = 0; i < 4; i++) {
+      ctx.calendar.create({ title: "Your call", start, end });
+    }
+
+    const res = await ctx.app.inject({ method: "GET", url: "/api/activity" });
+    const calls = res
+      .json()
+      .items.filter((i: { kind: string; title: string }) => i.kind === "event-upcoming" && i.title === "Your call");
+    expect(calls).toHaveLength(1);
+  });
 });

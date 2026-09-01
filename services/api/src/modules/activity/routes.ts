@@ -21,7 +21,20 @@ function upcomingEvents(repo: CalendarRepository, now: Date): ActivityItem[] {
   const start = now.toISOString();
   const end = new Date(now.getTime() + 14 * 86_400_000).toISOString();
   const events = repo.list(start, end).filter((e) => new Date(e.start).getTime() >= now.getTime());
-  return events.slice(0, 6).map((e) => ({
+
+  // One row per distinct occurrence. `list` returns each recurring series as a
+  // base row plus expanded occurrences, and a household can also end up with
+  // genuinely duplicated events; either way "what's next" should read as a
+  // schedule, not the same title six times.
+  const seen = new Set<string>();
+  const distinct = events.filter((e) => {
+    const key = `${e.title}@${e.start}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return distinct.slice(0, 6).map((e) => ({
     id: `evt-${e.id}`,
     kind: "event-upcoming" as const,
     title: e.title,
