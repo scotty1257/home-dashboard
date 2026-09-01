@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import type { WeatherCondition } from "@home-dashboard/contracts";
 import { cn } from "../../lib/cn";
 
-/* Deterministic pseudo-random, matching SpaceBackground: particle positions
+/* Deterministic pseudo-random: particle positions
    stay put across re-renders instead of jittering on every poll. */
 function seeded(i: number): number {
   const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
@@ -107,7 +107,7 @@ function Clouds({ count, opacity }: { count: number; opacity: number }) {
 /**
  * The living backdrop behind the weather readout: sun, moon, stars, clouds,
  * rain, snow, fog, wind, and lightning, drawn with CSS keyframes and tinted
- * divs (the same technique as SpaceBackground — no animation library, and no
+ * divs (the same technique as the gradient backdrop — no animation library, and no
  * emoji). Purely decorative: the condition is always also stated as an icon and
  * a label, and `prefers-reduced-motion` freezes all of it.
  */

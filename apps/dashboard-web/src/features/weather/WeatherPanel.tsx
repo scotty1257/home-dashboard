@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Droplets, RefreshCw, Wind } from "lucide-react";
+import { Droplets, MapPin, RefreshCw, Umbrella, Wind } from "lucide-react";
 import { api } from "../../lib/api";
 import { Panel } from "../../components/Panel";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
@@ -12,12 +12,12 @@ function conditionTint(condition: string): string {
   switch (condition) {
     case "clear":
     case "partly-cloudy":
-      return "text-amber";
+      return "text-ink-amber";
     case "rain":
     case "drizzle":
     case "snow":
     case "sleet":
-      return "text-sky";
+      return "text-ink-sky";
     case "thunderstorm":
       return "text-warning";
     default:
@@ -38,13 +38,16 @@ function weekday(date: string): string {
  * the two. Nothing scrolls — the hourly strip and the day rows are sized to
  * fit the cell, and the row counts are chosen to fill it exactly.
  *
- * The forecast is the point of this tile, so the day names, condition icons,
- * and temperatures are set large enough to read from across the room — the
- * daily strip carries a 26px icon and metric-scale numbers, not the cramped
- * metadata scale it used to.
+ * The layout is dense on purpose. The previous version spread the current
+ * conditions across three widely-separated columns and gave the daily rows a
+ * fixed precipitation column that was blank whenever the chance was under 10%,
+ * so most of the card was empty. Now the temperature, condition and metrics sit
+ * in one cluster, and precipitation rides with the day's icon only when there
+ * is some — which leaves room for five days instead of four.
  */
 export function WeatherPanel() {
   const { data, isLoading } = useQuery({ queryKey: ["weather"], queryFn: api.weather });
+  const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: api.settings });
 
   if (isLoading && !data) {
     return (
@@ -59,6 +62,11 @@ export function WeatherPanel() {
   const unit = units === "imperial" ? "°F" : "°C";
   const CurrentIcon = weatherIcon(current.condition, current.isDay);
 
+  // The report's own `location` is whatever the provider echoed back — raw
+  // coordinates ("40.71, -74.01") from Open-Meteo, or "Demo location" offline.
+  // A saved label is the presentable name, so prefer it and fall back.
+  const place = settings?.weatherLocation?.label?.trim() || data.location;
+
   return (
     <Panel
       title="Weather"
@@ -68,40 +76,50 @@ export function WeatherPanel() {
       backdrop={<WeatherScene condition={current.condition} isDay={current.isDay} />}
       bodyClassName="relative z-10 flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
       actions={
-        stale ? (
-          <span className="flex items-center gap-2 text-meta font-medium text-warning">
-            <RefreshCw size={14} /> offline
+        <span className="flex items-center gap-3">
+          {/* Which place this forecast is for — it was never shown at all. */}
+          <span className="flex min-w-0 items-center gap-1.5 text-meta text-ink-3">
+            <MapPin size={16} aria-hidden className="shrink-0" />
+            <span className="truncate">{place}</span>
           </span>
-        ) : undefined
+          {stale && (
+            <span className="flex shrink-0 items-center gap-1.5 text-meta font-medium text-warning">
+              <RefreshCw size={16} aria-hidden /> offline
+            </span>
+          )}
+        </span>
       }
     >
-      {/* Current conditions. */}
-      <div className="flex shrink-0 items-center gap-4">
+      {/* Current conditions — icon, temperature and label bound together, with
+          the metrics on one line beneath rather than stranded in a far column. */}
+      <div className="flex shrink-0 items-center gap-3">
         <CurrentIcon
-          size={48}
+          size={56}
           strokeWidth={1.5}
           className={cn("shrink-0", conditionTint(current.condition))}
         />
-        <div className="flex items-start leading-none">
-          <AnimatedNumber
-            value={Math.round(current.temperature)}
-            className="text-hero font-semibold tracking-tight tabular-nums"
-          />
-          <span className="mt-1 text-metric font-medium text-ink-2">{unit}</span>
-        </div>
-        <div className="ml-auto flex flex-col items-end gap-1 text-body text-ink-2">
-          <span className="font-medium text-ink">{conditionLabel(current.condition)}</span>
-          <span className="text-meta">
-            Feels like {Math.round(current.feelsLike)}
-            {unit}
-          </span>
-          <span className="flex items-center gap-3 text-meta text-ink-3">
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex items-start leading-none">
+            <AnimatedNumber
+              value={Math.round(current.temperature)}
+              className="text-hero font-semibold tracking-tight tabular-nums"
+            />
+            <span className="mt-1 text-metric font-medium text-ink-2">{unit}</span>
+            <span className="ml-3 mt-2 truncate text-title font-medium text-ink">
+              {conditionLabel(current.condition)}
+            </span>
+          </div>
+          <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-ink-3">
+            <span>
+              Feels like {Math.round(current.feelsLike)}
+              {unit}
+            </span>
             <span className="flex items-center gap-1.5">
-              <Droplets size={14} aria-hidden />
+              <Droplets size={16} aria-hidden />
               {current.humidity}%
             </span>
             <span className="flex items-center gap-1.5">
-              <Wind size={14} aria-hidden />
+              <Wind size={16} aria-hidden />
               {Math.round(current.windSpeed)}
             </span>
           </span>
@@ -126,30 +144,38 @@ export function WeatherPanel() {
       </div>
 
       {/* Rest of the week. The list takes the remaining height and distributes
-          it across the rows, so the card ends flush with its cell. Four days at
-          the 16px-floor type scale is what fits without clipping; a fifth row
-          would overflow the cell rather than shrink the text below the floor. */}
+          it across the rows, so the card ends flush with its cell.
+          Precipitation rides beside the icon only when there is a real chance
+          of it — it used to hold a fixed column that was blank most days.
+          Four rows is what the cell fits without clipping (the layout audit
+          fails on a single overflowing pixel); a fifth needs a taller tile. */}
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 border-t border-line/70 pt-2">
         {daily.slice(0, 4).map((d) => {
           const Icon = weatherIcon(d.condition, true);
+          const wet = d.precipitationProbability > 10;
           return (
             <div
               key={d.date}
-              className="grid flex-1 grid-cols-[3.5rem_2rem_3rem_1fr] items-center gap-3 rounded-lg px-1 text-body"
+              className="grid min-h-0 flex-1 grid-cols-[4rem_1fr_auto] items-center gap-3 rounded-inner px-1 text-body leading-none"
             >
-              <span className="text-body-lg font-medium text-ink-2">{weekday(d.date)}</span>
-              <Icon
-                size={26}
-                strokeWidth={1.75}
-                className={cn("shrink-0", conditionTint(d.condition))}
-                aria-hidden
-              />
-              <span className="text-body font-medium text-sky tabular-nums">
-                {d.precipitationProbability > 10 ? `${d.precipitationProbability}%` : ""}
+              <span className="text-body font-medium text-ink-2">{weekday(d.date)}</span>
+              <span className="flex items-center gap-2">
+                <Icon
+                  size={22}
+                  strokeWidth={1.75}
+                  className={cn("shrink-0", conditionTint(d.condition))}
+                  aria-hidden
+                />
+                {wet && (
+                  <span className="flex items-center gap-1 text-meta font-medium tabular-nums text-ink-sky">
+                    <Umbrella size={16} aria-hidden />
+                    {d.precipitationProbability}%
+                  </span>
+                )}
               </span>
-              <span className="text-right tabular-nums text-ink-3">
-                <span className="text-metric font-semibold text-ink">{Math.round(d.high)}°</span>{" "}
-                <span className="text-body-lg">/ {Math.round(d.low)}°</span>
+              <span className="text-right leading-none tabular-nums text-ink-3">
+                <span className="text-body-lg font-semibold text-ink">{Math.round(d.high)}°</span>{" "}
+                <span className="text-body">/ {Math.round(d.low)}°</span>
               </span>
             </div>
           );
