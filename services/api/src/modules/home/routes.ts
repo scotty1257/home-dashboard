@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { HomeCommand, HomeSnapshot } from "@home-dashboard/contracts";
+import { EntityOverrideInput, HomeCommand, HomeSnapshot } from "@home-dashboard/contracts";
 import type { Config } from "../../config.js";
 import type { Database } from "../../platform/database.js";
 import { TtlCache } from "../../platform/cache.js";
@@ -136,14 +136,15 @@ export function homeRoutes(app: FastifyInstance, db: Database, mod: HomeModule):
 
   app.patch("/api/home/entities/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
-    const body = request.body as {
-      favorite?: boolean;
-      color?: string;
-      alias?: string;
-      icon?: string;
-      requiresConfirmation?: boolean;
-    };
-    mod.setOverride(id, body);
+    // Validated rather than written through as-is: this is now driven by UI
+    // input from the settings screen, not just hand-rolled curl calls.
+    const parsed = EntityOverrideInput.safeParse(request.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ error: "invalid entity override", details: parsed.error.flatten() });
+    }
+    mod.setOverride(id, parsed.data);
     return reply.send({ ok: true });
   });
 }

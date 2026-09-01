@@ -42,6 +42,21 @@ export const EntityState = z.object({
 export type EntityState = z.infer<typeof EntityState>;
 
 /** A normalized action the API can route to Home Assistant (or the demo provider). */
+/**
+ * Per-entity dashboard overrides: which entities are pinned to the Home screen
+ * and how they present there. Home Assistant remains the source of truth for
+ * what exists and what state it is in; this is purely the dashboard's own view
+ * of it, stored locally and merged into every snapshot.
+ */
+export const EntityOverrideInput = z.object({
+  favorite: z.boolean().optional(),
+  color: ColorToken.optional(),
+  alias: z.string().max(60).optional(),
+  icon: z.string().max(40).optional(),
+  requiresConfirmation: z.boolean().optional(),
+});
+export type EntityOverrideInput = z.infer<typeof EntityOverrideInput>;
+
 export const HomeCommand = z.object({
   entityId: z.string().min(1),
   action: z.string().min(1), // e.g. "turn_on", "turn_off", "set_brightness", "set_temperature", "open_cover"
