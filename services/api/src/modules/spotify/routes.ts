@@ -17,6 +17,36 @@ import {
 
 const TOKEN_KEY = "spotify.tokens";
 
+/**
+ * Demo cover art as inline SVG data URIs.
+ *
+ * Demo mode previously shipped no artwork at all, so both players always fell
+ * through to the placeholder glyph and you could never see what a real cover
+ * looks like in the layout. These are self-contained (no network, no bundled
+ * binaries), which matters for a kiosk that has to render offline.
+ */
+function demoArt(from: string, to: string, glyph: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${from}"/>
+      <stop offset="100%" stop-color="${to}"/>
+    </linearGradient>
+    <radialGradient id="s" cx="30%" cy="26%" r="62%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="640" fill="url(#g)"/>
+  <rect width="640" height="640" fill="url(#s)"/>
+  <circle cx="320" cy="320" r="180" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width="2"/>
+  <circle cx="320" cy="320" r="248" fill="none" stroke="#ffffff" stroke-opacity="0.16" stroke-width="2"/>
+  <text x="320" y="352" font-family="Figtree, system-ui, sans-serif" font-size="132"
+        font-weight="700" fill="#ffffff" fill-opacity="0.92" text-anchor="middle">${glyph}</text>
+</svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 const DEMO_TRACKS = [
   {
     id: "demo-1",
@@ -24,6 +54,7 @@ const DEMO_TRACKS = [
     artists: ["Atlas Bloom"],
     album: "Warm Light",
     durationMs: 232_000,
+    artworkUrl: demoArt("#f5a623", "#ff7a5c", "GH"),
   },
   {
     id: "demo-2",
@@ -31,6 +62,7 @@ const DEMO_TRACKS = [
     artists: ["Cascade"],
     album: "Night Drive",
     durationMs: 254_000,
+    artworkUrl: demoArt("#7c8cff", "#b58cff", "NS"),
   },
   {
     id: "demo-3",
@@ -38,6 +70,7 @@ const DEMO_TRACKS = [
     artists: ["The Meridian"],
     album: "Stillness",
     durationMs: 198_000,
+    artworkUrl: demoArt("#3fc6b2", "#5db8ff", "SF"),
   },
 ];
 
