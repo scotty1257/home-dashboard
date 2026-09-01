@@ -95,7 +95,10 @@ class FakeRecorder {
   onstop: (() => void) | null = null;
 
   constructor(_stream: unknown, options?: { mimeType?: string }) {
-    this.mimeType = options?.mimeType ?? "audio/webm";
+    // Real browsers report the codec back on mimeType, not the bare string
+    // handed to the constructor. Mirror that here so this fake cannot hide a
+    // mime-normalization regression (see useHoldToRecord.test.ts).
+    this.mimeType = `${options?.mimeType ?? "audio/webm"};codecs=opus`;
     FakeRecorder.instances.push(this);
   }
 

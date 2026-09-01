@@ -33,6 +33,19 @@ const MIME_CANDIDATES = ["audio/webm", "audio/mp4", "audio/ogg"] as const;
 
 const TICK_MS = 100;
 
+/**
+ * Strips the codecs parameter from a MediaRecorder mime type.
+ *
+ * `MediaRecorder.mimeType` is not the bare string passed to the constructor —
+ * browsers normalize it to include the codec, e.g. `audio/webm;codecs=opus`
+ * (Chrome) or `audio/ogg; codecs=opus` (Firefox). The API's VoiceNoteInput
+ * validates `mimeType` against a strict enum of bare types, so passing the
+ * reported string straight through made every real-browser upload 400.
+ */
+function baseMimeType(mime: string): string {
+  return mime.split(";")[0]!.trim();
+}
+
 /** First MediaRecorder-supported mime from the candidate list, or null. */
 function pickMimeType(Recorder: typeof MediaRecorder): string | null {
   try {
@@ -145,7 +158,10 @@ export function useHoldToRecord(options: HoldToRecordOptions = {}): HoldToRecord
       return;
     }
 
-    const mime = recorder?.mimeType || "audio/webm";
+    // Both the metadata and the blob carry the bare type: the server also
+    // compares the uploaded part's mimetype against the metadata, so the two
+    // must agree on the same normalized string.
+    const mime = baseMimeType(recorder?.mimeType || "audio/webm");
     const blob = new Blob(chunks, { type: mime });
     const transcript = transcriptRef.current;
     transcriptRef.current = undefined;

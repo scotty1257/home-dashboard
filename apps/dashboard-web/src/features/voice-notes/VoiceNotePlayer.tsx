@@ -17,7 +17,7 @@ interface Props {
 
 const BAR_COUNT = 28;
 
-/* Deterministic pseudo-random, as in SpaceBackground. */
+/* Deterministic pseudo-random, so a waveform is stable across renders. */
 function seeded(i: number): number {
   const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
   return x - Math.floor(x);

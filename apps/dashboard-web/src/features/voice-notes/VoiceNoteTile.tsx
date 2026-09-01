@@ -55,10 +55,18 @@ export function VoiceNoteTile() {
 
   const upload = useCallback(
     async (blob: Blob, mime: string, durationMs: number, transcript?: string) => {
-      if (!actor) return;
+      // Throw rather than return: resolving here reports success to the
+      // recorder, so the press silently did nothing — no note sent, no error
+      // shown. A household with no other member, or a child with no note to
+      // reply to, hit this every time.
+      if (!actor) throw new Error("No active member selected");
       const replyTo = isChild ? latestNoteRef.current : undefined;
       const recipientId = isChild ? replyTo?.senderId : adultRecipientId;
-      if (!recipientId) return;
+      if (!recipientId) {
+        throw new Error(
+          isChild ? "No note to reply to yet" : "Pick someone to send this note to",
+        );
+      }
       await api.voiceNotes.upload(
         {
           senderId: actor.id,

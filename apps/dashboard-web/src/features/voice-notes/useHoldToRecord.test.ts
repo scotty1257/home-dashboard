@@ -6,6 +6,12 @@ import { useHoldToRecord } from "./useHoldToRecord";
  * Fake MediaRecorder standing in for the one jsdom lacks: records constructed
  * mime, state transitions, and delivers a final dataavailable + onstop pair on
  * stop() exactly like the real element does.
+ *
+ * Crucially it also reproduces the codecs suffix. A real MediaRecorder does NOT
+ * echo back the bare mime it was constructed with — Chrome reports
+ * `audio/webm;codecs=opus`, Firefox `audio/ogg; codecs=opus`. The earlier fake
+ * echoed the constructor argument verbatim, which hid a bug that made every
+ * real-browser upload fail: the suffixed string is not in the API's mime enum.
  */
 class FakeRecorder {
   static readonly instances: FakeRecorder[] = [];
@@ -26,8 +32,13 @@ class FakeRecorder {
   ondataavailable: ((event: { data: Blob }) => void) | null = null;
   onstop: (() => void) | null = null;
 
+  /** The bare mime handed to the constructor, before the codecs suffix. */
+  readonly requestedMimeType: string;
+
   constructor(_stream: unknown, options?: { mimeType?: string }) {
-    this.mimeType = options?.mimeType ?? "audio/webm";
+    this.requestedMimeType = options?.mimeType ?? "audio/webm";
+    // Same shape a real browser reports back.
+    this.mimeType = `${this.requestedMimeType};codecs=opus`;
     FakeRecorder.instances.push(this);
   }
 
@@ -80,7 +91,7 @@ describe("useHoldToRecord", () => {
 
     expect(getUserMedia).toHaveBeenCalledWith({ audio: true });
     expect(result.current.status).toBe("recording");
-    expect(FakeRecorder.last().mimeType).toBe("audio/webm");
+    expect(FakeRecorder.last().requestedMimeType).toBe("audio/webm");
     expect(FakeRecorder.last().state).toBe("recording");
 
     act(() => {
