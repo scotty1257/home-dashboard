@@ -45,6 +45,18 @@ function parseRange(header: string | undefined, size: number): ByteRange | "unsa
   return { start, end: Math.min(end, size - 1) };
 }
 
+/**
+ * The bare type from a mime string, dropping any parameters.
+ *
+ * Browsers report `MediaRecorder.mimeType` with the codec attached
+ * (`audio/webm;codecs=opus`), and that string reaches us as the uploaded
+ * part's own content type. Comparing the raw strings rejected valid uploads,
+ * so both sides are normalized before the equality check.
+ */
+function baseMimeType(mime: string): string {
+  return mime.split(";")[0]!.trim();
+}
+
 /** SQLite signals a missing sender/recipient this way; surfaced as 400. */
 function isForeignKeyError(err: unknown): boolean {
   const e = err as { message?: unknown };
@@ -110,7 +122,7 @@ export function voiceNoteRoutes(app: FastifyInstance, deps: VoiceNoteRouteDeps):
 
     // The metadata's mime drives both the whitelist (zod enum) and the stored
     // file's extension; the file part itself must agree with it.
-    if (audio.mimetype !== parsed.data.mimeType) {
+    if (baseMimeType(audio.mimetype) !== parsed.data.mimeType) {
       return reply.status(400).send({ error: "audio mime type does not match metadata" });
     }
     // Belt-and-braces: the plugin's fileSize limit is the primary gate.

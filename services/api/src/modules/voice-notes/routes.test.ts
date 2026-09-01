@@ -88,6 +88,26 @@ describe("voice-note routes", () => {
     expect(mismatch.statusCode).toBe(400);
   });
 
+  /**
+   * Browsers report `MediaRecorder.mimeType` with the codec attached, so the
+   * uploaded part arrives as `audio/webm;codecs=opus` while the metadata
+   * carries the bare enum value. Comparing the raw strings rejected every
+   * real recording with "audio mime type does not match metadata".
+   */
+  it("accepts an audio part whose mime carries a codecs parameter", async () => {
+    const { ctx } = makeApp();
+
+    const up = await upload(
+      ctx,
+      validMeta(),
+      Buffer.from("fake-audio-bytes"),
+      "audio/webm;codecs=opus",
+    );
+
+    expect(up.statusCode).toBe(201);
+    expect(up.json().mimeType).toBe("audio/webm");
+  });
+
   it("rejects metadata outside the contract with 400", async () => {
     const { ctx } = makeApp();
 
