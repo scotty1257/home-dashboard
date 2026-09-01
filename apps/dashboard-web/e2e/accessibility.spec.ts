@@ -15,7 +15,6 @@ const ALL_SCREENS = [
   { name: "today", tab: "Today" },
   { name: "calendar", tab: "Calendar" },
   { name: "family", tab: "Family" },
-  { name: "launch", tab: "Launch" },
   { name: "home", tab: "Home" },
   { name: "media", tab: "Music" },
   { name: "settings", tab: "Settings" },
@@ -24,7 +23,6 @@ const ALL_SCREENS = [
 const SHOT_SCREENS = [
   { name: "today", tab: "Today" },
   { name: "family", tab: "Family" },
-  { name: "launch", tab: "Launch" },
 ] as const;
 
 const VIEWPORTS = [
@@ -129,7 +127,7 @@ test("nav buttons expose aria-current when active", async ({ page }) => {
   const nav = page.locator('nav[aria-label="Primary"]');
   await expect(nav).toBeVisible();
 
-  const tabs = ["Today", "Calendar", "Family", "Launch", "Home", "Music"];
+  const tabs = ["Today", "Calendar", "Family", "Home", "Music"];
   for (const tab of tabs) {
     await nav.getByRole("button", { name: new RegExp(`^${tab}$`) }).click();
 
@@ -172,8 +170,8 @@ test("captures light and dark screenshots for visual contrast review", async ({ 
     }
   }
 
-  // All 12 screenshots exist on disk for manual contrast review.
-  expect(paths).toHaveLength(12);
+  // Every screen × theme × viewport screenshot exists for manual review.
+  expect(paths).toHaveLength(SHOT_SCREENS.length * THEMES.length * VIEWPORTS.length);
   for (const file of paths) {
     expect(fs.existsSync(file), `${file} saved`).toBe(true);
   }

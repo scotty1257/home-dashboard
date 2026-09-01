@@ -144,8 +144,13 @@ async function auditLayout(page: Page, gridSelector: string): Promise<Audit> {
     }
 
     // Type scale: every visible text node must sit on the canonical scale
-    // (meta 16, body 18, bodyLg 20, metric 24, countdown 32, clock 40, hero 64).
-    const ON_SCALE = ["16px", "18px", "20px", "24px", "32px", "40px", "64px"];
+    // (meta 16, body 18, bodyLg 20, title 22, metric 24, heading 28,
+    // countdown 32, clock 40, display 48, hero 64). The scale was widened with
+    // intermediate steps so dense tiles can step a heading down without going
+    // off-scale; 16px remains the hard kiosk floor.
+    const ON_SCALE = [
+      "16px", "18px", "20px", "22px", "24px", "28px", "32px", "40px", "48px", "64px",
+    ];
     const offScaleText: { tag: string; text: string; fontSize: string }[] = [];
     for (const el of document.querySelectorAll<HTMLElement>("*")) {
       if (el.tagName === "OPTION" || el.tagName === "OPTGROUP") continue;
@@ -287,8 +292,14 @@ test("calendar chips: metadata type, 28px minimum, readable title at 1280×720",
   request,
 }) => {
   // Seed one timed event for today so a chip actually renders.
+  //
+  // Earliest slot of the day on purpose: a month cell renders only the first
+  // couple of a day's chips and folds the rest into "+N more", and the suite
+  // shares one database, so an event seeded at 10am disappeared behind the
+  // events other specs had already added. Chips sort by start time, so 00:05
+  // is always visible no matter how full the day is.
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0);
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 5, 0);
   const end = new Date(start.getTime() + 60 * 60 * 1000);
   await request.post("/api/calendar/events", {
     data: {

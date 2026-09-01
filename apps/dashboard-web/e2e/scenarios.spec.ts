@@ -206,6 +206,8 @@ test("5: bedtime counts are logged per adult", async ({ page }) => {
 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/");
+  // The duty ledger lives on the Family tab.
+  await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Family$/ }).click();
   await expect(page.getByText(new RegExp(`You ${you}`)).first()).toBeVisible();
   await expect(page.getByText(new RegExp(`Partner ${partner}`)).first()).toBeVisible();
 });
@@ -222,6 +224,7 @@ test("6: school run streak text after four consecutive by Partner", async ({ pag
 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/");
+  await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Family$/ }).click();
   await expect(
     page.getByText(new RegExp(`Partner — last ${schoolRun.streak.count} in a row`)).first(),
   ).toBeVisible();
@@ -288,7 +291,7 @@ test("8: launch steps complete and persist", async ({ page }) => {
 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/");
-  await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Launch$/ }).click();
+  await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Family$/ }).click();
   await expect(page.getByText(/Complete/i).first()).toBeVisible();
 
   const after = await (await api.get("/api/launch/current")).json();
