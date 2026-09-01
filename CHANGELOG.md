@@ -5,6 +5,42 @@ first; each corresponds to one focused commit.
 
 ## Unreleased
 
+### Launch gets its own tab
+- Rendered in full on Family, the launch sequence took a full-width row of large
+  step cards and squeezed the board, queue and ledger into the bottom half.
+  It is now a sixth nav tab; Family keeps a summary card that links through.
+- Tab count and labels are pinned in **three** places — `e2e/nav.spec.ts`,
+  `Nav.test.tsx`, `App.test.tsx` — updated together.
+
+### Gradient mesh replaces the starfield backdrop
+- `SpaceBackground` is gone; `GradientBackground` paints from the `--mesh-*`
+  tokens so both themes stay on the shared palette.
+- Dark's secondary ink is raised (`--ink-3`/`-4` → `#d4dae3`/`#d2d8e1`,
+  `--accent-2` → `#b4bcff`). Those sit on a translucent panel over the gradient,
+  which composites much lighter than `--bg` alone; the old values measured
+  ~2.9:1 against the real painted backdrop.
+
+### Type scale filled in, body font now Figtree
+- Added `title` 22, `heading` 28, `display` 48. The scale jumped 20 → 24 → 32 →
+  40 → 64, leaving dense tiles nowhere to step a heading down without dropping
+  below the floor. **16px remains the hard kiosk floor.**
+- Five places changed together: `tokens.css`, `tokens.ts`, the `@theme inline`
+  block in `app.css`, `tokens.test.ts`, and `ON_SCALE` in `e2e/layout.spec.ts`.
+- Body font moved to Figtree in all three declarations (`tokens.css`, `app.css`,
+  the `index.html` font link). `--radius-pill` corrected to `9999px`.
+
+### Calendar gains week, day and agenda views
+- Month/Week/Day/Agenda toggle with keyboard shortcuts, a filter rail whose
+  subset survives a view switch, ICS import/export, and a current-time marker.
+
+### Contrast audit added — known flaky
+- `e2e/contrast.spec.ts` photographs each screen and checks text against the
+  real painted backdrop. Transitions are frozen alongside animations, since the
+  injected `color:transparent` is itself animated.
+- **Not yet a reliable gate.** A label with no background of its own, or a row
+  clipped by an internally scrolling panel, samples the wrong surface and
+  reports a false failure. Verify a violation directly before changing a token.
+
 ### Token scale raised for distance viewing
 - Touch targets: minimum 48px → **56px**, hero controls 64px → **72px**. Nothing
   interactive on a finger-driven kiosk should be smaller than a fingertip.
