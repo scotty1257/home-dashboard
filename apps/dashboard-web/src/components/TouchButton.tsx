@@ -7,6 +7,7 @@ import {
 } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../lib/cn";
+import { ICON } from "../lib/icons";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
@@ -14,10 +15,12 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: LucideIcon;
   /** Render icon only (square button). */
   iconOnly?: boolean;
+  /** Glyph size in px. The button is already ≥56px; this sizes what's inside it. */
+  iconSize?: number;
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-lg text-body font-medium " +
+  "inline-flex items-center justify-center gap-2 rounded-pill text-body font-medium " +
   "transition-colors duration-100 select-none disabled:opacity-40 disabled:pointer-events-none " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60 " +
   "pressable ripple-host";
@@ -50,13 +53,14 @@ function useRipple() {
   return { ripples, spawn };
 }
 
-/** Accessible touch button (≥48px target) with Lucide vector icons,
+/** Accessible touch button (≥56px target) with Lucide vector icons,
  *  spring press-squish, and a ripple that blooms from the finger. */
 export function TouchButton({
   children,
   variant = "soft",
   icon: Icon,
   iconOnly = false,
+  iconSize = ICON.md,
   className,
   onPointerDown,
   ...rest
@@ -73,7 +77,7 @@ export function TouchButton({
       }}
       {...rest}
     >
-      {Icon && <Icon size={18} strokeWidth={2} aria-hidden />}
+      {Icon && <Icon size={iconSize} strokeWidth={2} aria-hidden />}
       {!iconOnly && children != null && <span>{children}</span>}
       {ripples.map((rip) => (
         <span

@@ -134,7 +134,11 @@ export function Select({ value, options, onChange, label, disabled, className }:
           role="listbox"
           aria-label={label}
           className={cn(
-            "absolute left-0 right-0 z-overlay mt-1 max-h-80 overflow-y-auto",
+            // z-toast, not z-overlay: the listbox is absolutely positioned
+            // inside whatever contains the Select, and Selects are used inside
+            // sheets. At z-overlay (40) it lost to the sheet's own z-sheet (50)
+            // content and rendered underneath it.
+            "absolute left-0 right-0 z-toast mt-1 max-h-80 overflow-y-auto",
             "rounded-panel border border-line bg-raised p-1 shadow-raised",
           )}
         >

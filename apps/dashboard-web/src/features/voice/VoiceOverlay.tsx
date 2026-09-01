@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Mic, Send, X, Loader2, Volume2, AlertTriangle, HelpCircle, Sparkles } from "lucide-react";
 import { api } from "../../lib/api";
@@ -93,17 +94,34 @@ export function VoiceOverlay() {
     }
   };
 
+  // Escape closes, as it does for Sheet and the notification drawer. This
+  // overlay hand-rolls its own dialog rather than using Sheet, and had neither
+  // Escape nor backdrop-close — the only way out was the X.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, setOpen]);
+
   if (!open) return null;
 
   const state = session.isPending && !turn?.requiresConfirmation ? "thinking" : (turn?.state ?? "idle");
   const StateIcon = stateIcon(state);
 
-  return (
+  // Portalled for the same reason as Sheet: `fixed` is relative to the nearest
+  // ancestor with a transform/filter/backdrop-filter, and Panel has one.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-black/60 px-8 backdrop-blur-sm"
+      className="fixed inset-0 z-sheet flex flex-col items-center justify-center gap-6 bg-black/60 px-8 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Voice assistant"
+      onPointerDown={(e) => {
+        if (e.target === e.currentTarget) setOpen(false);
+      }}
     >
       <button
         className="absolute right-6 top-6 flex h-touch w-touch items-center justify-center rounded-inner border border-line bg-panel text-ink-3 transition-colors hover:text-ink"
@@ -118,7 +136,7 @@ export function VoiceOverlay() {
           className={cn(
             "flex h-24 w-24 items-center justify-center rounded-pill border border-line bg-panel text-accent",
             state === "listening" && "animate-[pulse_1.4s_ease-in-out_infinite] border-accent/40",
-            state === "speaking" && "text-teal",
+            state === "speaking" && "text-ink-teal",
             state === "error" && "text-danger",
           )}
         >
@@ -164,7 +182,8 @@ export function VoiceOverlay() {
           <Sparkles size={14} /> Voice input needs Chrome — type instead.
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -97,3 +97,19 @@ export const domainIcon = (domain: string): LucideIcon => {
 };
 
 export type { LucideIcon };
+
+/**
+ * Named glyph sizes. Icon sizes had drifted across the app (12/14/16/18/20/24/
+ * 26/28/32/36), so a gear in a 56px header button rendered smaller than a tab
+ * icon. These are the steps to reach for; the button/tile sets its own box.
+ */
+export const ICON = {
+  /** Inline with metadata text. */
+  sm: 18,
+  /** Default for controls and buttons. */
+  md: 22,
+  /** Header actions and primary controls. */
+  lg: 26,
+  /** Nav tabs and feature glyphs. */
+  xl: 30,
+} as const;
