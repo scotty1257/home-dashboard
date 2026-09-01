@@ -172,17 +172,21 @@ describe("App view switching", () => {
     expect(screen.getByRole("heading", { name: /^Duties$/ })).toBeInTheDocument();
   });
 
-  it("renders the launch sequence inside the Family tab, not as its own tab", async () => {
+  it("gives launch its own tab, with a summary card on Family", async () => {
     const user = userEvent.setup();
     renderWithProviders(<App />);
 
-    // Launch no longer owns a tab.
-    expect(screen.queryByRole("button", { name: /^Launch$/ })).not.toBeInTheDocument();
+    // Launch owns a tab now.
+    expect(screen.getByRole("button", { name: /^Launch$/ })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /^Family$/ }));
 
-    // No active run on a fresh database → the quiet state, beside the board.
+    // Family keeps a compact summary beside the board rather than the full
+    // step grid, which used to take the whole top row.
     expect(await screen.findByText("No launch right now")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Handoffs$/ })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Launch$/ }));
+    expect(await screen.findByRole("heading", { name: /^Launch$/ })).toBeInTheDocument();
   });
 });

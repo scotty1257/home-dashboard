@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Apple,
@@ -7,6 +7,7 @@ import {
   Check,
   Footprints,
   GlassWater,
+  Pencil,
   Rocket,
   RotateCcw,
   Shirt,
@@ -19,8 +20,10 @@ import { cn } from "../../lib/cn";
 import { Panel } from "../../components/Panel";
 import { TouchButton } from "../../components/TouchButton";
 import { useActiveActor } from "../household/ActorSwitcher";
+import { ICON } from "../../lib/icons";
 import { launchCountdown, useNow } from "./launchTime";
 import { useLaunchChime } from "./useLaunchChime";
+import { LaunchTemplateSheet } from "./LaunchTemplateSheet";
 
 const STEP_ICONS: Record<LaunchIconKey, LucideIcon> = {
   shoes: Footprints,
@@ -43,7 +46,14 @@ export function LaunchScreen() {
   const queryClient = useQueryClient();
   const { members, actor } = useActiveActor();
   const { data } = useQuery({ queryKey: ["launch"], queryFn: () => api.launch.current() });
+  const { data: templatesData } = useQuery({
+    queryKey: ["launch-templates"],
+    queryFn: () => api.launch.templates(),
+  });
   const now = useNow();
+  const [editing, setEditing] = useState(false);
+
+  const kids = members.filter((m) => m.role === "child");
 
   const run = data?.run ?? null;
   const template = data?.template ?? null;
@@ -86,10 +96,39 @@ export function LaunchScreen() {
     reset.mutate();
   }, [run, actor, reset]);
 
+  // The template behind the current run, or the first one, so the editor has
+  // something to open even outside an active window.
+  const editable =
+    (templatesData?.templates ?? []).find((t) => t.id === (template?.id ?? run?.templateId)) ??
+    templatesData?.templates?.[0];
+
+  const editSheet = (
+    <LaunchTemplateSheet
+      open={editing}
+      onClose={() => setEditing(false)}
+      template={editable}
+      children={kids.map((m) => ({ id: m.id, displayName: m.displayName }))}
+    />
+  );
+
   if (!run) {
     return (
-      <Panel title="Launch" icon={Rocket}>
+      <Panel
+        title="Launch"
+        icon={Rocket}
+        actions={
+          <TouchButton variant="ghost" icon={Pencil} onClick={() => setEditing(true)}>
+            {editable ? "Edit" : "Set up"}
+          </TouchButton>
+        }
+      >
         <p className="py-2 text-metric text-ink-3">No launch right now</p>
+        {editable && (
+          <p className="text-body text-ink-4">
+            {editable.name} · leaves {editable.departureLocalTime}
+          </p>
+        )}
+        {editSheet}
       </Panel>
     );
   }
@@ -105,8 +144,16 @@ export function LaunchScreen() {
           Family modules so the section is identifiable while a run is live. */}
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-2.5">
-          <Rocket size={16} strokeWidth={2} className="shrink-0 text-accent" aria-hidden />
+          <Rocket size={ICON.sm} strokeWidth={2} className="shrink-0 text-accent" aria-hidden />
           <h2 className="text-body font-semibold text-ink-2">Launch</h2>
+          <TouchButton
+            variant="ghost"
+            icon={Pencil}
+            className="ml-auto"
+            onClick={() => setEditing(true)}
+          >
+            Edit
+          </TouchButton>
         </div>
         <p className="mt-2 text-body font-medium text-ink-3">
           {childName ?? "Child"} · {template?.name ?? "Launch"}
@@ -127,7 +174,7 @@ export function LaunchScreen() {
               disabled={toggle.isPending}
               onClick={() => toggle.mutate({ stepId: step.id })}
               className={cn(
-                "relative flex min-h-40 flex-col items-center justify-center gap-3 rounded-lg border border-line bg-surface px-4",
+                "relative flex min-h-40 flex-col items-center justify-center gap-3 rounded-panel border border-line bg-surface px-4",
                 "select-none transition-all duration-100 active:translate-y-px focus-visible:outline-none",
                 "focus-visible:ring-2 focus-visible:ring-accent-2/60 disabled:pointer-events-none",
                 done ? "opacity-35 grayscale" : "hover:bg-raised",
@@ -183,6 +230,8 @@ export function LaunchScreen() {
           </div>
         </div>
       </footer>
+
+      {editSheet}
     </div>
   );
 }

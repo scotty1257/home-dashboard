@@ -6,21 +6,22 @@ import { Nav } from "./Nav";
 import { useNavStore } from "../lib/store";
 
 describe("Nav", () => {
-  it("renders exactly five tabs; launch lives inside Family", () => {
+  it("renders exactly six tabs, including Launch", () => {
     renderWithProviders(<Nav />);
 
     const nav = screen.getByRole("navigation", { name: "Primary" });
     const tabs = within(nav).getAllByRole("button");
-    expect(tabs).toHaveLength(5);
+    expect(tabs).toHaveLength(6);
 
-    for (const label of ["Today", "Calendar", "Family", "Home", "Music"]) {
+    for (const label of ["Today", "Calendar", "Family", "Home", "Music", "Launch"]) {
       expect(within(nav).getByRole("button", { name: new RegExp(`^${label}$`) })).toBeInTheDocument();
     }
 
     // Settings lives in the header gear, never as a tab.
     expect(within(nav).queryByRole("button", { name: /settings/i })).not.toBeInTheDocument();
-    // Launch is reachable from the Family tab, not the tab bar.
-    expect(within(nav).queryByRole("button", { name: /^Launch$/ })).not.toBeInTheDocument();
+    // Launch owns a tab: rendered in full on Family it took a full-width row
+    // and left the other three modules fighting over the bottom half.
+    expect(within(nav).getByRole("button", { name: /^Launch$/ })).toBeInTheDocument();
   });
 
   it("switches the active view when a tab is tapped", async () => {

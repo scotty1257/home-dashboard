@@ -4,6 +4,7 @@ import {
   Users,
   Lightbulb,
   Music,
+  Rocket,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { View } from "../lib/store";
@@ -16,6 +17,7 @@ const TABS: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "family", label: "Family", icon: Users },
   { id: "home", label: "Home", icon: Lightbulb },
   { id: "media", label: "Music", icon: Music },
+  { id: "launch", label: "Launch", icon: Rocket },
 ];
 
 export function Nav() {
@@ -29,11 +31,11 @@ export function Nav() {
       className="flex shrink-0 justify-center border-t border-line bg-panel/60 px-4 py-2 backdrop-blur-sm"
       aria-label="Primary"
     >
-      {/* A centered cluster, not five tabs smeared across 1920px. Constraining
+      {/* A centered cluster, not six tabs smeared across 1920px. Constraining
           the width keeps the targets within one thumb's travel of each other
           instead of hundreds of pixels apart. */}
       <div
-        className="relative grid w-full max-w-3xl"
+        className="relative grid w-full max-w-4xl"
         style={{ gridTemplateColumns: `repeat(${TABS.length}, minmax(0, 1fr))` }}
       >
         {/* One indicator that slides between tabs, rather than an element
@@ -58,7 +60,7 @@ export function Nav() {
               className={cn(
                 "pressable relative flex min-h-touch flex-col items-center justify-center gap-1 rounded-control",
                 "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-2/60",
-                active ? "text-accent" : "text-ink-3 hover:text-ink",
+                active ? "text-accent-ink" : "text-ink-3 hover:text-ink",
               )}
             >
               <Icon size={28} strokeWidth={active ? 2.2 : 2} aria-hidden />

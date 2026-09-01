@@ -11,11 +11,12 @@ export const useVoiceStore = create<VoiceState>((set) => ({
 }));
 
 /**
- * The five nav tabs map to today/calendar/family/home/media; settings is
- * reachable from the header gear, not the tab bar. The launch sequence lives
- * inside the Family tab rather than owning a tab of its own.
+ * The six nav tabs map to today/calendar/family/home/media/launch; settings is
+ * reachable from the header gear, not the tab bar. Launch owns a tab of its own
+ * — as the full-width top row of the Family screen it took half that page, and
+ * the morning routine is a thing you stand in front of on its own.
  */
-export type View = "today" | "calendar" | "family" | "home" | "media" | "settings";
+export type View = "today" | "calendar" | "family" | "home" | "media" | "launch" | "settings";
 
 interface NotificationState {
   open: boolean;

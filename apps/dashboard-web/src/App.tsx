@@ -1,7 +1,7 @@
 import { useNavStore } from "./lib/store";
 import { useTimeOfDayTheme } from "./lib/theme";
 import { useLiveEvents } from "./lib/useLiveEvents";
-import { SpaceBackground } from "./components/SpaceBackground";
+import { GradientBackground } from "./components/GradientBackground";
 import { Header } from "./app/Header";
 import { Nav } from "./app/Nav";
 import { CalendarPanel } from "./features/calendar/CalendarPanel";
@@ -9,6 +9,7 @@ import { TodayOverview } from "./features/overview/TodayOverview";
 import { FamilyScreen } from "./features/family/FamilyScreen";
 import { HomeOverview } from "./features/home/HomeOverview";
 import { MediaScreen } from "./features/media/MediaScreen";
+import { LaunchScreen } from "./features/launch/LaunchScreen";
 import { VoiceOverlay } from "./features/voice/VoiceOverlay";
 import { NotificationDrawer } from "./features/notifications/NotificationDrawer";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
@@ -21,6 +22,14 @@ function HomeView() {
   return (
     <div className="h-full overflow-y-auto">
       <HomeOverview />
+    </div>
+  );
+}
+
+function LaunchView() {
+  return (
+    <div className="h-full overflow-y-auto">
+      <LaunchScreen />
     </div>
   );
 }
@@ -40,7 +49,7 @@ export default function App() {
 
   return (
     <div className="relative flex h-full flex-col text-ink">
-      <SpaceBackground />
+      <GradientBackground />
 
       <div className="relative z-10 flex h-full flex-col">
         <Header />
@@ -51,6 +60,7 @@ export default function App() {
             {view === "family" && <FamilyScreen />}
             {view === "home" && <HomeView />}
             {view === "media" && <MediaScreen />}
+            {view === "launch" && <LaunchView />}
             {view === "settings" && <SettingsView />}
           </div>
         </main>

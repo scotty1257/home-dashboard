@@ -20,7 +20,7 @@ test.describe("navigation at 1920×1080", () => {
 
     const tabs = nav.getByRole("button");
     await expect(tabs).toHaveCount(6);
-    for (const label of ["Today", "Calendar", "Family", "Launch", "Home", "Music"]) {
+    for (const label of ["Today", "Calendar", "Family", "Home", "Music", "Launch"]) {
       await expect(nav.getByRole("button", { name: new RegExp(`^${label}$`) })).toBeVisible();
     }
 
@@ -37,7 +37,7 @@ test.describe("navigation at 1920×1080", () => {
   test("Family tab opens the family coordination screen", async ({ page }) => {
     await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Family$/ }).click();
 
-    // The three Family columns by heading (fresh DB → empty boards, headings
+    // Every Family module by heading (fresh DB → empty boards, headings
     // still render).
     await expect(page.getByRole("heading", { name: /^Handoffs$/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: /^Permissions$/ })).toBeVisible();
@@ -51,19 +51,24 @@ test.describe("navigation at 1920×1080", () => {
 
     await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Today$/ }).click();
 
-    // Today-only regions: voice note drop and the context rail.
+    // Today-only regions: the voice note drop and the weather panel.
     await expect(page.getByRole("heading", { name: /^Voice notes$/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: /^Weather$/ })).toBeVisible();
   });
 
-  test("Launch tab opens the full-screen launch sequence", async ({ page }) => {
-    await page.locator('nav[aria-label="Primary"]').getByRole("button", { name: /^Launch$/ }).click();
+  test("the launch sequence has its own tab, with a summary on Family", async ({ page }) => {
+    const nav = page.locator('nav[aria-label="Primary"]');
+    // Launch owns a tab: in full it took a full-width row on Family and left
+    // the other three modules squeezed into the bottom half of that screen.
+    await expect(nav.getByRole("button", { name: /^Launch$/ })).toHaveCount(1);
 
-    // Fresh DB → no active run → the quiet exit state (a countdown or
-    // 'No launch right now' depending on templates).
-    await expect(
-      page.getByText("No launch right now").or(page.getByText(/^Bus in \d+ min$/)),
-    ).toBeVisible();
+    await nav.getByRole("button", { name: /^Family$/ }).click();
+
+    // Structure, not data: the summary panel is present on Family whatever the
+    // run state is. Asserting the quiet copy here coupled this spec to whether
+    // an earlier spec had activated the weekday template in the shared DB.
+    const summary = page.getByRole("heading", { name: /^Launch$/, level: 2 });
+    await expect(summary).toBeVisible();
   });
 });
 
