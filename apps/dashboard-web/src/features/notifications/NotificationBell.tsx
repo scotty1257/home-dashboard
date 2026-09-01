@@ -1,6 +1,7 @@
 import { Bell } from "lucide-react";
 import { useNotificationStore } from "../../lib/store";
 import { TouchButton } from "../../components/TouchButton";
+import { ICON } from "../../lib/icons";
 import { useNotifications } from "./NotificationDrawer";
 
 /**
@@ -17,6 +18,7 @@ export function NotificationBell() {
         variant="ghost"
         icon={Bell}
         iconOnly
+        iconSize={ICON.lg}
         aria-label={count === 0 ? "Notifications" : `Notifications, ${count} needing attention`}
         onClick={() => setOpen(true)}
       />

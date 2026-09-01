@@ -105,7 +105,7 @@ export function ActivityFeed() {
           <span className="text-body text-ink-3">The rest of the day is clear.</span>
         </div>
       ) : (
-        <ul className="flex flex-col gap-1">
+        <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-1">
           {items.map((item, i) => {
             const Icon = iconFor(item);
             const day = dayLabel(item.at);
@@ -140,7 +140,7 @@ export function ActivityFeed() {
                       item.severity === "warning" || item.severity === "alert"
                         ? "text-warning"
                         : isNow
-                          ? "text-accent"
+                          ? "text-accent-ink"
                           : "text-ink-3",
                     )}
                     aria-hidden

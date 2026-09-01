@@ -3,7 +3,7 @@ import { VoiceNoteTile } from "../voice-notes/VoiceNoteTile";
 import { WeatherPanel } from "../weather/WeatherPanel";
 import { NowPlaying } from "../media/NowPlaying";
 import { ActivityFeed } from "./ActivityFeed";
-import { CalendarPanel } from "../calendar/CalendarPanel";
+import { WeekAgendaPanel } from "../calendar/WeekAgendaPanel";
 
 /**
  * A grid cell. Below 2xl the cell keeps a comfortable minimum height so the
@@ -27,10 +27,10 @@ const CELL =
  * voice notes, what's playing, and what's next.
  *
  * At 2xl it is a 12-column, 2-row grid. Weather and voice notes sit in the top
- * row, the player and Now & Upcoming beneath them, and the compact calendar
- * runs the full height of the middle column (a month grid needs the vertical
- * room to stay readable). Below 2xl it degrades to a scrollable single-column
- * stack.
+ * row, the player and Now & Upcoming beneath them, and the week agenda runs the
+ * full height of the right column — a vertical list of the next seven days is
+ * what actually needs that height. Below 2xl it degrades to a scrollable
+ * single-column stack.
  */
 export function TodayOverview() {
   return (
@@ -47,18 +47,16 @@ export function TodayOverview() {
           <WeatherPanel />
         </div>
 
-        {/* Compact calendar — a single cell. A month grid given the full column
-            height just stretches its rows into empty space; half a column with
-            dense, readable cells is the better read at a glance. */}
+        {/* Now & Upcoming — a single cell. It shows what is imminent, which is
+            a short list by definition; it does not need a full column. */}
         <div className={cn(CELL, "2xl:col-span-4")}>
-          <CalendarPanel compact />
+          <ActivityFeed />
         </div>
 
-        {/* Now & Upcoming — the schedule takes the full right column. It is the
-            one tile that genuinely grows: a multi-day horizon with day
-            dividers, and an explicit all-clear when there is nothing to show. */}
+        {/* The week ahead — takes the full right column. Seven stacked days
+            with their events is the tile that genuinely uses the height. */}
         <div className={cn(CELL, "2xl:col-span-4 2xl:row-span-2")}>
-          <ActivityFeed />
+          <WeekAgendaPanel />
         </div>
 
         {/* Voice notes — compact until expanded. */}

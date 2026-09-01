@@ -137,8 +137,9 @@ describe("TodayOverview", () => {
     expect(screen.getByRole("heading", { name: /^Voice notes$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Now Playing$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Now & Upcoming" })).toBeInTheDocument();
-    // The compact calendar widget is back on Today.
-    expect(screen.getByRole("heading", { name: /20\d\d/ })).toBeInTheDocument();
+    // The calendar tile is the week ahead, not a month grid — seven stacked
+    // days is what actually uses the full-height column.
+    expect(screen.getByRole("heading", { name: /^This week$/ })).toBeInTheDocument();
   });
 
   it("keeps family coordination off the home screen", async () => {

@@ -7,6 +7,7 @@ import { useVoiceStore, useNavStore } from "../lib/store";
 import { ActorSwitcher } from "../features/household/ActorSwitcher";
 import { NotificationBell } from "../features/notifications/NotificationBell";
 import { formatClock, formatDate } from "../lib/format";
+import { ICON } from "../lib/icons";
 
 /**
  * One status cluster instead of three. Three separate dot+icon+word groups of
@@ -20,9 +21,9 @@ import { formatClock, formatDate } from "../lib/format";
 function DemoBadge({ services }: { services: string[] }) {
   if (services.length === 0) return null;
   return (
-    <span className="flex items-center gap-2 rounded-pill bg-warning/12 px-3 py-1.5 text-meta font-medium text-warning">
-      <span aria-hidden className="inline-block h-2 w-2 rounded-pill bg-warning" />
-      {services.join(" and ")} on demo data
+    <span className="flex items-center gap-2 rounded-pill border border-warning/25 bg-warning/15 px-3 py-1.5 text-meta font-semibold text-warning">
+      <span aria-hidden className="inline-block h-2 w-2 shrink-0 rounded-pill bg-warning" />
+      <span>{services.join(" and ")} on demo data</span>
     </span>
   );
 }
@@ -47,10 +48,10 @@ export function Header() {
   ].filter((s): s is string => s !== null);
 
   return (
-    <header className="flex shrink-0 items-center gap-6 border-b border-line bg-panel/60 px-6 py-2 backdrop-blur-sm">
+    <header className="relative z-header flex shrink-0 items-center gap-6 border-b border-line bg-panel/60 px-6 py-2 backdrop-blur-sm">
       <div className="flex items-center gap-2.5">
         <span className="flex h-8 w-8 items-center justify-center rounded-inner bg-accent text-white">
-          <House size={16} strokeWidth={2.2} />
+          <House size={ICON.sm} strokeWidth={2.2} />
         </span>
         <span className="truncate text-body-lg font-semibold tracking-tight text-ink">
           Danson-Dennis Family
@@ -74,6 +75,7 @@ export function Header() {
           variant="ghost"
           icon={Settings}
           iconOnly
+          iconSize={ICON.lg}
           aria-label="Settings"
           onClick={() => setView("settings")}
         />
@@ -85,7 +87,8 @@ export function Header() {
           icon={Mic}
           onClick={() => setVoiceOpen(true)}
           aria-label="Open voice assistant"
-          className="min-h-touch-lg px-6 text-body-lg"
+          iconSize={ICON.lg}
+          className="min-h-touch-md px-8 text-body-lg my-2"
         >
           Assistant
         </TouchButton>

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, BellOff, X } from "lucide-react";
@@ -76,9 +77,11 @@ export function NotificationDrawer() {
 
   if (!open) return null;
 
-  return (
+  // Portalled for the same reason as Sheet: `fixed` is relative to the nearest
+  // ancestor with a transform/filter/backdrop-filter, and Panel has one.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"
+      className="fixed inset-0 z-sheet flex justify-end bg-black/60 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"
       onPointerDown={() => setOpen(false)}
       role="presentation"
     >
@@ -160,6 +163,7 @@ export function NotificationDrawer() {
           )}
         </div>
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
