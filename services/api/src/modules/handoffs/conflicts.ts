@@ -28,6 +28,17 @@ export interface ConflictEvent {
 
 const MINUTE_MS = 60_000;
 
+/**
+ * Recurring calendar events are expanded into occurrences carrying synthetic
+ * `${baseId}#${ISO}` ids (see CalendarRepository.expandOccurrences); obligations
+ * only ever reference the stored base id. Collapse an occurrence id back to its
+ * series so a recurring event can be matched — and recognised as itself.
+ */
+export function baseEventId(id: string): string {
+  const hash = id.indexOf("#");
+  return hash === -1 ? id : id.slice(0, hash);
+}
+
 /** Wall-clock view of an instant in a zone. */
 function localParts(when: Date | string, timezone: string): TZDate {
   return new TZDate(new Date(when), timezone);
@@ -106,7 +117,7 @@ export function adultConflictsForHandoff(
 
   const conflicts: ConflictEvent[] = [];
   for (const event of events) {
-    if (event.id === handoff.eventId) continue;
+    if (baseEventId(event.id) === baseEventId(handoff.eventId)) continue;
     if (event.ownerId !== adultMemberId) continue;
     if (event.scheduleKind !== "adult-commitment") continue;
 
@@ -125,7 +136,18 @@ export function adultConflictsForHandoff(
       conflicts.push(event);
     }
   }
-  return conflicts;
+
+  // One entry per series: a weekly commitment overlapping the handoff window
+  // must read as one conflict, not the same title repeated per occurrence.
+  const bySeries = new Map<string, ConflictEvent>();
+  for (const event of conflicts) {
+    const key = baseEventId(event.id);
+    const seen = bySeries.get(key);
+    if (!seen || new Date(event.start).getTime() < new Date(seen.start).getTime()) {
+      bySeries.set(key, event);
+    }
+  }
+  return [...bySeries.values()];
 }
 
 /** Attention state for an obligation given the injected clock and settings. */
@@ -192,7 +214,8 @@ export function buildBoardItems(
   const memberById = new Map(members.map((m) => [m.id, m] as const));
 
   return obligations.map((obligation) => {
-    const backingEvent = events.find((e) => e.id === obligation.eventId) ?? null;
+    const backingEvent =
+      events.find((e) => baseEventId(e.id) === baseEventId(obligation.eventId)) ?? null;
     const child = backingEvent?.ownerId ? (memberById.get(backingEvent.ownerId) ?? null) : null;
 
     const availability: AdultAvailability[] = adults.map((adult) => {

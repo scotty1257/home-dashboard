@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   adultConflictsForHandoff,
   attentionStateFor,
+  baseEventId,
   buildBoardItems,
   type ConflictInputs,
 } from "./conflicts.js";
@@ -79,6 +80,61 @@ function adultEvent(over: Partial<Record<string, unknown>> = {}) {
     ...over,
   };
 }
+
+describe("recurring occurrences (synthetic `base#ISO` ids)", () => {
+  it("collapses an occurrence id back to its series", () => {
+    expect(baseEventId("evt-call")).toBe("evt-call");
+    expect(baseEventId(`evt-call#${local(THU, 16, 0)}`)).toBe("evt-call");
+  });
+
+  it("does not report the handoff's own recurring series as a conflict", () => {
+    // The pickup itself recurs weekly, so the window also contains an expanded
+    // occurrence of `evt-pickup`. It must not conflict with itself.
+    const ownOccurrence = adultEvent({
+      id: `evt-pickup#${local(THU, 16, 15)}`,
+      title: "Pickup",
+      start: local(THU, 16, 15),
+      end: local(THU, 16, 30),
+    });
+
+    const conflicts = adultConflictsForHandoff(handoff, [ownOccurrence], inputs(), "member-you");
+
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it("reports one conflict for a recurring commitment, not one per occurrence", () => {
+    // A weekly 16:00 call expands to the base row plus occurrences; every one
+    // of them overlaps the 16:15 pickup, which used to read as
+    // "conflicts with Call, Call, Call".
+    const series = [
+      adultEvent(),
+      adultEvent({ id: `evt-call#${local(THU, 16, 0)}` }),
+      adultEvent({ id: `evt-call#${local(THU, 16, 5)}`, start: local(THU, 16, 5) }),
+    ];
+
+    const conflicts = adultConflictsForHandoff(handoff, series, inputs(), "member-you");
+
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0]!.title).toBe("Call");
+    // The earliest occurrence is the one kept.
+    expect(conflicts[0]!.start).toBe(local(THU, 16, 0));
+  });
+
+  it("still resolves the backing event for a handoff on a recurring series", () => {
+    const occurrence = adultEvent({
+      id: `evt-pickup#${local(THU, 16, 15)}`,
+      title: "Swim pickup",
+      start: local(THU, 16, 15),
+      end: local(THU, 16, 30),
+      scheduleKind: "general" as const,
+      ownerId: "member-kid",
+    });
+
+    const [item] = buildBoardItems([handoff], [occurrence], [you, partner, kid], inputs());
+
+    expect(item!.eventSummary?.title).toBe("Swim pickup");
+  });
+});
 
 describe("adultConflictsForHandoff", () => {
   it("flags a 16:00–16:15 call buffered by overrun against a 16:15 pickup", () => {
